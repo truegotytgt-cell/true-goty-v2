@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "true-goty",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-11-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "true_goty_db",
+      "database_name": "true-goty-db",
+      "database_id": "eb76d54b-0522-4c53-9b1f-a8d906ac9843"
+    }
+  ]
+}

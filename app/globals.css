@@ -1,0 +1,15 @@
+:root {
+  --bg-black: #0A0A0F;
+  --purple-neon: #B026FF;
+  --text-light: #F4F4F0;
+  --bg-gray: #1C1C1E;
+  --border-color: #333333;
+}
+
+body {
+  background-color: var(--bg-black);
+  color: var(--text-light);
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
