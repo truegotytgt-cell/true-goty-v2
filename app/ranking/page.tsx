@@ -5,13 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Podium from '../../components/Podium';
 
-// O formato que a API devolve
-type DadosAPI = {
-  game_title: string;
-  total_score: number;
-};
-
-// O formato que o nosso componente Podium e a lista esperam
+type DadosAPI = { game_title: string; total_score: number; };
 type JogoRanking = { titulo: string; pontos: number };
 
 export default function PlacarGlobal() {
@@ -23,7 +17,6 @@ export default function PlacarGlobal() {
       .then(res => res.json())
       .then(data => {
         if (data.success && data.ranking) {
-          // AQUI ESTÁ A MÁGICA: Convertemos os nomes das propriedades
           const formatado = data.ranking.map((item: DadosAPI) => ({
             titulo: item.game_title,
             pontos: item.total_score
@@ -53,44 +46,57 @@ export default function PlacarGlobal() {
     );
   }
 
-  // Separa o Top 3 do restante da lista
   const top3 = ranking.slice(0, 3);
   const restante = ranking.slice(3);
 
+  // Cálculo para a Barra de Força
+  const maxPontos = Math.max(...ranking.map(r => r.pontos));
+  const minPontos = Math.min(...ranking.map(r => r.pontos));
+
   return (
     <main style={{ maxWidth: '900px', margin: '0 auto', padding: '6rem 2rem', textAlign: 'center' }}>
-      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏆</div>
+      
+      {/* Eyebrow e Título */}
+      <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🏆</div>
       <h1 style={{ color: 'var(--text-light)', fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: 900, textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>
         PLACAR GLOBAL TGT
       </h1>
       <p style={{ color: '#a1a1aa', marginBottom: '2rem' }}>A soma de todos os votos da comunidade.</p>
 
-      {/* COMPONENTE DO PÓDIO */}
       <Podium top3={top3} />
 
-      {/* LISTA DO 4º AO 10º */}
-      <div style={{ backgroundColor: 'var(--bg-gray)', borderRadius: '12px', padding: '1rem 2rem', border: '1px solid #333', textAlign: 'left' }}>
+      <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.6)', backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '1.5rem 2rem', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left' }}>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          {restante.map((jogo, index) => (
-            <li key={jogo.titulo} style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              padding: '15px 0', 
-              borderBottom: index !== restante.length - 1 ? '1px solid #333' : 'none',
-              fontSize: '1rem'
-            }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <strong style={{ color: 'var(--purple-neon)', width: '30px' }}>{index + 4}º</strong> 
-                <span style={{ color: '#FFF' }}>{jogo.titulo}</span>
-              </span>
-              <span style={{ fontWeight: 'bold', color: jogo.pontos > 0 ? '#FFF' : '#ef4444' }}>{jogo.pontos} PTS</span>
-            </li>
-          ))}
+          {restante.map((jogo, index) => {
+            const percentual = maxPontos === minPontos ? 50 : ((jogo.pontos - minPontos) / (maxPontos - minPontos)) * 100;
+            
+            return (
+              <li key={jogo.titulo} style={{ 
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '15px 0', borderBottom: index !== restante.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                position: 'relative', overflow: 'hidden'
+              }}>
+                {/* Barra de Força */}
+                <div style={{
+                  position: 'absolute', left: 0, top: 0, bottom: 0,
+                  width: `${percentual}%`,
+                  background: jogo.pontos > 0 ? 'linear-gradient(to right, rgba(176, 38, 255, 0.15), transparent)' : 'linear-gradient(to right, rgba(239, 68, 68, 0.1), transparent)',
+                  zIndex: 0
+                }} />
+
+                <span style={{ display: 'flex', alignItems: 'center', gap: '1rem', zIndex: 1 }}>
+                  <strong style={{ color: 'var(--purple-neon)', width: '30px', fontSize: '1.1rem' }}>{index + 4}º</strong> 
+                  <span style={{ color: '#FFF', fontWeight: 600 }}>{jogo.titulo}</span>
+                </span>
+                <span style={{ fontWeight: 900, color: jogo.pontos > 0 ? '#FFF' : '#ef4444', zIndex: 1 }}>{jogo.pontos} PTS</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
       <div style={{ marginTop: '3rem' }}>
-        <Link href="/" style={{ backgroundColor: 'transparent', border: '1px solid #333', color: '#FFF', padding: '1rem 2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold' }}>
+        <Link href="/" style={{ backgroundColor: 'transparent', border: '1px solid #333', color: '#FFF', padding: '1rem 2rem', borderRadius: '50px', textDecoration: 'none', fontWeight: 'bold' }}>
           Voltar ao Início
         </Link>
       </div>

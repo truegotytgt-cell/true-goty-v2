@@ -3,19 +3,17 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'; // Adicionado useSearchParams
+import { useRouter, useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 import jogosData from '../../lib/jogos.json';
 
 export default function Obrigado() {
   const [urlImagem, setUrlImagem] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams(); // Pega os parâmetros da URL
-  
-  // Pega a categoria da URL, ou assume 'tgt' como padrão
+  const searchParams = useSearchParams();
   const categoria = searchParams.get('categoria') || 'tgt';
 
   useEffect(() => {
-    // ✅ CORREÇÃO: Agora usa a categoria dinâmica
     const salvo = localStorage.getItem(`tgt_my_ranking_${categoria}`);
     if (salvo) {
       const placar = JSON.parse(salvo);
@@ -29,61 +27,109 @@ export default function Obrigado() {
         setUrlImagem(url);
       }
     }
-  }, [categoria]); // Adicionado 'categoria' como dependência
+  }, [categoria]);
+
+  // Funções de compartilhamento
+  const shareText = encodeURIComponent(`Meu Top 3 no True GOTY: ${localStorage.getItem(`tgt_my_ranking_${categoria}`) ? JSON.parse(localStorage.getItem(`tgt_my_ranking_${categoria}`) as string).slice(0,3).map((j:any)=>j.titulo).join(', ') : ''}. Faça o seu em truegoty.com`);
+  
+  const shareWhatsApp = () => window.open(`https://api.whatsapp.com/send?text=${shareText}`, '_blank');
+  const shareTwitter = () => window.open(`https://twitter.com/intent/tweet?text=${shareText}`, '_blank');
 
   async function resetarTudo() {
     if (!confirm("Deseja apagar seu voto e começar do zero?")) return;
-
     try {
       await fetch('/api/reset', { method: 'POST' });
-      
-      // ✅ CORREÇÃO: Limpa as chaves dinâmicas
       localStorage.removeItem(`tgt_has_voted_${categoria}`);
       localStorage.removeItem(`tgt_my_ranking_${categoria}`);
       localStorage.removeItem(`tgt_progress_${categoria}`);
-      
-      router.push(`/votar/${categoria}`); // Redireciona para a votação da categoria correta
+      router.push(`/votar/${categoria}`);
     } catch (error) {
       alert("Erro ao resetar. Tente limpar os cookies do navegador.");
     }
   }
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', textAlign: 'center', padding: '2rem' }}>
-      <h1 style={{ fontSize: '3rem', color: 'var(--text-light)', marginBottom: '1rem' }}>MUITO OBRIGADO!</h1>
-      <p style={{ fontSize: '1.2rem', color: '#a1a1aa', marginBottom: '2rem' }}>
-        Seu voto para a categoria <strong>{categoria.toUpperCase()}</strong> foi registrado com sucesso.
-      </p>
+    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '85vh', textAlign: 'center', padding: '2rem' }}>
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 40, scale: 0.95 }} 
+        animate={{ opacity: 1, y: 0, scale: 1 }} 
+        transition={{ duration: 1, type: "spring", bounce: 0.3 }} // Animação de entrada com mola
+        style={{ 
+          backgroundColor: 'rgba(15, 15, 20, 0.7)', backdropFilter: 'blur(20px)', 
+          border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '30px', 
+          padding: '4rem 3rem', maxWidth: '750px', width: '100%',
+          boxShadow: '0 30px 60px rgba(0,0,0,0.6), inset 0 0 40px rgba(212, 175, 55, 0.05)'
+        }}
+      >
+        <div style={{ fontSize: '5rem', marginBottom: '1rem', filter: 'drop-shadow(0 0 20px rgba(212, 175, 55, 0.6))' }}>
+          🏆
+        </div>
 
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '2rem' }}>
-        {urlImagem && (
-          <a 
-            href={urlImagem} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ backgroundColor: 'transparent', color: 'var(--purple-neon)', padding: '1rem 2rem', fontSize: '1.1rem', fontWeight: 'bold', border: '2px solid var(--purple-neon)', borderRadius: '8px', textDecoration: 'none' }}
-          >
-            BAIXAR IMAGEM DO TOP 3
-          </a>
-        )}
+        <h1 style={{ fontSize: '3rem', color: '#FFF', marginBottom: '1rem', fontWeight: 900, letterSpacing: '-1px' }}>
+          SEU VEREDITO ESTÁ NA HISTÓRIA!
+        </h1>
+        
+        <p style={{ fontSize: '1.2rem', color: '#a1a1aa', marginBottom: '3rem', lineHeight: 1.6, maxWidth: '500px', margin: '0 auto 3rem auto' }}>
+          Sua voz ajudou a moldar o <strong style={{ color: '#D4AF37' }}>Placar Global da categoria {categoria.toUpperCase()}</strong>.<br/>
+          Agora, mostre ao mundo qual jogo realmente merece o título.
+        </p>
 
-        <Link href={`/meu-ranking?categoria=${categoria}`} style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 2rem', fontSize: '1.1rem', fontWeight: 'bold', borderRadius: '8px', textDecoration: 'none' }}>
-          VER MEU RANKING
-        </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+          
+          {urlImagem && (
+            <motion.a 
+              whileHover={{ scale: 1.03, boxShadow: '0 0 50px rgba(212, 175, 55, 0.6)' }}
+              whileTap={{ scale: 0.98 }}
+              href={urlImagem} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ 
+                width: '100%', background: 'linear-gradient(to right, #B026FF, #D4AF37)', color: '#FFF', 
+                padding: '1.2rem', fontSize: '1.2rem', fontWeight: 900, borderRadius: '50px', 
+                textDecoration: 'none', boxShadow: '0 0 30px rgba(176, 38, 255, 0.4)', 
+                border: '1px solid rgba(255,255,255,0.3)', letterSpacing: '1px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px'
+              }}
+            >
+              📲 BAIXAR IMAGEM DO TOP 3
+            </motion.a>
+          )}
 
-        <Link href="/ranking" style={{ backgroundColor: 'transparent', color: 'var(--text-light)', padding: '1rem 2rem', fontSize: '1.1rem', fontWeight: 'bold', border: '2px solid #333', borderRadius: '8px', textDecoration: 'none' }}>
-          VER PLACAR GLOBAL
-        </Link>
-      </div>
+          <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1rem' }}>
+            <button onClick={shareWhatsApp} style={{ 
+              backgroundColor: 'rgba(37, 211, 102, 0.1)', color: '#25D366', padding: '0.8rem 1.5rem', 
+              fontSize: '0.95rem', fontWeight: 'bold', border: '1px solid rgba(37, 211, 102, 0.3)', 
+              borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px'
+            }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(37, 211, 102, 0.2)'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(37, 211, 102, 0.1)'}>
+              <span>WhatsApp</span>
+            </button>
+            
+            <button onClick={shareTwitter} style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#FFF', padding: '0.8rem 1.5rem', 
+              fontSize: '0.95rem', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.2)', 
+              borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px'
+            }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}>
+              <span>Postar no X</span>
+            </button>
+          </div>
 
-      <div style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '2rem' }}>
-        <button 
-          onClick={resetarTudo}
-          style={{ background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem' }}
-        >
-          Apagar voto e votar novamente (Teste)
-        </button>
-      </div>
+          <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem', width: '100%', justifyContent: 'center' }}>
+             <Link href={`/meu-ranking?categoria=${categoria}`} style={{ color: '#a1a1aa', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#FFF'} onMouseOut={(e) => e.currentTarget.style.color = '#a1a1aa'}>
+              Ver Meu Ranking
+            </Link>
+            <Link href="/ranking" style={{ color: '#a1a1aa', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#FFF'} onMouseOut={(e) => e.currentTarget.style.color = '#a1a1aa'}>
+              Ver Placar Global
+            </Link>
+          </div>
+
+        </div>
+
+        <div style={{ marginTop: '3rem' }}>
+          <button onClick={resetarTudo} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline', opacity: 0.5 }}>
+            Apagar voto e votar novamente (Teste)
+          </button>
+        </div>
+      </motion.div>
     </main>
   );
 }

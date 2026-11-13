@@ -8,13 +8,14 @@ import jogosData from '../../../lib/jogos.json';
 import { calcularPlacar, Jogo } from '../../../lib/condorcet';
 import { useVotingProgress } from '../../../lib/useVotingProgress'; 
 import CardDuelo from '../../../components/CardDuelo';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Votar() {
   const params = useParams();
   const categoria = (params?.categoria as string) || 'tgt'; 
   const jogos = jogosData.top10;
   
-  const { votos, duelos, dueloAtual, carregado, registrarVoto, desfazerVoto, resetarProgresso } = useVotingProgress(categoria, jogos);
+  const { votos, duelos, dueloAtual, carregado, registrarVoto, desfazerVoto } = useVotingProgress(categoria, jogos);
   
   const [animacao, setAnimacao] = useState<{jogo1: 'idle'|'winner'|'loser', jogo2: 'idle'|'winner'|'loser'}>({ jogo1: 'idle', jogo2: 'idle' });
 
@@ -110,21 +111,11 @@ export default function Votar() {
           ))}
         </ul>
 
-        <div 
-          className="cf-turnstile" 
-          data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} 
-          data-theme="dark"
-          style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}
-        ></div>
+        <div className="cf-turnstile" data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} data-theme="dark" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}></div>
 
-        <button 
-          onClick={() => enviarParaPlacarGlobal(placarFinal)}
-          style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 3rem', fontSize: '1.2rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', boxShadow: '0 0 20px rgba(176, 38, 255, 0.4)' }}
-        >
+        <button onClick={() => enviarParaPlacarGlobal(placarFinal)} style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 3rem', fontSize: '1.2rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', boxShadow: '0 0 20px rgba(176, 38, 255, 0.4)' }}>
           CONFIRMAR MEU TRUE GOTY
         </button>
-        
-        {/* AVISO DE SEGURANÇA: O botão de resetar foi removido daqui para produção. */}
       </main>
     );
   }
@@ -132,27 +123,72 @@ export default function Votar() {
   const duelo = duelos[dueloAtual];
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', gap: '2rem' }}>
-      <h1 style={{ color: 'var(--purple-neon)', textAlign: 'center' }}>
+    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', gap: '2rem', padding: '0 1rem' }}>
+      
+      <h1 style={{ color: 'var(--purple-neon)', textAlign: 'center', fontSize: '2rem', fontWeight: 900 }}>
         QUAL FOI O MELHOR?
-        <span style={{ display: 'block', fontSize: '1rem', color: '#a1a1aa', marginTop: '0.5rem', fontWeight: 'normal' }}>
-          Batalha {dueloAtual + 1} de {duelos.length}
+        <span style={{ display: 'block', fontSize: '1rem', color: '#a1a1aa', marginTop: '0.5rem', fontWeight: 'normal', letterSpacing: '2px' }}>
+          BATALHA {dueloAtual + 1} DE {duelos.length}
         </span>
       </h1>
       
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <CardDuelo jogo={duelo.jogo1} status={animacao.jogo1} onClick={() => executarVoto(duelo.jogo1, duelo.jogo2, true)} />
-        <h2 style={{ fontSize: '3rem', color: 'var(--purple-neon)' }}>VS</h2>
-        <CardDuelo jogo={duelo.jogo2} status={animacao.jogo2} onClick={() => executarVoto(duelo.jogo2, duelo.jogo1, false)} />
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center', width: '100%', maxWidth: '1000px' }}>
+        
+        {/* Lado Esquerdo (Animado) */}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={`jogo1-${dueloAtual}`}
+            initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}
+            style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}
+          >
+            <CardDuelo jogo={duelo.jogo1} status={animacao.jogo1} onClick={() => executarVoto(duelo.jogo1, duelo.jogo2, true)} />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* MEDALHÃO VS (Aço Damasco) */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 2rem' }}>
+          <div style={{ width: '2px', height: '80px', background: 'linear-gradient(to bottom, transparent, var(--purple-neon), transparent)', marginBottom: '1rem' }} />
+          <div style={{ 
+            width: '80px', height: '80px', transform: 'rotate(45deg)', 
+            background: 'linear-gradient(135deg, #1a1a24, #05000A)', 
+            border: '2px solid var(--purple-neon)', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 30px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2)',
+            position: 'relative'
+          }}>
+            <span style={{ transform: 'rotate(-45deg)', color: '#D4AF37', fontSize: '1.8rem', fontWeight: 900, textShadow: '0 0 10px rgba(212, 175, 55, 0.8)' }}>
+              VS
+            </span>
+          </div>
+          <div style={{ width: '2px', height: '80px', background: 'linear-gradient(to top, transparent, var(--purple-neon), transparent)', marginTop: '1rem' }} />
+        </div>
+
+        {/* Lado Direito (Animado) */}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={`jogo2-${dueloAtual}`}
+            initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} transition={{ duration: 0.3 }}
+            style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}
+          >
+            <CardDuelo jogo={duelo.jogo2} status={animacao.jogo2} onClick={() => executarVoto(duelo.jogo2, duelo.jogo1, false)} />
+          </motion.div>
+        </AnimatePresence>
+
       </div>
 
-      <p style={{ color: '#a1a1aa', fontSize: '0.9rem', marginTop: '-1rem' }}>
-        Dica: Use as setas <strong>←</strong> e <strong>→</strong> do teclado para votar mais rápido!
-      </p>
+      {/* TECLAS ESTILIZADAS (Substituindo o texto simples) */}
+      <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <span style={{ color: '#a1a1aa', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Pressione <kbd style={{ backgroundColor: '#1a1a24', border: '1px solid #333', borderBottom: '2px solid #555', borderRadius: '4px', padding: '2px 8px', color: '#FFF', fontFamily: 'monospace', fontSize: '1rem' }}>←</kbd> para escolher
+        </span>
+        <span style={{ color: '#a1a1aa', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Pressione <kbd style={{ backgroundColor: '#1a1a24', border: '1px solid #333', borderBottom: '2px solid #555', borderRadius: '4px', padding: '2px 8px', color: '#FFF', fontFamily: 'monospace', fontSize: '1rem' }}>→</kbd> para escolher
+        </span>
+      </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+      <div style={{ marginTop: '1rem' }}>
         {dueloAtual > 0 && (
-          <button onClick={desfazerVoto} style={{ backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid #333', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>
+          <button onClick={desfazerVoto} style={{ backgroundColor: 'transparent', color: '#a1a1aa', border: '1px solid #333', padding: '0.5rem 1rem', borderRadius: '50px', cursor: 'pointer', fontSize: '0.85rem' }}>
             ← Desfazer último voto
           </button>
         )}

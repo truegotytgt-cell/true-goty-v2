@@ -16,25 +16,24 @@ export default function CardDuelo({ jogo, onClick, status = 'idle' }: Props) {
 
   const variantes = {
     idle: { 
-      scale: isHovered ? 1.02 : 1, 
+      scale: isHovered ? 1.03 : 1, 
       opacity: 1, 
       filter: isHovered ? 'brightness(1.1)' : 'brightness(1)',
-      borderColor: isHovered ? 'var(--purple-neon)' : 'var(--border-color)',
-      // AQUI ESTÁ O GLOW INTERNO (inset) E EXTERNO
+      borderColor: isHovered ? 'var(--purple-neon)' : 'rgba(255,255,255,0.1)',
       boxShadow: isHovered ? '0 0 30px rgba(176, 38, 255, 0.4), inset 0 0 50px rgba(176, 38, 255, 0.2)' : 'none' 
     },
     winner: { 
-      scale: 1.05, // Reduzido para não tampar a tela
+      scale: 1.08, // Aumento um pouco maior para dar impacto
       opacity: 1, 
-      filter: 'brightness(1.15)', 
-      borderColor: 'var(--purple-neon)', 
-      boxShadow: '0 0 50px rgba(176, 38, 255, 0.7), inset 0 0 60px rgba(176, 38, 255, 0.4)', 
+      filter: 'brightness(1.2)', 
+      borderColor: '#D4AF37', // Borda dourada para o vencedor (premiação)
+      boxShadow: '0 0 60px rgba(212, 175, 55, 0.6), inset 0 0 50px rgba(212, 175, 55, 0.3)', 
       zIndex: 10 
     },
     loser: { 
-      scale: 0.95, // Encolhe suavemente
-      opacity: 0.2, 
-      filter: 'grayscale(100%) brightness(0.6)', 
+      scale: 0.92,
+      opacity: 0.3, 
+      filter: 'grayscale(100%) brightness(0.5)', 
       borderColor: 'transparent', 
       boxShadow: 'none' 
     }
@@ -45,31 +44,34 @@ export default function CardDuelo({ jogo, onClick, status = 'idle' }: Props) {
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      animate={status === 'idle' ? (isHovered ? 'idle' : 'idle') : status}
+      animate={status}
       variants={variantes}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+      // AQUI ESTÁ A MÁGICA DA SUAVIDADE (Spring)
+      transition={{ type: "spring", stiffness: 120, damping: 15, mass: 1 }}
       style={{
         cursor: status === 'idle' ? 'pointer' : 'default',
-        border: '2px solid var(--border-color)',
+        border: '2px solid rgba(255,255,255,0.1)',
         borderRadius: '16px',
         padding: '1rem',
-        backgroundColor: 'var(--bg-gray)',
+        backgroundColor: 'rgba(28, 28, 30, 0.8)',
+        backdropFilter: 'blur(10px)',
         textAlign: 'center',
-        width: '320px',
+        width: '100%',
+        maxWidth: '340px',
         position: 'relative',
         overflow: 'hidden'
       }}
     >
-      <img 
-        src={jogo.imagem} 
-        alt={jogo.titulo} 
-        style={{ width: '100%', borderRadius: '12px', marginBottom: '1rem', transition: 'all 0.3s' }} 
-      />
-      <h3 style={{ fontSize: '1.3rem', color: 'var(--text-light)', fontWeight: 900 }}>{jogo.titulo}</h3>
+      <div style={{ width: '100%', aspectRatio: '3/4', overflow: 'hidden', borderRadius: '12px', marginBottom: '1rem' }}>
+        <img src={jogo.imagem} alt={jogo.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.3s' }} />
+      </div>
+      <h3 style={{ fontSize: '1.2rem', color: status === 'winner' ? '#D4AF37' : 'var(--text-light)', fontWeight: 800, transition: 'color 0.3s' }}>
+        {jogo.titulo}
+      </h3>
 
       {status === 'idle' && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s ease', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-          <div style={{ backgroundColor: 'rgba(176, 38, 255, 0.9)', backdropFilter: 'blur(8px)', border: '2px solid #FFF', color: '#FFF', padding: '12px 40px', borderRadius: '50px', fontWeight: 900, fontSize: '1.4rem', boxShadow: '0 0 30px rgba(176, 38, 255, 0.8)', letterSpacing: '2px' }}>
+          <div style={{ backgroundColor: 'rgba(176, 38, 255, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid #FFF', color: '#FFF', padding: '12px 40px', borderRadius: '50px', fontWeight: 900, fontSize: '1.2rem', boxShadow: '0 0 30px rgba(176, 38, 255, 0.8)', letterSpacing: '1px' }}>
             VOTAR
           </div>
         </div>
