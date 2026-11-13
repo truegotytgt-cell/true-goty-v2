@@ -7,18 +7,16 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { env } = getCloudflareContext();
-
-    // 1. VERIFICAÇÃO DO TURNSTILE (O ESCUDO)
-    // O token vem junto com os dados que o frontend enviou
     const turnstileToken = body.scores[0]?.turnstileToken;
+    const categoria = body.scores[0]?.category || 'tgt';
 
     if (!turnstileToken) {
       return NextResponse.json({ success: false, error: "Token ausente" }, { status: 400 });
     }
 
-    // Perguntamos para a Cloudflare se o token é válido
+    // 1. Validação do Turnstile
     const formData = new FormData();
-    formData.append('secret', env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY);
+    formData.append('secret', env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY || '');
     formData.append('response', turnstileToken);
 
     const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
@@ -28,22 +26,35 @@ export async function POST(request: Request) {
     
     const turnstileData = await turnstileRes.json();
 
-    // Se a Cloudflare disser que é um robô ou o token for falso, bloqueia!
     if (!turnstileData.success) {
       console.log("❌ Bot bloqueado pelo Turnstile!");
       return NextResponse.json({ success: false, error: "Falha na verificação de segurança" }, { status: 403 });
     }
 
-    // 2. SALVANDO NO BANCO (Se passou pelo escudo)
+    // 2. Salva no banco D1
     const db = getDB(env);
     await salvarVotosNoBanco(db, body.scores);
+    console.log("✅ Votos salvos com sucesso no D1!");
 
-    console.log("✅ Votos salvos no banco D1 após verificação de segurança!");
+    // 3. Cria a resposta de sucesso
+    const response = NextResponse.json({ success: true, message: "Votos salvos!" });
     
-    return NextResponse.json({ success: true, message: "Votos salvos!" });
+    // 4. A MÁGICA DO COOKIE (Agora do jeito certo!)
+    response.cookies.set({
+      name: `tgt_voted_${categoria}`,
+      value: 'true',
+      httpOnly: true, // JavaScript não pode ler
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 365, // 1 ano
+      path: '/',
+    });
+
+    return response;
     
   } catch (error) {
-    console.error("❌ Erro ao salvar no banco:", error);
+    // Se der erro, isso vai imprimir no terminal a causa exata
+    console.error("❌ ERRO FATAL NA API:", error);
     return NextResponse.json({ success: false, error: "Falha ao processar" }, { status: 500 });
   }
 }

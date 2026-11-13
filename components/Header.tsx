@@ -12,7 +12,7 @@ export default function Header() {
     { name: 'MÉTODO', path: '/metodo' },
     { name: 'INDICADOS', path: '/indicados' },
     { name: 'GOTY', path: '/resultados' },
-    { name: 'VOTAR', path: '/votar' },
+    { name: 'VOTAR', path: '/votar/tgt' }, // Atualizado
     { name: 'SOBRE', path: '/sobre' },
   ];
 
@@ -45,7 +45,10 @@ export default function Header() {
         border: '1px solid #333'
       }}>
         {navLinks.map((link) => {
-          const isActive = pathname === link.path;
+          // MELHORIA NA LÓGICA: Se a URL começar com /votar, a aba fica ativa.
+          // Isso serve para /votar/tgt e para /votar/oscar no futuro.
+          const isActive = pathname === link.path || (link.name === 'VOTAR' && pathname.startsWith('/votar'));
+          
           return (
             <Link 
               key={link.name} 
