@@ -2,38 +2,57 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation'; // Import para ler a URL
+import { useParams } from 'next/navigation';
 import Script from 'next/script';
-import jogosData from '../../../lib/jogos.json'; // Um nível a mais de ../
-import { calcularPlacar } from '../../../lib/condorcet';
+import jogosData from '../../../lib/jogos.json';
+import { calcularPlacar, Jogo } from '../../../lib/condorcet';
 import { useVotingProgress } from '../../../lib/useVotingProgress'; 
 import CardDuelo from '../../../components/CardDuelo';
 
 export default function Votar() {
   const params = useParams();
-  // Pega a categoria da URL (ex: 'tgt' ou 'oscar'). Se não tiver, assume 'tgt'.
   const categoria = (params?.categoria as string) || 'tgt'; 
-  
   const jogos = jogosData.top10;
   
-  // O Hook agora recebe a categoria dinamicamente!
   const { votos, duelos, dueloAtual, carregado, registrarVoto, desfazerVoto, resetarProgresso } = useVotingProgress(categoria, jogos);
   
+  // Estados para controlar a animação dos cards
+  const [animacao, setAnimacao] = useState<{jogo1: 'idle'|'winner'|'loser', jogo2: 'idle'|'winner'|'loser'}>({ jogo1: 'idle', jogo2: 'idle' });
+
+  // Função que centraliza o voto e a animação
+  function executarVoto(vencedor: Jogo, perdedor: Jogo, jogo1Venceu: boolean) {
+    if (animacao.jogo1 !== 'idle') return; // Evita duplo clique
+
+    // 1. Dispara a animação visual
+    setAnimacao({
+      jogo1: jogo1Venceu ? 'winner' : 'loser',
+      jogo2: jogo1Venceu ? 'loser' : 'winner'
+    });
+
+    // 2. Espera 600ms (tempo da animação) e avança para o próximo duelo
+    setTimeout(() => {
+      registrarVoto(vencedor.titulo, perdedor.titulo);
+      setAnimacao({ jogo1: 'idle', jogo2: 'idle' }); // Reseta para a próxima batalha
+    }, 600);
+  }
+
+  // Atalhos de teclado adaptados para a nova função
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!carregado || duelos.length === 0 || dueloAtual >= duelos.length) return;
       const duelo = duelos[dueloAtual];
+      
       if (e.key === 'ArrowLeft') {
         e.preventDefault(); 
-        registrarVoto(duelo.jogo1.titulo, duelo.jogo2.titulo);
+        executarVoto(duelo.jogo1, duelo.jogo2, true);
       } else if (e.key === 'ArrowRight') {
         e.preventDefault(); 
-        registrarVoto(duelo.jogo2.titulo, duelo.jogo1.titulo);
+        executarVoto(duelo.jogo2, duelo.jogo1, false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [carregado, duelos, dueloAtual, registrarVoto]);
+  }, [carregado, duelos, dueloAtual, animacao]); // Adicionado animacao nas dependências
 
   async function enviarParaPlacarGlobal(placarFinal: any[]) {
     const turnstileToken = (window as any).turnstile?.getResponse();
@@ -45,7 +64,7 @@ export default function Votar() {
     const dadosParaEnviar = placarFinal.map(item => ({
       game_title: item.titulo,
       score: item.pontos,
-      category: categoria, // Usa a categoria da URL!
+      category: categoria,
       turnstileToken: turnstileToken 
     }));
 
@@ -59,10 +78,9 @@ export default function Votar() {
       const resultado = await resposta.json();
       
       if (resultado.success) {
-        // Salva no localStorage com a tag da categoria
         localStorage.setItem(`tgt_has_voted_${categoria}`, 'true');
         localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
-        window.location.href = '/obrigado';
+        window.location.href = `/obrigado?categoria=${categoria}`;
       } else {
         alert("Erro de segurança: " + resultado.error);
       }
@@ -74,7 +92,7 @@ export default function Votar() {
   if (!carregado || duelos.length === 0) {
     return (
       <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <h1 style={{ color: 'var(--purple-neon)' }}>Carregando seu progresso...</h1>
+        <h1 style={{ color: 'var(--purple-neon)' }}>Preparando o tapete vermelho...</h1>
       </main>
     );
   }
@@ -85,7 +103,9 @@ export default function Votar() {
       <main style={{ padding: '2rem', textAlign: 'center' }}>
         <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
         
-        <h1 style={{ color: 'var(--purple-neon)' }}>SEU TOP 10 ({categoria.toUpperCase()})</h1>
+        <h1 style={{ color: 'var(--purple-neon)' }}>SUA SELEÇÃO FINAL ({categoria.toUpperCase()})</h1>
+        <p style={{ color: '#a1a1aa', marginBottom: '2rem' }}>O jogo mais amado da comunidade vai ser decidido pelos seus votos.</p>
+        
         <ul style={{ listStyle: 'none', padding: 0, maxWidth: '400px', margin: '0 auto', marginBottom: '2rem' }}>
           {placarFinal.map((item, index) => (
             <li key={item.titulo} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #333', color: 'white' }}>
@@ -106,7 +126,7 @@ export default function Votar() {
           onClick={() => enviarParaPlacarGlobal(placarFinal)}
           style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 3rem', fontSize: '1.2rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', boxShadow: '0 0 20px rgba(176, 38, 255, 0.4)' }}
         >
-          ENVIAR PARA O PLACAR GLOBAL
+          CONFIRMAR MEU TRUE GOTY
         </button>
         
         <div style={{ marginTop: '2rem' }}>
@@ -122,12 +142,25 @@ export default function Votar() {
 
   return (
     <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '2rem' }}>
-      <h1 style={{ color: 'var(--purple-neon)' }}>BATALHA {dueloAtual + 1} DE {duelos.length}</h1>
+      <h1 style={{ color: 'var(--purple-neon)', textAlign: 'center' }}>
+        QUAL FOI O MELHOR?
+        <span style={{ display: 'block', fontSize: '1rem', color: '#a1a1aa', marginTop: '0.5rem', fontWeight: 'normal' }}>
+          Batalha {dueloAtual + 1} de {duelos.length}
+        </span>
+      </h1>
       
       <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-        <CardDuelo jogo={duelo.jogo1} onClick={() => registrarVoto(duelo.jogo1.titulo, duelo.jogo2.titulo)} />
+        <CardDuelo 
+          jogo={duelo.jogo1} 
+          status={animacao.jogo1}
+          onClick={() => executarVoto(duelo.jogo1, duelo.jogo2, true)} 
+        />
         <h2 style={{ fontSize: '3rem', color: 'var(--purple-neon)' }}>VS</h2>
-        <CardDuelo jogo={duelo.jogo2} onClick={() => registrarVoto(duelo.jogo2.titulo, duelo.jogo1.titulo)} />
+        <CardDuelo 
+          jogo={duelo.jogo2} 
+          status={animacao.jogo2}
+          onClick={() => executarVoto(duelo.jogo2, duelo.jogo1, false)} 
+        />
       </div>
 
       <p style={{ color: '#a1a1aa', fontSize: '0.9rem', marginTop: '-1rem' }}>

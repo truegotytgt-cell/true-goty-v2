@@ -22,21 +22,26 @@ export default function Home() {
         QUAL É O VERDADEIRO<br/>
         <span style={{ color: 'var(--purple-neon)' }}>GAME OF THE YEAR?</span>
       </h1>
-      <p style={{ fontSize: '1.2rem', color: '#a1a1aa', maxWidth: '600px', marginBottom: '3rem' }}>
-        Voz aos jogadores. Sem corporativismo, apenas a opinião da comunidade.
+      
+      {/* Copywriting acolhedor: focado no benefício e sem jargões */}
+      <p style={{ fontSize: '1.2rem', color: '#a1a1aa', maxWidth: '600px', marginBottom: '3rem', lineHeight: 1.6 }}>
+        Escolhas frente a frente garantem que o jogo mais amado vença, sem empates. 
+        Sua voz importa: descubra qual título realmente marcou a comunidade.
       </p>
+      
       <p style={{ fontSize: '1.1rem', color: 'var(--purple-neon)', fontWeight: 'bold', marginBottom: '1.5rem' }}>
-        Escolha qual ranking você quer visualizar:
+        Pronto para escolher o seu favorito?
       </p>
+      
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {/* Link atualizado para a nova rota dinâmica */}
-        <Link href="/votar/tgt" style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1.2rem 3rem', fontSize: '1.2rem', fontWeight: 900, borderRadius: '8px', textDecoration: 'none', boxShadow: '0 0 30px rgba(176, 38, 255, 0.4)' }}>
-          VOTAR NO TGT
+        <Link href="/votar/tgt" style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1.2rem 3rem', fontSize: '1.2rem', fontWeight: 900, borderRadius: '8px', textDecoration: 'none', boxShadow: '0 0 30px rgba(176, 38, 255, 0.4)', transition: 'transform 0.2s' }}>
+          COMEÇAR A VOTAR
         </Link>
         <button disabled style={{ backgroundColor: 'transparent', color: '#666', padding: '1.2rem 3rem', fontSize: '1.2rem', fontWeight: 900, borderRadius: '8px', border: '1px solid #333', cursor: 'not-allowed' }}>
           COMPARATIVO MERCADO (EM BREVE)
         </button>
       </div>
+      
       <div style={{ marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <span style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--purple-neon)', textShadow: '0 0 15px rgba(176, 38, 255, 0.5)' }}>
           {votos === null ? '...' : votos.toLocaleString('pt-BR')}

@@ -3,15 +3,20 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Importante para redirecionar
+import { useRouter, useSearchParams } from 'next/navigation'; // Adicionado useSearchParams
 import jogosData from '../../lib/jogos.json';
 
 export default function Obrigado() {
   const [urlImagem, setUrlImagem] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams(); // Pega os parâmetros da URL
+  
+  // Pega a categoria da URL, ou assume 'tgt' como padrão
+  const categoria = searchParams.get('categoria') || 'tgt';
 
   useEffect(() => {
-    const salvo = localStorage.getItem('tgt_my_ranking_tgt');
+    // ✅ CORREÇÃO: Agora usa a categoria dinâmica
+    const salvo = localStorage.getItem(`tgt_my_ranking_${categoria}`);
     if (salvo) {
       const placar = JSON.parse(salvo);
       if (placar.length >= 3) {
@@ -24,23 +29,20 @@ export default function Obrigado() {
         setUrlImagem(url);
       }
     }
-  }, []);
+  }, [categoria]); // Adicionado 'categoria' como dependência
 
-  // NOVA FUNÇÃO: Limpa tudo e permite votar de novo
   async function resetarTudo() {
     if (!confirm("Deseja apagar seu voto e começar do zero?")) return;
 
     try {
-      // 1. Chama a API para apagar o Cookie HttpOnly
       await fetch('/api/reset', { method: 'POST' });
       
-      // 2. Limpa o localStorage
-      localStorage.removeItem('tgt_has_voted_tgt');
-      localStorage.removeItem('tgt_my_ranking_tgt');
-      localStorage.removeItem('tgt_progress_tgt');
+      // ✅ CORREÇÃO: Limpa as chaves dinâmicas
+      localStorage.removeItem(`tgt_has_voted_${categoria}`);
+      localStorage.removeItem(`tgt_my_ranking_${categoria}`);
+      localStorage.removeItem(`tgt_progress_${categoria}`);
       
-      // 3. Redireciona para a votação
-      router.push('/votar/tgt');
+      router.push(`/votar/${categoria}`); // Redireciona para a votação da categoria correta
     } catch (error) {
       alert("Erro ao resetar. Tente limpar os cookies do navegador.");
     }
@@ -50,7 +52,7 @@ export default function Obrigado() {
     <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', textAlign: 'center', padding: '2rem' }}>
       <h1 style={{ fontSize: '3rem', color: 'var(--text-light)', marginBottom: '1rem' }}>MUITO OBRIGADO!</h1>
       <p style={{ fontSize: '1.2rem', color: '#a1a1aa', marginBottom: '2rem' }}>
-        Seu voto foi registrado no Placar Global com sucesso.
+        Seu voto para a categoria <strong>{categoria.toUpperCase()}</strong> foi registrado com sucesso.
       </p>
 
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '2rem' }}>
@@ -65,7 +67,7 @@ export default function Obrigado() {
           </a>
         )}
 
-        <Link href="/meu-ranking" style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 2rem', fontSize: '1.1rem', fontWeight: 'bold', borderRadius: '8px', textDecoration: 'none' }}>
+        <Link href={`/meu-ranking?categoria=${categoria}`} style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 2rem', fontSize: '1.1rem', fontWeight: 'bold', borderRadius: '8px', textDecoration: 'none' }}>
           VER MEU RANKING
         </Link>
 
@@ -74,7 +76,6 @@ export default function Obrigado() {
         </Link>
       </div>
 
-      {/* BOTÃO DE RESET ADICIONADO */}
       <div style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '2rem' }}>
         <button 
           onClick={resetarTudo}
