@@ -16,27 +16,22 @@ export default function Votar() {
   
   const { votos, duelos, dueloAtual, carregado, registrarVoto, desfazerVoto, resetarProgresso } = useVotingProgress(categoria, jogos);
   
-  // Estados para controlar a animação dos cards
   const [animacao, setAnimacao] = useState<{jogo1: 'idle'|'winner'|'loser', jogo2: 'idle'|'winner'|'loser'}>({ jogo1: 'idle', jogo2: 'idle' });
 
-  // Função que centraliza o voto e a animação
   function executarVoto(vencedor: Jogo, perdedor: Jogo, jogo1Venceu: boolean) {
-    if (animacao.jogo1 !== 'idle') return; // Evita duplo clique
+    if (animacao.jogo1 !== 'idle') return;
 
-    // 1. Dispara a animação visual
     setAnimacao({
       jogo1: jogo1Venceu ? 'winner' : 'loser',
       jogo2: jogo1Venceu ? 'loser' : 'winner'
     });
 
-    // 2. Espera 600ms (tempo da animação) e avança para o próximo duelo
     setTimeout(() => {
       registrarVoto(vencedor.titulo, perdedor.titulo);
-      setAnimacao({ jogo1: 'idle', jogo2: 'idle' }); // Reseta para a próxima batalha
+      setAnimacao({ jogo1: 'idle', jogo2: 'idle' }); 
     }, 600);
   }
 
-  // Atalhos de teclado adaptados para a nova função
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!carregado || duelos.length === 0 || dueloAtual >= duelos.length) return;
@@ -52,7 +47,7 @@ export default function Votar() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [carregado, duelos, dueloAtual, animacao]); // Adicionado animacao nas dependências
+  }, [carregado, duelos, dueloAtual, animacao]);
 
   async function enviarParaPlacarGlobal(placarFinal: any[]) {
     const turnstileToken = (window as any).turnstile?.getResponse();
@@ -129,11 +124,7 @@ export default function Votar() {
           CONFIRMAR MEU TRUE GOTY
         </button>
         
-        <div style={{ marginTop: '2rem' }}>
-            <button onClick={resetarProgresso} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
-              Refazer votação do zero
-            </button>
-        </div>
+        {/* AVISO DE SEGURANÇA: O botão de resetar foi removido daqui para produção. */}
       </main>
     );
   }
@@ -141,7 +132,7 @@ export default function Votar() {
   const duelo = duelos[dueloAtual];
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '2rem' }}>
+    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', gap: '2rem' }}>
       <h1 style={{ color: 'var(--purple-neon)', textAlign: 'center' }}>
         QUAL FOI O MELHOR?
         <span style={{ display: 'block', fontSize: '1rem', color: '#a1a1aa', marginTop: '0.5rem', fontWeight: 'normal' }}>
@@ -149,18 +140,10 @@ export default function Votar() {
         </span>
       </h1>
       
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-        <CardDuelo 
-          jogo={duelo.jogo1} 
-          status={animacao.jogo1}
-          onClick={() => executarVoto(duelo.jogo1, duelo.jogo2, true)} 
-        />
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <CardDuelo jogo={duelo.jogo1} status={animacao.jogo1} onClick={() => executarVoto(duelo.jogo1, duelo.jogo2, true)} />
         <h2 style={{ fontSize: '3rem', color: 'var(--purple-neon)' }}>VS</h2>
-        <CardDuelo 
-          jogo={duelo.jogo2} 
-          status={animacao.jogo2}
-          onClick={() => executarVoto(duelo.jogo2, duelo.jogo1, false)} 
-        />
+        <CardDuelo jogo={duelo.jogo2} status={animacao.jogo2} onClick={() => executarVoto(duelo.jogo2, duelo.jogo1, false)} />
       </div>
 
       <p style={{ color: '#a1a1aa', fontSize: '0.9rem', marginTop: '-1rem' }}>
@@ -173,12 +156,6 @@ export default function Votar() {
             ← Desfazer último voto
           </button>
         )}
-        <button 
-          onClick={() => { if(confirm("Tem certeza que deseja apagar todo o progresso?")) { resetarProgresso(); } }} 
-          style={{ backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #ef4444', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          Resetar Votação (Teste)
-        </button>
       </div>
     </main>
   );

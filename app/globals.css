@@ -1,15 +1,76 @@
+/* app/globals.css */
+/* (Mantenha o que já existe acima e adicione isso no final) */
+
 :root {
-  --bg-black: #0A0A0F;
-  --purple-neon: #B026FF;
-  --text-light: #F4F4F0;
+  --bg-black: #0A0A0A;
   --bg-gray: #1C1C1E;
+  --purple-neon: #a855f7;
   --border-color: #333333;
+  --text-light: #F4F4F0;
+  --text-muted: #D1D5DB;
 }
 
-body {
-  background-color: var(--bg-black);
-  color: var(--text-light);
-  font-family: Arial, Helvetica, sans-serif;
+html, body {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  background-color: var(--bg-black);
+  color: var(--text-light);
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* REFINO FINO E RESPONSIVIDADE (Para celulares e tablets) */
+@media (max-width: 1024px) {
+  /* Reduz o padding do topo em telas menores */
+  div[style*="paddingTop: '100px'"] {
+    padding-top: 140px !important; /* Empurra mais pra baixo porque o header pode quebrar */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Header para mobile */
+  header div {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Reduz o tamanho dos títulos principais em telas de celular */
+  h1 {
+    font-size: 2rem !important;
+  }
+
+  /* Ajusta a arena de votação no celular (um card embaixo do outro) */
+  main div[style*="display: 'flex'"] {
+    flex-direction: column;
+  }
+  
+  /* Ajusta os cards de duelo para ocuparem a tela toda no celular */
+  main div[style*="width: '320px'"] {
+    width: 100% !important;
+    max-width: 350px;
+  }
+
+  /* Os textos "VS" ficam menores */
+  h2[style*="fontSize: '3rem'"] {
+    font-size: 1.5rem !important;
+    margin: 1rem 0;
+  }
+
+  /* Grid de indicados para 2 colunas no celular */
+  div[style*="gridTemplateColumns: 'repeat(auto-fill"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Grid de indicados para 1 coluna em celulares pequenos */
+  div[style*="gridTemplateColumns: 'repeat(auto-fill"] {
+    grid-template-columns: 1fr !important;
+  }
 }
