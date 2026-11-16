@@ -1,25 +1,30 @@
 // app/indicados/page.tsx
 'use client';
 
-import jogosData from '../../lib/jogos.json';
-import { useState } from 'react';
+import jogosData from '@/lib/jogos.json';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
+
+function formatarNota(nota: number) {
+  if (typeof nota !== 'number') return nota;
+  return nota.toFixed(1);
+}
 
 function renderizarPlataformas(plataformas: string[]) {
   if (!plataformas) return null;
   return (
-    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.8rem', flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: 'auto', flexWrap: 'wrap' }}>
       {plataformas.map(p => {
-        let icone = '🎮';
+        let label = p;
         const pLower = p.toLowerCase(); 
-        if (pLower === 'pc') icone = '💻';
-        if (pLower === 'ps5') icone = '🎮 PS';
-        if (pLower === 'xbox') icone = '🎮 Xbox';
-        if (pLower === 'switch') icone = '🎮 Switch';
+        if (pLower === 'ps5') label = 'PS5';
+        if (pLower === 'xbox') label = 'XBOX';
+        if (pLower === 'switch') label = 'NSW';
+        if (pLower === 'pc') label = 'PC';
         
         return (
-          <span key={p} style={{ fontSize: '0.65rem', color: '#a1a1aa', backgroundColor: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 'bold' }}>
-            {icone}
+          <span key={p} style={{ fontSize: '0.6rem', color: '#a1a1aa', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 700 }}>
+            {label}
           </span>
         );
       })}
@@ -28,53 +33,65 @@ function renderizarPlataformas(plataformas: string[]) {
 }
 
 export default function Indicados() {
-  // CORREÇÃO AQUI: Puxando os jogos da gaveta 'tgt' do novo jogos.json
   const jogos = (jogosData as any).tgt?.top10 || [];
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
-    <main style={{ padding: '6rem 2rem', color: 'var(--text-light)', minHeight: '100vh' }}>
-      <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-        <span style={{ display: 'inline-block', color: '#D4AF37', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '1rem' }}>
-          ★ A Curadoria Oficial
+    <main style={{ minHeight: 'calc(100vh - 80px)', padding: '85px 2rem 2rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
+      
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#D4AF37', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '0.2rem' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          A Curadoria Oficial
         </span>
-        <h1 style={{ color: 'var(--text-light)', fontSize: '3rem', marginBottom: '1rem', fontWeight: 900 }}>
-          INDICADOS TGT
+        <h1 style={{ color: 'var(--text-light)', fontSize: '2.8rem', marginBottom: '0.2rem', fontWeight: 900, letterSpacing: '-1px' }}>
+          INDICADOS TGT <span style={{ color: 'var(--purple-neon)' }}>2026</span>
         </h1>
-        <p style={{ color: '#a1a1aa', fontSize: '1.1rem' }}>
-          Conheça os 10 jogos que disputam o True GOTY deste ano.
+        <p style={{ color: '#a1a1aa', fontSize: '0.95rem' }}>
+          Clique em um jogo para ver seus detalhes e confrontos.
         </p>
       </div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* CORREÇÃO DE CENTRALIZAÇÃO: auto-fill para distribuir melhor e maxWidth aumentado */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem', width: '100%', maxWidth: '1600px', justifyContent: 'center', flex: 1, zIndex: 1 }}>
         {jogos.map((jogo: any, index: number) => (
           <motion.div 
             key={jogo.slug}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            onMouseEnter={() => setHoveredCard(jogo.slug)}
-            onMouseLeave={() => setHoveredCard(null)}
-            style={{ 
-              backgroundColor: 'rgba(28, 28, 30, 0.6)', backdropFilter: 'blur(10px)',
-              padding: '1rem', borderRadius: '16px', 
-              border: hoveredCard === jogo.slug ? '1px solid var(--purple-neon)' : '1px solid rgba(255,255,255,0.05)',
-              textAlign: 'center', transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-              position: 'relative', cursor: 'pointer', display: 'flex', flexDirection: 'column',
-              transform: hoveredCard === jogo.slug ? 'translateY(-8px)' : 'translateY(0)',
-              boxShadow: hoveredCard === jogo.slug ? '0 15px 30px rgba(176, 38, 255, 0.2)' : 'none'
-            }}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: index * 0.05 }}
+            whileHover={{ scale: 1.02 }}
           >
-            {jogo.user_rating_original && (
-              <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', backgroundColor: 'rgba(10, 10, 15, 0.85)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.5)', padding: '4px 10px', borderRadius: '8px', fontWeight: 900, fontSize: '0.9rem', backdropFilter: 'blur(4px)', zIndex: 10 }}>
-                {jogo.user_rating_original}
+            <Link href={`/indicados/${jogo.slug}/confrontos`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', height: '100%' }}>
+              
+              <div style={{ 
+                backgroundColor: 'rgba(28, 28, 30, 0.6)', backdropFilter: 'blur(10px)',
+                padding: '0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)',
+                textAlign: 'center', transition: 'all 0.3s ease', position: 'relative', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--purple-neon)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(176, 38, 255, 0.15)' }}
+              onMouseOut={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                {jogo.user_rating_original && (
+                  <div style={{ position: 'absolute', top: '1rem', right: '1rem', backgroundColor: 'rgba(10, 10, 15, 0.9)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.5)', padding: '2px 8px', borderRadius: '6px', fontWeight: 900, fontSize: '0.8rem', zIndex: 10 }}>
+                    {formatarNota(jogo.user_rating_original)}
+                  </div>
+                )}
+                
+                <div style={{ width: '100%', aspectRatio: '3/4', overflow: 'hidden', borderRadius: '8px', marginBottom: '0.8rem' }}>
+                  <img src={jogo.imagem} alt={jogo.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                
+                <h3 style={{ 
+                  fontSize: '0.95rem', margin: '0 0 0.5rem 0', fontWeight: 800, color: 'var(--text-light)', lineHeight: 1.2,
+                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '2.4em'
+                }}>
+                  {jogo.titulo}
+                </h3>
+                
+                {renderizarPlataformas(jogo.plataformas)}
               </div>
-            )}
-            <div style={{ width: '100%', aspectRatio: '3/4', overflow: 'hidden', borderRadius: '12px', marginBottom: '1.2rem' }}>
-              <img src={jogo.imagem} alt={jogo.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', transform: hoveredCard === jogo.slug ? 'scale(1.05)' : 'scale(1)' }} />
-            </div>
-            <h3 style={{ fontSize: '1.1rem', margin: 0, flexGrow: 1, fontWeight: 800 }}>{jogo.titulo}</h3>
-            {renderizarPlataformas(jogo.plataformas)}
+            </Link>
           </motion.div>
         ))}
       </div>

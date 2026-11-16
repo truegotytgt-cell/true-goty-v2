@@ -5,15 +5,13 @@ import { getDB } from '../../../lib/db';
 
 export async function GET(request: Request) {
   try {
-    // 1. Pegamos a categoria da URL (ex: /api/ranking?category=mercado)
-    // Se não vier nada, usamos 'tgt' como padrão.
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('category') || 'tgt';
 
     const { env } = getCloudflareContext();
     const db = getDB(env);
 
-    // 2. A query agora usa o parâmetro '?' em vez do 'tgt' fixo
+    // Soma os pontos de cada jogo na categoria especificada e ordena
     const { results } = await db.prepare(
       "SELECT game_title, SUM(score) as total_score FROM results WHERE category = ? GROUP BY game_title ORDER BY total_score DESC"
     ).bind(categoria).all();

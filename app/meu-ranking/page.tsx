@@ -10,15 +10,51 @@ type Jogo = { titulo: string; pontos: number };
 
 export default function MeuRanking() {
   const [ranking, setRanking] = useState<Jogo[]>([]);
+  const [carregando, setCarregando] = useState(true);
   const searchParams = useSearchParams();
   const categoria = searchParams.get('categoria') || 'tgt';
 
   useEffect(() => {
-    const salvo = localStorage.getItem(`tgt_my_ranking_${categoria}`);
-    if (salvo) {
-      setRanking(JSON.parse(salvo));
+    async function buscarRanking() {
+      try {
+        // Busca os dados reais do banco D1
+        const res = await fetch(`/api/meu-ranking?category=${categoria}`);
+        const json = await res.json();
+
+        if (json.success && json.ranking && json.ranking.length > 0) {
+          // Converte o formato do banco para o formato esperado pelo Podium
+          const formatado = json.ranking.map((item: any) => ({
+            titulo: item.game_title,
+            pontos: item.score
+          }));
+          setRanking(formatado);
+        } else {
+          // Fallback: tenta o localStorage (para quem votou antes da API existir)
+          const salvo = localStorage.getItem(`tgt_my_ranking_${categoria}`);
+          if (salvo) {
+            setRanking(JSON.parse(salvo));
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao buscar ranking:", error);
+        // Em caso de erro, tenta o localStorage
+        const salvo = localStorage.getItem(`tgt_my_ranking_${categoria}`);
+        if (salvo) setRanking(JSON.parse(salvo));
+      } finally {
+        setCarregando(false);
+      }
     }
+
+    buscarRanking();
   }, [categoria]);
+
+  if (carregando) {
+    return (
+      <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--purple-neon)', fontSize: '1.2rem' }}>
+        Buscando seu ranking...
+      </main>
+    );
+  }
 
   if (ranking.length === 0) {
     return (
@@ -48,7 +84,6 @@ export default function MeuRanking() {
       <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.6)', backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '1.5rem 2rem', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left' }}>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {restante.map((jogo, index) => {
-            // Lógica da barra de força
             const percentual = maxPontos === minPontos ? 50 : ((jogo.pontos - minPontos) / (maxPontos - minPontos)) * 100;
             
             return (
@@ -57,7 +92,6 @@ export default function MeuRanking() {
                 padding: '15px 0', borderBottom: index !== restante.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                 position: 'relative', overflow: 'hidden'
               }}>
-                {/* A Barra de Força ao fundo */}
                 <div style={{
                   position: 'absolute', left: 0, top: 0, bottom: 0,
                   width: `${percentual}%`,

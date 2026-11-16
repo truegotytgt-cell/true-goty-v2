@@ -36,25 +36,24 @@ export default function Header() {
   const labelAtual = lang === 'pt' ? 'PT-BR' : lang === 'en' ? 'EN' : 'ES';
 
   return (
-    // Diminuí o padding vertical para '0.2rem' para compensar a imagem maior
-    <header style={{ position: 'fixed', top: 0, width: '100%', backgroundColor: 'rgba(10, 10, 15, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(176, 38, 255, 0.2)', zIndex: 100, boxSizing: 'border-box', padding: '0.2rem 2rem', minHeight: '80px', display: 'flex', alignItems: 'center' }}>
+    <header style={{ position: 'fixed', top: 0, width: '100%', backgroundColor: 'rgba(5, 0, 10, 0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', zIndex: 100, boxSizing: 'border-box', padding: '0.5rem 2rem', minHeight: '75px', display: 'flex', alignItems: 'center' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
         
-        {/* LOGO AUMENTADA */}
+        {/* LOGO AJUSTADA: Mais equilibrada, sem espremer a tela */}
         <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
           <img 
             src="/logo-tgt.png" 
             alt="TGT - True GOTY" 
-            // Aumentei a altura para 110px e adicionei uma margem negativa para colar mais no topo
-            style={{ height: '110px', width: 'auto', objectFit: 'contain', margin: '-15px 0' }} 
+            style={{ height: '75px', width: 'auto', objectFit: 'contain', margin: '-10px 0' }} 
           />
         </Link>
 
-        <nav style={{ display: 'flex', gap: '0.2rem', backgroundColor: 'var(--bg-gray)', padding: '0.5rem', borderRadius: '50px', border: '1px solid #333' }}>
+        {/* NAVEGAÇÃO CENTRAL MAIS SOFISTICADA */}
+        <nav style={{ display: 'flex', gap: '0.2rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '0.4rem', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
           {navLinks.map((link) => {
             const isActive = pathname === link.path || (link.path === '/votar/tgt' && pathname.startsWith('/votar'));
             return (
-              <Link key={link.name} href={link.path} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '50px', textDecoration: 'none', transition: 'all 0.3s ease', backgroundColor: isActive ? 'var(--purple-neon)' : 'transparent', color: isActive ? '#FFF' : '#a1a1aa', boxShadow: isActive ? '0 0 15px rgba(176, 38, 255, 0.4)' : 'none' }}>
+              <Link key={link.name} href={link.path} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '50px', textDecoration: 'none', transition: 'all 0.3s ease', backgroundColor: isActive ? 'var(--purple-neon)' : 'transparent', color: isActive ? '#FFF' : '#a1a1aa', boxShadow: isActive ? '0 0 20px rgba(176, 38, 255, 0.3)' : 'none' }}>
                 {link.name}
               </Link>
             );
@@ -64,7 +63,7 @@ export default function Header() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
           
           <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <button onClick={() => setLangOpen(!langOpen)} style={{ background: 'transparent', border: '1px solid #333', color: '#a1a1aa', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s' }}>
+            <button onClick={() => setLangOpen(!langOpen)} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', color: '#a1a1aa', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s' }}>
               <img src={`https://flagcdn.com/${flagAtual}.svg`} width="20" alt={labelAtual} style={{ borderRadius: '2px', boxShadow: '0 0 2px rgba(255,255,255,0.5)' }} />
               {labelAtual}
             </button>
@@ -89,7 +88,11 @@ export default function Header() {
             )}
           </div>
 
-          <Link href="/contato" style={{ padding: '0.5rem 1.5rem', border: '1px solid var(--purple-neon)', borderRadius: '8px', color: 'var(--purple-neon)', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.85rem' }}>
+          {/* BOTÃO CONTATO COM FUNDO ROXO PREMIUM */}
+          <Link href="/contato" style={{ padding: '0.6rem 1.5rem', border: '1px solid var(--purple-neon)', borderRadius: '8px', backgroundColor: 'var(--purple-neon)', color: '#FFF', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.85rem', boxShadow: '0 0 15px rgba(176, 38, 255, 0.2)', transition: 'all 0.2s' }}
+          onMouseOver={(e) => { e.currentTarget.style.boxShadow = '0 0 25px rgba(176, 38, 255, 0.5)'; e.currentTarget.style.transform = 'scale(1.02)' }}
+          onMouseOut={(e) => { e.currentTarget.style.boxShadow = '0 0 15px rgba(176, 38, 255, 0.2)'; e.currentTarget.style.transform = 'scale(1)' }}
+          >
             {t.nav_contato}
           </Link>
         </div>
