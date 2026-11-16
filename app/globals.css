@@ -74,3 +74,9 @@ html, body {
     grid-template-columns: 1fr !important;
   }
 }
+/* Adicione esta animação no final do seu globals.css */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(176, 38, 255, 0.9); }
+  100% { box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
+}

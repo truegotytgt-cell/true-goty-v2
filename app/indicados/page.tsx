@@ -11,7 +11,6 @@ function renderizarPlataformas(plataformas: string[]) {
     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.8rem', flexWrap: 'wrap' }}>
       {plataformas.map(p => {
         let icone = '🎮';
-        // CORREÇÃO AQUI: Usando toLowerCase() para ser à prova de falhas
         const pLower = p.toLowerCase(); 
         if (pLower === 'pc') icone = '💻';
         if (pLower === 'ps5') icone = '🎮 PS';
@@ -29,7 +28,8 @@ function renderizarPlataformas(plataformas: string[]) {
 }
 
 export default function Indicados() {
-  const jogos = jogosData.top10;
+  // CORREÇÃO AQUI: Puxando os jogos da gaveta 'tgt' do novo jogos.json
+  const jogos = (jogosData as any).tgt?.top10 || [];
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
@@ -47,7 +47,7 @@ export default function Indicados() {
       </div>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-        {jogos.map((jogo, index) => (
+        {jogos.map((jogo: any, index: number) => (
           <motion.div 
             key={jogo.slug}
             initial={{ opacity: 0, y: 40 }}

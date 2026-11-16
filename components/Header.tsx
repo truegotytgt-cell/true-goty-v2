@@ -4,13 +4,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { useLanguage } from './LanguageProvider'; // <-- IMPORTANDO
+import { useLanguage } from './LanguageProvider'; 
 
 export default function Header() {
   const pathname = usePathname();
   const [langOpen, setLangOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { lang, setLang, t } = useLanguage(); // <-- USANDO O IDIOMA
+  const { lang, setLang, t } = useLanguage(); 
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -26,28 +26,35 @@ export default function Header() {
     { name: t.nav_inicio, path: '/' },
     { name: t.nav_metodo, path: '/metodo' },
     { name: t.nav_indicados, path: '/indicados' },
-    { name: t.nav_goty, path: '/resultados' },
+    { name: t.nav_goty, path: '/resultados' }, 
+    { name: 'História', path: '/historia' }, 
     { name: t.nav_votar, path: '/votar/tgt' },
     { name: t.nav_sobre, path: '/sobre' },
   ];
 
-  // Bandeira atual baseada no idioma
   const flagAtual = lang === 'pt' ? 'br' : lang === 'en' ? 'us' : 'es';
   const labelAtual = lang === 'pt' ? 'PT-BR' : lang === 'en' ? 'EN' : 'ES';
 
   return (
-    <header style={{ position: 'fixed', top: 0, width: '100%', backgroundColor: 'rgba(10, 10, 15, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(176, 38, 255, 0.2)', zIndex: 100, boxSizing: 'border-box', padding: '1rem 2rem' }}>
+    // Diminuí o padding vertical para '0.2rem' para compensar a imagem maior
+    <header style={{ position: 'fixed', top: 0, width: '100%', backgroundColor: 'rgba(10, 10, 15, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(176, 38, 255, 0.2)', zIndex: 100, boxSizing: 'border-box', padding: '0.2rem 2rem', minHeight: '80px', display: 'flex', alignItems: 'center' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
         
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <h1 style={{ color: 'var(--text-light)', fontSize: '2rem', fontWeight: 900, margin: 0, textShadow: '0 0 10px var(--purple-neon)' }}>TGT</h1>
+        {/* LOGO AUMENTADA */}
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <img 
+            src="/logo-tgt.png" 
+            alt="TGT - True GOTY" 
+            // Aumentei a altura para 110px e adicionei uma margem negativa para colar mais no topo
+            style={{ height: '110px', width: 'auto', objectFit: 'contain', margin: '-15px 0' }} 
+          />
         </Link>
 
-        <nav style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--bg-gray)', padding: '0.5rem', borderRadius: '50px', border: '1px solid #333' }}>
+        <nav style={{ display: 'flex', gap: '0.2rem', backgroundColor: 'var(--bg-gray)', padding: '0.5rem', borderRadius: '50px', border: '1px solid #333' }}>
           {navLinks.map((link) => {
             const isActive = pathname === link.path || (link.path === '/votar/tgt' && pathname.startsWith('/votar'));
             return (
-              <Link key={link.name} href={link.path} style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '50px', textDecoration: 'none', transition: 'all 0.3s ease', backgroundColor: isActive ? 'var(--purple-neon)' : 'transparent', color: isActive ? '#FFF' : '#a1a1aa', boxShadow: isActive ? '0 0 15px rgba(176, 38, 255, 0.4)' : 'none' }}>
+              <Link key={link.name} href={link.path} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '50px', textDecoration: 'none', transition: 'all 0.3s ease', backgroundColor: isActive ? 'var(--purple-neon)' : 'transparent', color: isActive ? '#FFF' : '#a1a1aa', boxShadow: isActive ? '0 0 15px rgba(176, 38, 255, 0.4)' : 'none' }}>
                 {link.name}
               </Link>
             );

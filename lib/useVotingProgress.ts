@@ -17,42 +17,65 @@ export function useVotingProgress(categoria: string, jogos: any[]) {
 
   const chaveStorage = `tgt_progress_${categoria}`;
 
-  useEffect(() => {
-    const salvo = localStorage.getItem(chaveStorage);
-    
-    if (salvo) {
-      try {
-        const parsed = JSON.parse(salvo);
-        setVotos(parsed.votos || []);
-        setDueloAtual(parsed.dueloAtual || 0);
-        
-        if (parsed.duelos && parsed.duelos.length > 0) {
-          setDuelos(parsed.duelos);
-        } else {
-          setDuelos(gerarDuelos(jogos));
-        }
-      } catch (e) {
-        console.error("Erro ao ler o progresso:", e);
-      }
-    } else {
-      // AQUI ESTÁ A CORREÇÃO DO BUG 1:
-      // Se é a primeira vez, gera os duelos E salva imediatamente no localStorage
-      const duelosIniciais = gerarDuelos(jogos);
-      setDuelos(duelosIniciais);
+  // Função auxiliar para nunca quebrar a tela se o navegador bloquear o salvamento
+  function salvarNoNavegadorSeguro(novosVotos: Voto[], novoDuelo: number, listaDuelos: Duelo[]) {
+    try {
       localStorage.setItem(
         chaveStorage, 
-        JSON.stringify({ votos: [], dueloAtual: 0, duelos: duelosIniciais })
+        JSON.stringify({ votos: novosVotos, dueloAtual: novoDuelo, duelos: listaDuelos })
       );
+    } catch (e) {
+      console.warn("Não foi possível salvar o progresso (modo anônimo ou memória cheia). O jogo continuará funcionando nesta aba, mas não será salvo ao recarregar.");
     }
+  }
+
+  useEffect(() => {
+    // A quantidade esperada de confrontos (ex: 10 jogos = 45 duelos)
+    const duelosEsperados = jogos.length > 0 ? (jogos.length * (jogos.length - 1)) / 2 : 0;
+
+    try {
+      const salvo = localStorage.getItem(chaveStorage);
+      
+      if (salvo) {
+        try {
+          const parsed = JSON.parse(salvo);
+          const votosSalvos = parsed.votos || [];
+          const dueloAtualSalvo = parsed.dueloAtual || 0;
+          
+          // Valida se os duelos existem e se a quantidade está correta
+          if (parsed.duelos && parsed.duelos.length === duelosEsperados) {
+            setVotos(votosSalvos);
+            setDueloAtual(dueloAtualSalvo);
+            setDuelos(parsed.duelos);
+          } else {
+            // Se os duelos estão corrompidos ou faltando, gera novos e salva na hora
+            const duelosIniciais = gerarDuelos(jogos);
+            setDuelos(duelosIniciais);
+            salvarNoNavegadorSeguro(votosSalvos, dueloAtualSalvo, duelosIniciais);
+          }
+        } catch (parseError) {
+          // Se o JSON estiver corrompido, limpa o lixo e recomeça
+          console.error("Cache corrompido. Limpando e reiniciando:", parseError);
+          localStorage.removeItem(chaveStorage);
+          const duelosIniciais = gerarDuelos(jogos);
+          setDuelos(duelosIniciais);
+          salvarNoNavegadorSeguro([], 0, duelosIniciais);
+        }
+      } else {
+        // Primeira vez do usuário: gera e salva
+        const duelosIniciais = gerarDuelos(jogos);
+        setDuelos(duelosIniciais);
+        salvarNoNavegadorSeguro([], 0, duelosIniciais);
+      }
+    } catch (e) {
+      // Se o navegador bloquear até a LEITURA (caso raro, mas possível)
+      console.warn("Não foi possível acessar o localStorage. Rodando em memória.");
+      const duelosIniciais = gerarDuelos(jogos);
+      setDuelos(duelosIniciais);
+    }
+    
     setCarregado(true);
   }, [chaveStorage, jogos]);
-
-  function salvarNoNavegador(novosVotos: Voto[], novoDuelo: number, listaDuelos: Duelo[]) {
-    localStorage.setItem(
-      chaveStorage, 
-      JSON.stringify({ votos: novosVotos, dueloAtual: novoDuelo, duelos: listaDuelos })
-    );
-  }
 
   function registrarVoto(vencedor: string, perdedor: string) {
     const novosVotos = [...votos, { vencedor, perdedor }];
@@ -60,7 +83,7 @@ export function useVotingProgress(categoria: string, jogos: any[]) {
     
     setVotos(novosVotos);
     setDueloAtual(proximoDuelo);
-    salvarNoNavegador(novosVotos, proximoDuelo, duelos);
+    salvarNoNavegadorSeguro(novosVotos, proximoDuelo, duelos);
   }
 
   function desfazerVoto() {
@@ -69,7 +92,7 @@ export function useVotingProgress(categoria: string, jogos: any[]) {
     const dueloAnterior = dueloAtual - 1;
     setVotos(novosVotos);
     setDueloAtual(dueloAnterior);
-    salvarNoNavegador(novosVotos, dueloAnterior, duelos);
+    salvarNoNavegadorSeguro(novosVotos, dueloAnterior, duelos);
   }
 
   function resetarProgresso() {
@@ -77,10 +100,7 @@ export function useVotingProgress(categoria: string, jogos: any[]) {
     setDueloAtual(0);
     const novosDuelos = gerarDuelos(jogos);
     setDuelos(novosDuelos);
-    localStorage.setItem(
-      chaveStorage, 
-      JSON.stringify({ votos: [], dueloAtual: 0, duelos: novosDuelos })
-    );
+    salvarNoNavegadorSeguro([], 0, novosDuelos);
   }
 
   return {

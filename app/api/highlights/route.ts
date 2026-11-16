@@ -3,6 +3,15 @@ import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getDB } from '../../../lib/db';
 
+// Tipagem básica para o resultado da nossa query agregada
+type ConfrontoAgregado = {
+  jogo_a: string;
+  jogo_b: string;
+  vitorias_a: number;
+  vitorias_b: number;
+  total: number;
+};
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -13,7 +22,7 @@ export async function GET(request: Request) {
     const { env } = getCloudflareContext();
     const db = getDB(env);
 
-    // 1. Descobrir o Top 1 e o Último Colocado
+    // 1. Descobrir o Top 1 e o Último Colocado (All-time)
     const { results: ranking } = await db.prepare(
       "SELECT game_title, SUM(score) as total_score FROM results WHERE category = ? GROUP BY game_title ORDER BY total_score DESC"
     ).bind(categoria).all();
@@ -25,8 +34,8 @@ export async function GET(request: Request) {
     const primeiroColocado = ranking[0].game_title;
     const ultimoColocado = ranking[ranking.length - 1].game_title;
 
-    // 2. A NOVA Zebra do Ano (A sua ideia): 
-    // Qual jogo o ÚLTIMO colocado mais conseguiu vencer?
+    // 2. A NOVA Zebra do Ano: 
+    // Qual jogo o ÚLTIMO colocado mais conseguiu vencer neste ano?
     const zebraQuery = await db.prepare(`
       SELECT loser_title as jogo_derrotado, COUNT(*) as vitorias
       FROM pairwise_results 
@@ -42,59 +51,68 @@ export async function GET(request: Request) {
       vitorias: zebraQuery.vitorias
     } : null;
 
-    // 3. O Confronto Mais Parelho
-    const { results: parelhos } = await db.prepare(`
+    // 3. Uma ÚNICA query para pegar todos os confrontos agrupados
+    // Ela normaliza os pares para Jogo A vs Jogo B, independente de quem ganhou.
+    // Assim, conseguimos as vitórias de A e de B de uma vez só.
+    const { results: todosConfrontos } = await db.prepare(`
+      WITH ParesNormalizados AS (
+        SELECT
+          CASE WHEN winner_title < loser_title THEN winner_title ELSE loser_title END AS jogo_a,
+          CASE WHEN winner_title < loser_title THEN loser_title ELSE winner_title END AS jogo_b,
+          CASE WHEN winner_title < loser_title THEN 1 ELSE 0 END AS win_a,
+          CASE WHEN winner_title > loser_title THEN 1 ELSE 0 END AS win_b
+        FROM pairwise_results
+        WHERE category = ? AND year = ?
+      )
       SELECT 
-        a.winner_title AS jogo_a, a.loser_title AS jogo_b, COUNT(*) AS total
-      FROM pairwise_results a
-      WHERE a.category = ? AND a.year = ?
-      GROUP BY a.winner_title, a.loser_title
-      ORDER BY ABS(
-        (SELECT COUNT(*) FROM pairwise_results b WHERE b.category = a.category AND b.year = a.year AND b.winner_title = a.winner_title AND b.loser_title = a.loser_title) - 
-        (SELECT COUNT(*) FROM pairwise_results c WHERE c.category = a.category AND c.year = a.year AND c.winner_title = a.loser_title AND c.loser_title = a.winner_title)
-      ) ASC
-      LIMIT 1
-    `).bind(categoria, anoFiltro).all();
+        jogo_a, 
+        jogo_b, 
+        SUM(win_a) AS vitorias_a,
+        SUM(win_b) AS vitorias_b,
+        SUM(win_a) + SUM(win_b) AS total
+      FROM ParesNormalizados
+      GROUP BY jogo_a, jogo_b
+    `).bind(categoria, anoFiltro).all<ConfrontoAgregado>();
 
     let confrontoParelho = null;
-    if (parelhos && parelhos.length > 0) {
-      const c = parelhos[0];
-      const vA = await db.prepare("SELECT COUNT(*) as v FROM pairwise_results WHERE category = ? AND year = ? AND winner_title = ? AND loser_title = ?").bind(categoria, anoFiltro, c.jogo_a, c.jogo_b).first();
-      const vB = await db.prepare("SELECT COUNT(*) as v FROM pairwise_results WHERE category = ? AND year = ? AND winner_title = ? AND loser_title = ?").bind(categoria, anoFiltro, c.jogo_b, c.jogo_a).first();
-      
-      const total = (vA?.v as number) + (vB?.v as number);
-      const divisaoA = total > 0 ? Math.round(((vA?.v as number) / total) * 100) : 50;
-
-      confrontoParelho = { jogo_a: c.jogo_a, jogo_b: c.jogo_b, porcentagem_a: divisaoA, porcentagem_b: 100 - divisaoA };
-    }
-
-    // 4. O Confronto Mais Desequilibrado
-    const { results: desequilibrados } = await db.prepare(`
-      SELECT 
-        a.winner_title AS jogo_a, a.loser_title AS jogo_b, COUNT(*) AS total
-      FROM pairwise_results a
-      WHERE a.category = ? AND a.year = ?
-      GROUP BY a.winner_title, a.loser_title
-      ORDER BY ABS(
-        (SELECT COUNT(*) FROM pairwise_results b WHERE b.category = a.category AND b.year = a.year AND b.winner_title = a.winner_title AND b.loser_title = a.loser_title) - 
-        (SELECT COUNT(*) FROM pairwise_results c WHERE c.category = a.category AND c.year = a.year AND c.winner_title = a.loser_title AND c.loser_title = a.winner_title)
-      ) DESC
-      LIMIT 1
-    `).bind(categoria, anoFiltro).all();
-
     let confrontoDesequilibrado = null;
-    if (desequilibrados && desequilibrados.length > 0) {
-      const c = desequilibrados[0];
-      const vA = await db.prepare("SELECT COUNT(*) as v FROM pairwise_results WHERE category = ? AND year = ? AND winner_title = ? AND loser_title = ?").bind(categoria, anoFiltro, c.jogo_a, c.jogo_b).first();
-      const vB = await db.prepare("SELECT COUNT(*) as v FROM pairwise_results WHERE category = ? AND year = ? AND winner_title = ? AND loser_title = ?").bind(categoria, anoFiltro, c.jogo_b, c.jogo_a).first();
-      
-      const total = (vA?.v as number) + (vB?.v as number);
-      const divisaoA = total > 0 ? Math.round(((vA?.v as number) / total) * 100) : 50;
 
-      confrontoDesequilibrado = { jogo_a: c.jogo_a, jogo_b: c.jogo_b, porcentagem_a: divisaoA, porcentagem_b: 100 - divisaoA };
+    if (todosConfrontos && todosConfrontos.length > 0) {
+      let menorDiferencaProporcional = 2.0; // O máximo possível é 1.0 (100% vs 0%)
+      let maiorDiferencaProporcional = -1.0;
+
+      for (const c of todosConfrontos) {
+        if (c.total === 0) continue;
+
+        // A mágica acontece aqui: diferença dividida pelo total (proporção)
+        const diferencaProporcional = Math.abs(c.vitorias_a - c.vitorias_b) / c.total;
+        
+        const porcentagemA = Math.round((c.vitorias_a / c.total) * 100);
+        const porcentagemB = 100 - porcentagemA;
+
+        const confrontoFormatado = {
+          jogo_a: c.jogo_a,
+          jogo_b: c.jogo_b,
+          porcentagem_a: porcentagemA,
+          porcentagem_b: porcentagemB
+        };
+
+        // Verifica se é o mais parelho
+        if (diferencaProporcional < menorDiferencaProporcional) {
+          menorDiferencaProporcional = diferencaProporcional;
+          confrontoParelho = confrontoFormatado;
+        }
+
+        // Verifica se é o mais desequilibrado
+        if (diferencaProporcional > maiorDiferencaProporcional) {
+          maiorDiferencaProporcional = diferencaProporcional;
+          confrontoDesequilibrado = confrontoFormatado;
+        }
+      }
     }
 
-    return NextResponse.json({
+    // 4. Monta a resposta com Cache de 5 minutos (300 segundos)
+    const response = NextResponse.json({
       success: true,
       ano: anoFiltro,
       data: {
@@ -103,6 +121,10 @@ export async function GET(request: Request) {
         desequilibrado: confrontoDesequilibrado
       }
     });
+
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60');
+
+    return response;
 
   } catch (error) {
     console.error("Erro ao buscar highlights:", error);

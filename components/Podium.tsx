@@ -9,7 +9,11 @@ type JogoRanking = { titulo: string; pontos: number };
 export default function Podium({ top3 }: { top3: JogoRanking[] }) {
   if (!top3 || top3.length < 3) return null;
 
-  const getImagem = (titulo: string) => jogosData.top10.find(j => j.titulo === titulo)?.imagem || '';
+  // CORREÇÃO AQUI: Busca na gaveta 'tgt' do novo jogos.json
+  const getImagem = (titulo: string) => {
+    const lista = (jogosData as any).tgt?.top10 || [];
+    return lista.find((j: any) => j.titulo === titulo)?.imagem || '';
+  };
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '1rem', marginBottom: '4rem', minHeight: '400px', marginTop: '2rem' }}>
