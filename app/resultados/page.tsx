@@ -68,7 +68,8 @@ export default function ResultadosHub() {
             <p style={{ fontSize: '0.9rem', color: '#a1a1aa', margin: 0 }}>A soma de todos os votos da comunidade.</p>
           </Link>
 
-          <Link href="/votar" style={{
+          {/* CORREÇÃO AQUI: href alterado para /meu-ranking */}
+          <Link href="/meu-ranking" style={{
             display: 'flex',
             flexDirection: 'column',
             padding: '1.5rem',

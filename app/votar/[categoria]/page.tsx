@@ -18,6 +18,7 @@ export default function Votar() {
   const { votos, duelos, dueloAtual, carregado, registrarVoto, desfazerVoto } = useVotingProgress(categoria, jogos);
   
   const [animacao, setAnimacao] = useState<{jogo1: 'idle'|'winner'|'loser', jogo2: 'idle'|'winner'|'loser'}>({ jogo1: 'idle', jogo2: 'idle' });
+  const [enviando, setEnviando] = useState(false);
 
   function executarVoto(vencedor: Jogo, perdedor: Jogo, jogo1Venceu: boolean) {
     if (animacao.jogo1 !== 'idle') return;
@@ -35,7 +36,7 @@ export default function Votar() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!carregado || duelos.length === 0 || dueloAtual >= duelos.length) return;
+      if (!carregado || duelos.length === 0 || dueloAtual >= duelos.length || enviando) return;
       const duelo = duelos[dueloAtual];
       
       if (e.key === 'ArrowLeft') {
@@ -48,14 +49,16 @@ export default function Votar() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [carregado, duelos, dueloAtual, animacao]);
+  }, [carregado, duelos, dueloAtual, animacao, enviando]);
 
-  async function enviarParaPlacarGlobal(placarFinal: any[]) {
+  async function enviarParaPlacarGlobal(placarFinal: any[], votosBrutos: any[]) {
     const turnstileToken = (window as any).turnstile?.getResponse();
     if (!turnstileToken) {
-      alert("Por favor, aguarde a verificação de segurança.");
+      alert("Por favor, aguarde a verificação de segurança aparecer e clique novamente.");
       return;
     }
+
+    setEnviando(true);
 
     const dadosParaEnviar = placarFinal.map(item => ({
       game_title: item.titulo,
@@ -64,11 +67,20 @@ export default function Votar() {
       turnstileToken: turnstileToken 
     }));
 
+    const pairwiseParaEnviar = votosBrutos.map(v => ({
+      winner_title: v.vencedor,
+      loser_title: v.perdedor,
+      category: categoria
+    }));
+
     try {
       const resposta = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scores: dadosParaEnviar })
+        body: JSON.stringify({ 
+          scores: dadosParaEnviar,
+          pairwise: pairwiseParaEnviar
+        })
       });
       
       const resultado = await resposta.json();
@@ -78,10 +90,22 @@ export default function Votar() {
         localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
         window.location.href = `/obrigado?categoria=${categoria}`;
       } else {
-        alert("Erro de segurança: " + resultado.error);
+        // Se o erro for porque ele já votou, salvamos o placar local e redirecionamos!
+        if (resultado.error && resultado.error.includes("já votou")) {
+          localStorage.setItem(`tgt_has_voted_${categoria}`, 'true');
+          localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
+          alert("Parece que você já votou nesta categoria! Vamos te levar para a página de resultados.");
+          window.location.href = `/obrigado?categoria=${categoria}`;
+        } else {
+          alert("Ops! Ocorreu um erro: " + resultado.error);
+          (window as any).turnstile?.reset(); 
+          setEnviando(false); 
+        }
       }
     } catch (erro) {
-      alert("Erro ao enviar os votos.");
+      alert("Erro de conexão. Tente novamente.");
+      (window as any).turnstile?.reset();
+      setEnviando(false); 
     }
   }
 
@@ -113,8 +137,8 @@ export default function Votar() {
 
         <div className="cf-turnstile" data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} data-theme="dark" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}></div>
 
-        <button onClick={() => enviarParaPlacarGlobal(placarFinal)} style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 3rem', fontSize: '1.2rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', boxShadow: '0 0 20px rgba(176, 38, 255, 0.4)' }}>
-          CONFIRMAR MEU TRUE GOTY
+        <button onClick={() => enviarParaPlacarGlobal(placarFinal, votos)} disabled={enviando} style={{ backgroundColor: enviando ? '#666' : 'var(--purple-neon)', color: '#FFF', padding: '1rem 3rem', fontSize: '1.2rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: enviando ? 'not-allowed' : 'pointer', boxShadow: '0 0 20px rgba(176, 38, 255, 0.4)' }}>
+          {enviando ? 'ENVIANDO...' : 'CONFIRMAR MEU TRUE GOTY'}
         </button>
       </main>
     );
@@ -134,7 +158,6 @@ export default function Votar() {
       
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center', width: '100%', maxWidth: '1000px' }}>
         
-        {/* Lado Esquerdo (Animado) */}
         <AnimatePresence mode="wait">
           <motion.div 
             key={`jogo1-${dueloAtual}`}
@@ -145,25 +168,14 @@ export default function Votar() {
           </motion.div>
         </AnimatePresence>
 
-        {/* MEDALHÃO VS (Aço Damasco) */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 2rem' }}>
           <div style={{ width: '2px', height: '80px', background: 'linear-gradient(to bottom, transparent, var(--purple-neon), transparent)', marginBottom: '1rem' }} />
-          <div style={{ 
-            width: '80px', height: '80px', transform: 'rotate(45deg)', 
-            background: 'linear-gradient(135deg, #1a1a24, #05000A)', 
-            border: '2px solid var(--purple-neon)', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 30px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2)',
-            position: 'relative'
-          }}>
-            <span style={{ transform: 'rotate(-45deg)', color: '#D4AF37', fontSize: '1.8rem', fontWeight: 900, textShadow: '0 0 10px rgba(212, 175, 55, 0.8)' }}>
-              VS
-            </span>
+          <div style={{ width: '80px', height: '80px', transform: 'rotate(45deg)', background: 'linear-gradient(135deg, #1a1a24, #05000A)', border: '2px solid var(--purple-neon)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2)', position: 'relative' }}>
+            <span style={{ transform: 'rotate(-45deg)', color: '#D4AF37', fontSize: '1.8rem', fontWeight: 900, textShadow: '0 0 10px rgba(212, 175, 55, 0.8)' }}>VS</span>
           </div>
           <div style={{ width: '2px', height: '80px', background: 'linear-gradient(to top, transparent, var(--purple-neon), transparent)', marginTop: '1rem' }} />
         </div>
 
-        {/* Lado Direito (Animado) */}
         <AnimatePresence mode="wait">
           <motion.div 
             key={`jogo2-${dueloAtual}`}
@@ -176,7 +188,6 @@ export default function Votar() {
 
       </div>
 
-      {/* TECLAS ESTILIZADAS (Substituindo o texto simples) */}
       <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
         <span style={{ color: '#a1a1aa', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
           Pressione <kbd style={{ backgroundColor: '#1a1a24', border: '1px solid #333', borderBottom: '2px solid #555', borderRadius: '4px', padding: '2px 8px', color: '#FFF', fontFamily: 'monospace', fontSize: '1rem' }}>←</kbd> para escolher
@@ -188,7 +199,7 @@ export default function Votar() {
 
       <div style={{ marginTop: '1rem' }}>
         {dueloAtual > 0 && (
-          <button onClick={desfazerVoto} style={{ backgroundColor: 'transparent', color: '#a1a1aa', border: '1px solid #333', padding: '0.5rem 1rem', borderRadius: '50px', cursor: 'pointer', fontSize: '0.85rem' }}>
+          <button onClick={desfazerVoto} disabled={enviando} style={{ backgroundColor: 'transparent', color: '#a1a1aa', border: '1px solid #333', padding: '0.5rem 1rem', borderRadius: '50px', cursor: 'pointer', fontSize: '0.85rem' }}>
             ← Desfazer último voto
           </button>
         )}

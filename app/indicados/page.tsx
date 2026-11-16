@@ -3,7 +3,7 @@
 
 import jogosData from '../../lib/jogos.json';
 import { useState } from 'react';
-import { motion } from 'framer-motion'; // <-- IMPORTADO
+import { motion } from 'framer-motion';
 
 function renderizarPlataformas(plataformas: string[]) {
   if (!plataformas) return null;
@@ -11,10 +11,13 @@ function renderizarPlataformas(plataformas: string[]) {
     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.8rem', flexWrap: 'wrap' }}>
       {plataformas.map(p => {
         let icone = '🎮';
-        if (p === 'PC') icone = '💻';
-        if (p === 'PS5') icone = '🎮 PS';
-        if (p === 'Xbox') icone = '🎮 Xbox';
-        if (p === 'switch') icone = '🎮 Switch';
+        // CORREÇÃO AQUI: Usando toLowerCase() para ser à prova de falhas
+        const pLower = p.toLowerCase(); 
+        if (pLower === 'pc') icone = '💻';
+        if (pLower === 'ps5') icone = '🎮 PS';
+        if (pLower === 'xbox') icone = '🎮 Xbox';
+        if (pLower === 'switch') icone = '🎮 Switch';
+        
         return (
           <span key={p} style={{ fontSize: '0.65rem', color: '#a1a1aa', backgroundColor: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 'bold' }}>
             {icone}
@@ -49,7 +52,7 @@ export default function Indicados() {
             key={jogo.slug}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }} // <-- EFEITO CASCATA (0.1s de atraso por card)
+            transition={{ duration: 0.5, delay: index * 0.1 }}
             onMouseEnter={() => setHoveredCard(jogo.slug)}
             onMouseLeave={() => setHoveredCard(null)}
             style={{ 

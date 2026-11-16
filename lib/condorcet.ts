@@ -19,14 +19,21 @@ export type Voto = {
 // 1. Gera todos os duelos possíveis (Todos contra Todos)
 export function gerarDuelos(jogos: Jogo[]): Duelo[] {
   const duelos: Duelo[] = [];
-  // Loop para pegar o Jogo A e comparar com o Jogo B
+  
   for (let i = 0; i < jogos.length; i++) {
     for (let j = i + 1; j < jogos.length; j++) {
-      duelos.push({ jogo1: jogos[i], jogo2: jogos[j] });
+      // AQUI ESTÁ A CORREÇÃO DA FASE 0:
+      // Jogamos uma moeda (Math.random). Se for maior que 0.5, 
+      // o jogo[i] fica na esquerda. Se for menor, ele vai para a direita.
+      if (Math.random() > 0.5) {
+        duelos.push({ jogo1: jogos[i], jogo2: jogos[j] });
+      } else {
+        duelos.push({ jogo1: jogos[j], jogo2: jogos[i] });
+      }
     }
   }
   
-  // Embaralha os duelos para não ser sempre a mesma sequência
+  // Embaralha a ordem dos duelos para não ser sempre a mesma sequência
   return duelos.sort(() => Math.random() - 0.5);
 }
 
