@@ -26,14 +26,12 @@ export default function Home() {
   };
 
   return (
-    /* Ajustei a altura para caber na tela inteira descontando o Header, e diminuí os paddings */
     <main style={{ 
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
       minHeight: 'calc(100vh - 80px)', textAlign: 'center', padding: '2rem 2rem 1rem 2rem', 
       boxSizing: 'border-box' 
     }}>
       
-      {/* HEADLINE (Agora no topo) */}
       <motion.h1 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
         style={{ fontSize: '4.5rem', fontWeight: 900, color: '#F4F4F0', lineHeight: 1.05, marginBottom: '1rem', textShadow: '0 4px 20px rgba(0,0,0,0.8)', letterSpacing: '-1.5px' }}
@@ -44,7 +42,6 @@ export default function Home() {
         </span>
       </motion.h1>
 
-      {/* EYEBROW (Movido para baixo do Título) */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
         style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.2)', padding: '6px 18px', borderRadius: '50px', marginBottom: '2rem', backdropFilter: 'blur(5px)' }}
@@ -54,7 +51,6 @@ export default function Home() {
         </span>
       </motion.div>
 
-      {/* SUBTÍTULO (Reescrito com alma) */}
       <motion.p 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }}
         style={{ fontSize: '1.2rem', color: '#d4d4d8', maxWidth: '650px', marginBottom: '3rem', lineHeight: 1.6, fontWeight: 400 }}
@@ -77,23 +73,21 @@ export default function Home() {
         onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(176, 38, 255, 0.6)' }}
         onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 35px rgba(176, 38, 255, 0.45)' }}
         >
-          {t.home_btn_votar}
+          Votar no True GOTY
         </Link>
-        <button disabled style={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(10px)', color: '#71717a', 
+        <Link href="/votar/mercado" style={{ 
+          backgroundColor: 'rgba(212, 175, 55, 0.1)', backdropFilter: 'blur(10px)', color: '#D4AF37', 
           padding: '1.1rem 2.5rem', fontSize: '1.1rem', fontWeight: 900, borderRadius: '50px', 
-          border: '1px dashed rgba(255, 255, 255, 0.15)', cursor: 'not-allowed', letterSpacing: '1px',
-          display: 'flex', alignItems: 'center', gap: '10px'
-        }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#71717a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          {t.home_btn_mercado}
-        </button>
+          border: '1px solid rgba(212, 175, 55, 0.4)', letterSpacing: '1px',
+          display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', transition: 'all 0.3s'
+        }}
+        onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(212, 175, 55, 0.2)' }}
+        onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
+        >
+          Votar no Mercado (TGA)
+        </Link>
       </motion.div>
 
-      {/* CONTADOR HALL DA FAMA */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.8, type: 'spring', bounce: 0.4 }}
         style={{ 

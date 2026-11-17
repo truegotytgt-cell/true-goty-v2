@@ -1,23 +1,6 @@
 // app/api/og/route.tsx
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-function getBase64Image(imagePath: string) {
-  try {
-    if (!imagePath) return '';
-    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-    const fullPath = path.join(process.cwd(), 'public', cleanPath);
-    if (!fs.existsSync(fullPath)) return '';
-    const imageBuffer = fs.readFileSync(fullPath);
-    const ext = path.extname(fullPath).toLowerCase();
-    let mimeType = 'image/jpeg';
-    if (ext === '.png') mimeType = 'image/png';
-    if (ext === '.webp') mimeType = 'image/webp';
-    return `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
-  } catch (e: any) { return ''; }
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,9 +9,16 @@ export async function GET(request: NextRequest) {
     const t2 = searchParams.get('t2') || 'Jogo 2';
     const t3 = searchParams.get('t3') || 'Jogo 3';
     
-    const b64_i1 = getBase64Image(searchParams.get('i1') || '');
-    const b64_i2 = getBase64Image(searchParams.get('i2') || '');
-    const b64_i3 = getBase64Image(searchParams.get('i3') || '');
+    // Transforma o caminho relativo (ex: /zelda.jpg) em URL absoluta (https://site.com/zelda.jpg)
+    const getAbsoluteUrl = (imagePath: string) => {
+      if (!imagePath) return '';
+      const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+      return new URL(cleanPath, request.url).toString();
+    };
+
+    const i1 = getAbsoluteUrl(searchParams.get('i1') || '');
+    const i2 = getAbsoluteUrl(searchParams.get('i2') || '');
+    const i3 = getAbsoluteUrl(searchParams.get('i3') || '');
 
     return new ImageResponse(
       (
@@ -42,7 +32,7 @@ export async function GET(request: NextRequest) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '30px', width: '100%' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '300px' }}>
               <div style={{ position: 'relative' }}>
-                {b64_i1 ? <img src={b64_i1} style={{ width: '280px', height: '280px', borderRadius: '16px', border: '6px solid #D4AF37', objectFit: 'cover' }} /> : <div style={{ width: '280px', height: '280px', backgroundColor: '#222', borderRadius: '16px' }}></div>}
+                {i1 ? <img src={i1} style={{ width: '280px', height: '280px', borderRadius: '16px', border: '6px solid #D4AF37', objectFit: 'cover' }} /> : <div style={{ width: '280px', height: '280px', backgroundColor: '#222', borderRadius: '16px' }}></div>}
                 <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#D4AF37', color: '#000', padding: '4px 16px', borderRadius: '50px', fontSize: '18px', fontWeight: 'bold' }}>1º</div>
               </div>
               <h3 style={{ color: '#D4AF37', fontSize: '24px', margin: '10px 0 0 0', textAlign: 'center', fontWeight: 'bold' }}>{t1}</h3>
@@ -50,7 +40,7 @@ export async function GET(request: NextRequest) {
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '220px' }}>
               <div style={{ position: 'relative' }}>
-                {b64_i2 ? <img src={b64_i2} style={{ width: '200px', height: '200px', borderRadius: '12px', border: '4px solid #E2E8F0', objectFit: 'cover' }} /> : <div style={{ width: '200px', height: '200px', backgroundColor: '#222', borderRadius: '12px' }}></div>}
+                {i2 ? <img src={i2} style={{ width: '200px', height: '200px', borderRadius: '12px', border: '4px solid #E2E8F0', objectFit: 'cover' }} /> : <div style={{ width: '200px', height: '200px', backgroundColor: '#222', borderRadius: '12px' }}></div>}
                 <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#E2E8F0', color: '#000', padding: '4px 16px', borderRadius: '50px', fontSize: '16px', fontWeight: 'bold' }}>2º</div>
               </div>
               <h3 style={{ color: '#FFF', fontSize: '20px', margin: '10px 0 0 0', textAlign: 'center' }}>{t2}</h3>
@@ -58,7 +48,7 @@ export async function GET(request: NextRequest) {
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '220px' }}>
               <div style={{ position: 'relative' }}>
-                {b64_i3 ? <img src={b64_i3} style={{ width: '200px', height: '200px', borderRadius: '12px', border: '4px solid #CD7F32', objectFit: 'cover' }} /> : <div style={{ width: '200px', height: '200px', backgroundColor: '#222', borderRadius: '12px' }}></div>}
+                {i3 ? <img src={i3} style={{ width: '200px', height: '200px', borderRadius: '12px', border: '4px solid #CD7F32', objectFit: 'cover' }} /> : <div style={{ width: '200px', height: '200px', backgroundColor: '#222', borderRadius: '12px' }}></div>}
                 <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#CD7F32', color: '#000', padding: '4px 16px', borderRadius: '50px', fontSize: '16px', fontWeight: 'bold' }}>3º</div>
               </div>
               <h3 style={{ color: '#FFF', fontSize: '20px', margin: '10px 0 0 0', textAlign: 'center' }}>{t3}</h3>
@@ -74,6 +64,7 @@ export async function GET(request: NextRequest) {
       { width: 1200, height: 630 } // Formato paisagem para preview de link
     );
   } catch (e: any) {
+    console.error("Erro ao gerar imagem OG:", e);
     return new Response('Falha ao gerar imagem', { status: 500 });
   }
 }

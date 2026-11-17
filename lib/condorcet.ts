@@ -22,9 +22,7 @@ export function gerarDuelos(jogos: Jogo[]): Duelo[] {
   
   for (let i = 0; i < jogos.length; i++) {
     for (let j = i + 1; j < jogos.length; j++) {
-      // AQUI ESTÁ A CORREÇÃO DA FASE 0:
-      // Jogamos uma moeda (Math.random). Se for maior que 0.5, 
-      // o jogo[i] fica na esquerda. Se for menor, ele vai para a direita.
+      // Jogamos uma moeda para decidir quem fica na esquerda ou direita
       if (Math.random() > 0.5) {
         duelos.push({ jogo1: jogos[i], jogo2: jogos[j] });
       } else {
@@ -33,27 +31,44 @@ export function gerarDuelos(jogos: Jogo[]): Duelo[] {
     }
   }
   
-  // Embaralha a ordem dos duelos para não ser sempre a mesma sequência
   return duelos.sort(() => Math.random() - 0.5);
 }
 
-// 2. Calcula a pontuação baseada nos votos (+1 vitória, -1 derrota)
+// 2. Calcula a pontuação real de Condorcet com desempate direto
 export function calcularPlacar(jogos: Jogo[], votos: Voto[]) {
-  const placar: Record<string, number> = {};
+  const pontos = new Map<string, number>(); // Pontuação de 0 a 9
+  const matrizVitorias = new Map<string, Set<string>>(); // Quem venceu quem
 
-  // Zera a pontuação de todo mundo
+  // Zera a pontuação e a matriz para todos os jogos
   jogos.forEach(jogo => {
-    placar[jogo.titulo] = 0;
+    pontos.set(jogo.titulo, 0);
+    matrizVitorias.set(jogo.titulo, new Set());
   });
 
-  // Soma e subtrai os pontos
+  // Preenche os dados com base nos votos
   votos.forEach(voto => {
-    placar[voto.vencedor] += 1;
-    placar[voto.perdedor] -= 1;
+    // Soma 1 ponto para o vencedor
+    pontos.set(voto.vencedor, (pontos.get(voto.vencedor) || 0) + 1);
+    
+    // Registra na matriz que o vencedor bateu o perdedor
+    if (!matrizVitorias.has(voto.vencedor)) matrizVitorias.set(voto.vencedor, new Set());
+    matrizVitorias.get(voto.vencedor)?.add(voto.perdedor);
   });
 
-  // Transforma em uma lista ordenada do maior para o menor
-  return Object.keys(placar)
-    .map(titulo => ({ titulo, pontos: placar[titulo] }))
-    .sort((a, b) => b.pontos - a.pontos);
+  // Transforma em lista e ordena
+  return Array.from(pontos.entries())
+    .map(([titulo, pontosTotais]) => ({ titulo, pontos: pontosTotais }))
+    .sort((a, b) => {
+      // 1º Critério: Quem tem mais pontos (venceu mais jogos)
+      if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+      
+      // 2º Critério (Desempate): Confronto direto
+      const aVenceuB = matrizVitorias.get(a.titulo)?.has(b.titulo);
+      const bVenceuA = matrizVitorias.get(b.titulo)?.has(a.titulo);
+
+      if (aVenceuB) return -1; // A fica na frente
+      if (bVenceuA) return 1;  // B fica na frente
+      
+      return 0; // Empate técnico absoluto
+    });
 }

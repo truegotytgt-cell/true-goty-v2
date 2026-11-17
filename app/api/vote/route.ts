@@ -7,6 +7,7 @@ import {
   prepararPairwiseStatements, 
   PairwiseVotoDB 
 } from '../../../lib/db';
+import jogosData from '../../../lib/jogos.json';
 
 async function gerarHash(texto: string) {
   const msgBuffer = new TextEncoder().encode(texto);
@@ -20,9 +21,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { env } = getCloudflareContext();
     
-    // 1. Extração e Validação do Payload
-    const turnstileToken = body.turnstileToken || body.scores?.[0]?.turnstileToken;
-    const categoria = body.category || body.scores?.[0]?.category || 'tgt';
+    // 1. Extração do Payload
+    const turnstileToken = body.turnstileToken;
+    const categoria = body.category || 'tgt';
     const pairwise: PairwiseVotoDB[] = body.pairwise || [];
 
     if (!turnstileToken) {
@@ -33,7 +34,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Payload inválido. Esperado 45 confrontos." }, { status: 400 });
     }
 
-    // 2. Validação do Turnstile
+    // 2. TRAVA DE SEGURANÇA: Validação de Conteúdo
+    const jogosCategoria = (jogosData as any)[categoria]?.top10 || [];
+    if (jogosCategoria.length !== 10) {
+      return NextResponse.json({ success: false, error: "Categoria inválida ou não configurada." }, { status: 400 });
+    }
+
+    const titulosValidos = new Set(jogosCategoria.map((j: any) => j.titulo));
+    const confrontosUnicos = new Set<string>();
+
+    for (const match of pairwise) {
+      // Verifica se os jogos existem nesta categoria
+      if (!titulosValidos.has(match.winner_title) || !titulosValidos.has(match.loser_title)) {
+        return NextResponse.json({ success: false, error: "Jogo inexistente na categoria." }, { status: 400 });
+      }
+      
+      // Impede jogo contra ele mesmo
+      if (match.winner_title === match.loser_title) {
+        return NextResponse.json({ success: false, error: "Um jogo não pode duelar contra si mesmo." }, { status: 400 });
+      }
+
+      // Impede duplicação de confrontos (ex: GTA vs Zelda e Zelda vs GTA)
+      const parOrdenado = [match.winner_title, match.loser_title].sort().join('|');
+      if (confrontosUnicos.has(parOrdenado)) {
+        return NextResponse.json({ success: false, error: "Confronto duplicado detectado no envio." }, { status: 400 });
+      }
+      confrontosUnicos.add(parOrdenado);
+    }
+
+    // Como são 10 jogos, todos contra todos geram exatamente 45 combinações únicas.
+    if (confrontosUnicos.size !== 45) {
+       return NextResponse.json({ success: false, error: "Conjunto incompleto ou inválido de duelos." }, { status: 400 });
+    }
+
+    // 3. Validação do Turnstile
     const formData = new FormData();
     formData.append('secret', env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY || '');
     formData.append('response', turnstileToken);
@@ -52,10 +86,9 @@ export async function POST(request: Request) {
 
     const db = getDB(env);
 
-    // 3. CRIAÇÃO DO SESSION_ID (IP-HASH)
+    // 4. CRIAÇÃO DO SESSION_ID (IP-HASH)
     let ip = request.headers.get('cf-connecting-ip');
     
-    // Válvula de escape APENAS para testes locais
     if (!ip && process.env.NODE_ENV === 'development') {
       ip = '127.0.0.1';
     }
@@ -66,7 +99,6 @@ export async function POST(request: Request) {
 
     let salt = env.SESSION_SALT || process.env.SESSION_SALT; 
     
-    // Válvula de escape APENAS para testes locais
     if (!salt && process.env.NODE_ENV === 'development') {
       salt = 'tgt_local_dev_salt_apenas_para_testes';
     }
@@ -78,7 +110,7 @@ export async function POST(request: Request) {
 
     const session_id = await gerarHash(ip + salt);
 
-    // 4. TRAVA DE SEGURANÇA (Dedup rápida)
+    // 5. TRAVA DE SEGURANÇA (Dedup rápida)
     const votoExistente = await db.prepare(
       "SELECT id FROM results WHERE session_id = ? AND category = ? LIMIT 1"
     ).bind(session_id, categoria).first();
@@ -90,14 +122,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. RECÁLCULO DOS SCORES NO BACKEND (Zero confiança no frontend)
+    // 6. RECÁLCULO DOS SCORES NO BACKEND (Agora batendo com o frontend: 0 a 9)
     const scoresMap = new Map<string, number>();
     
+    // Inicia todos com 0
+    jogosCategoria.forEach((j: any) => scoresMap.set(j.titulo, 0));
+
+    // Adiciona +1 por vitória
     for (const match of pairwise) {
       scoresMap.set(match.winner_title, (scoresMap.get(match.winner_title) || 0) + 1);
-      if (!scoresMap.has(match.loser_title)) {
-        scoresMap.set(match.loser_title, 0);
-      }
     }
 
     const scoresCalculados = Array.from(scoresMap.entries()).map(([titulo, pontos]) => ({
@@ -106,7 +139,7 @@ export async function POST(request: Request) {
       category: categoria
     }));
 
-    // 6. Salva no banco D1 de forma ATÔMICA
+    // 7. Salva no banco D1 de forma ATÔMICA
     const votosStatements = prepararVotosStatements(db, scoresCalculados, session_id);
     const pairwiseStatements = prepararPairwiseStatements(db, pairwise, session_id);
 

@@ -1,18 +1,21 @@
 // app/historia/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import jogosData from '../../lib/jogos.json';
 
-export default function Historia() {
-  const [categoria, setCategoria] = useState<'tgt' | 'mercado'>('tgt');
+function HistoriaContent() {
+  const searchParams = useSearchParams();
+  const catUrl = searchParams.get('cat') as 'tgt' | 'mercado' | null;
+  
+  const [categoria, setCategoria] = useState<'tgt' | 'mercado'>(catUrl || 'tgt');
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
   
   const [highlights, setHighlights] = useState<any>(null);
   const [carregando, setCarregando] = useState(true);
 
-  // Estados do Head-to-Head
   const [jogoA, setJogoA] = useState('');
   const [jogoB, setJogoB] = useState('');
   const [h2h, setH2h] = useState<any>(null);
@@ -62,55 +65,38 @@ export default function Historia() {
     buscarH2h();
   }, [jogoA, jogoB, categoria, anoSelecionado]);
 
-  // AQUI ESTÁ A CORREÇÃO: Garantindo que a lista nunca seja undefined
   const listaJogos = (jogosData as any)[categoria]?.top10 || [];
   const semJogos = listaJogos.length === 0;
 
   return (
     <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '8rem 2rem 4rem', backgroundColor: '#0A0A0A', backgroundImage: 'radial-gradient(circle at 50% 0%, #1a1a24 0%, #0A0A0A 100%)' }}>
       
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-        style={{ color: 'white', fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem', textAlign: 'center', textShadow: '0 0 20px rgba(176, 38, 255, 0.3)' }}
-      >
+      <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ color: 'white', fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem', textAlign: 'center', textShadow: '0 0 20px rgba(176, 38, 255, 0.3)' }}>
         RANKINGS HISTÓRICOS
       </motion.h1>
       <p style={{ color: '#a1a1aa', fontSize: '1.1rem', marginBottom: '3rem', textAlign: 'center' }}>
-        Viaje no tempo e descubra os maiores causos, zebras e confrontos do TGT.
+        Viaje no tempo e descubra os maiores causos, zebras e confrontos do {categoria === 'tgt' ? 'TGT' : 'Mercado'}.
       </p>
 
-      {/* PAINEL DE SELEÇÃO */}
       <div style={{ backgroundColor: '#121212', border: '1px solid #333', borderRadius: '24px', padding: '2rem', width: '100%', maxWidth: '800px', display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center', marginBottom: '4rem', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
         
-        {/* Seletor de Categoria */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
           <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '1px' }}>CATEGORIA</span>
           <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: '#0A0A0A', padding: '0.5rem', borderRadius: '50px', border: '1px solid #333' }}>
-            <button 
-              onClick={() => setCategoria('tgt')}
-              style={{ padding: '0.8rem 2rem', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: categoria === 'tgt' ? 'var(--purple-neon)' : 'transparent', color: categoria === 'tgt' ? '#FFF' : '#a1a1aa', transition: 'all 0.3s' }}
-            >
+            <button onClick={() => setCategoria('tgt')} style={{ padding: '0.8rem 2rem', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: categoria === 'tgt' ? 'var(--purple-neon)' : 'transparent', color: categoria === 'tgt' ? '#FFF' : '#a1a1aa', transition: 'all 0.3s' }}>
               TRUE GOTY
             </button>
-            <button 
-              onClick={() => setCategoria('mercado')}
-              style={{ padding: '0.8rem 2rem', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: categoria === 'mercado' ? 'var(--purple-neon)' : 'transparent', color: categoria === 'mercado' ? '#FFF' : '#a1a1aa', transition: 'all 0.3s' }}
-            >
+            <button onClick={() => setCategoria('mercado')} style={{ padding: '0.8rem 2rem', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: categoria === 'mercado' ? '#D4AF37' : 'transparent', color: categoria === 'mercado' ? '#000' : '#a1a1aa', transition: 'all 0.3s' }}>
               MERCADO
             </button>
           </div>
         </div>
 
-        {/* Seletor de Ano */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
           <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '1px' }}>EDIÇÃO</span>
           <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: '#0A0A0A', padding: '0.5rem', borderRadius: '50px', border: '1px solid #333' }}>
             {anosDisponiveis.map(ano => (
-              <button 
-                key={ano}
-                onClick={() => setAnoSelecionado(ano)}
-                style={{ padding: '0.8rem 1.5rem', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: anoSelecionado === ano ? '#D4AF37' : 'transparent', color: anoSelecionado === ano ? '#000' : '#a1a1aa', transition: 'all 0.3s' }}
-              >
+              <button key={ano} onClick={() => setAnoSelecionado(ano)} style={{ padding: '0.8rem 1.5rem', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: anoSelecionado === ano ? '#D4AF37' : 'transparent', color: anoSelecionado === ano ? '#000' : '#a1a1aa', transition: 'all 0.3s' }}>
                 {ano}
               </button>
             ))}
@@ -118,7 +104,6 @@ export default function Historia() {
         </div>
       </div>
 
-      {/* RESULTADOS */}
       <AnimatePresence mode="wait">
         {carregando ? (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ color: 'var(--purple-neon)', fontSize: '1.2rem', marginBottom: '4rem' }}>
@@ -160,28 +145,19 @@ export default function Historia() {
               )}
             </div>
 
-            {/* HEAD-TO-HEAD */}
             <div style={{ width: '100%', maxWidth: '800px', backgroundColor: '#121212', border: '1px solid #333', borderRadius: '24px', padding: '3rem 2rem', textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
               <h2 style={{ color: 'white', fontSize: '2rem', fontWeight: 900, marginBottom: '0.5rem' }}>Confronto Direto</h2>
               <p style={{ color: '#a1a1aa', marginBottom: '2rem' }}>Escolha dois jogos para ver quem venceu mais vezes em {anoSelecionado}.</p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
-                <select 
-                  value={jogoA} onChange={(e) => setJogoA(e.target.value)}
-                  disabled={semJogos}
-                  style={{ padding: '1rem', borderRadius: '8px', backgroundColor: '#0A0A0A', color: 'white', border: '1px solid #444', minWidth: '250px', fontSize: '1rem', cursor: semJogos ? 'not-allowed' : 'pointer', opacity: semJogos ? 0.5 : 1 }}
-                >
+                <select value={jogoA} onChange={(e) => setJogoA(e.target.value)} disabled={semJogos} style={{ padding: '1rem', borderRadius: '8px', backgroundColor: '#0A0A0A', color: 'white', border: '1px solid #444', minWidth: '250px', fontSize: '1rem', cursor: semJogos ? 'not-allowed' : 'pointer', opacity: semJogos ? 0.5 : 1 }}>
                   <option value="">Selecione o Jogo A</option>
                   {listaJogos.map((jogo: any) => <option key={`A-${jogo.titulo}`} value={jogo.titulo}>{jogo.titulo}</option>)}
                 </select>
 
                 <div style={{ display: 'flex', alignItems: 'center', color: 'var(--purple-neon)', fontWeight: 'bold', fontSize: '1.5rem' }}>VS</div>
 
-                <select 
-                  value={jogoB} onChange={(e) => setJogoB(e.target.value)}
-                  disabled={semJogos}
-                  style={{ padding: '1rem', borderRadius: '8px', backgroundColor: '#0A0A0A', color: 'white', border: '1px solid #444', minWidth: '250px', fontSize: '1rem', cursor: semJogos ? 'not-allowed' : 'pointer', opacity: semJogos ? 0.5 : 1 }}
-                >
+                <select value={jogoB} onChange={(e) => setJogoB(e.target.value)} disabled={semJogos} style={{ padding: '1rem', borderRadius: '8px', backgroundColor: '#0A0A0A', color: 'white', border: '1px solid #444', minWidth: '250px', fontSize: '1rem', cursor: semJogos ? 'not-allowed' : 'pointer', opacity: semJogos ? 0.5 : 1 }}>
                   <option value="">Selecione o Jogo B</option>
                   {listaJogos.map((jogo: any) => <option key={`B-${jogo.titulo}`} value={jogo.titulo}>{jogo.titulo}</option>)}
                 </select>
@@ -221,5 +197,13 @@ export default function Historia() {
         )}
       </AnimatePresence>
     </main>
+  );
+}
+
+export default function Historia() {
+  return (
+    <Suspense fallback={<main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--purple-neon)' }}>Carregando...</main>}>
+      <HistoriaContent />
+    </Suspense>
   );
 }
