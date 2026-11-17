@@ -37,7 +37,7 @@ export default function Metodo() {
     {
       num: '03',
       title: 'O Placar',
-      desc: 'Vitórias valem +1 e derrotas -1. Ao final, o seu ranking é somado ao Placar Global. O jogo com a maior pontuação da comunidade leva o título de True GOTY.',
+      desc: 'Cada vitória no confronto direto vale +1 ponto (podendo chegar de 0 a 9 pontos). Ao final, o seu ranking é somado ao Placar Global. O jogo com a maior pontuação da comunidade leva o título de True GOTY. Empates são resolvidos no mano a mano.',
       icon: (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -130,7 +130,7 @@ export default function Metodo() {
           border: '1px solid rgba(255,255,255,0.2)', letterSpacing: '1px'
         }}
         onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(176, 38, 255, 0.6)' }}
-        onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(176, 38, 255, 0.4)' }}
+        onMouseOut={(e) { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(176, 38, 255, 0.4)' }}
         >
           ENTENDI, QUERO VOTAR
         </Link>

@@ -74,7 +74,11 @@ export async function GET(request: Request) {
         return 0;
       });
 
-    return NextResponse.json({ success: true, ranking: rankingFinal });
+    // 🛡️ Blindagem do Plano Free: Cache de 60 segundos no Edge da Cloudflare
+    const response = NextResponse.json({ success: true, ranking: rankingFinal });
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
+    return response;
+
   } catch (error) {
     console.error("Erro ao buscar ranking:", error);
     return NextResponse.json({ success: false, error: "Falha ao buscar ranking" }, { status: 500 });

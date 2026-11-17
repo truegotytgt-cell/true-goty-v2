@@ -47,8 +47,34 @@ export default function Votar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [carregado, duelos, dueloAtual, animacao, enviando, iniciou]);
 
-  if (jogos.length === 0) {
+  // 🔴 ETAPA 3: Se a categoria não existe no JSON (ex: /votar/batata), dá 404 real.
+  if (!jogosDaCategoria) {
     notFound();
+  }
+
+  // 🟢 ETAPA 3: Se a categoria existe mas está vazia (ex: Mercado), exibe a tela amigável.
+  if (jogos.length === 0) {
+    return (
+      <main style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', textAlign: 'center', padding: '120px 2rem 2rem' }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ maxWidth: '600px' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>⏳</div>
+          <h1 style={{ color: '#D4AF37', fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '2px' }}>
+            EM BREVE!
+          </h1>
+          <p style={{ color: '#a1a1aa', fontSize: '1.2rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
+            Os indicados da categoria <strong style={{ color: 'var(--purple-neon)' }}>{categoria.toUpperCase()} (TGA)</strong> serão liberados no dia <strong>19/11</strong>.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => router.push('/votar')} style={{ backgroundColor: 'transparent', border: '1px solid #555', color: '#a1a1aa', padding: '1rem 2rem', fontSize: '1rem', fontWeight: 'bold', borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#FFF'} onMouseOut={(e) => e.currentTarget.style.color = '#a1a1aa'}>
+              ← Voltar
+            </button>
+            <button onClick={() => router.push('/votar/tgt')} style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 3rem', fontSize: '1.1rem', fontWeight: 'bold', border: 'none', borderRadius: '50px', cursor: 'pointer', boxShadow: '0 0 30px rgba(176, 38, 255, 0.5)' }}>
+              Ir votar no True GOTY
+            </button>
+          </div>
+        </motion.div>
+      </main>
+    );
   }
 
   async function enviarParaPlacarGlobal(placarFinal: any[], votosBrutos: any[]) {

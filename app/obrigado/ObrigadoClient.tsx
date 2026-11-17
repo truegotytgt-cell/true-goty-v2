@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { calcularPlacar, Jogo } from '../../lib/condorcet';
@@ -25,12 +25,10 @@ const IconInstagram = () => (
 
 export default function ObrigadoClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const categoria = searchParams.get('categoria') || 'tgt';
   
   const [ranking, setRanking] = useState<any[] | null>(null);
   const [carregado, setCarregado] = useState(false);
-  const [resetando, setResetando] = useState(false);
 
   const jogosDaCategoria = (jogosData as any)[categoria]?.top10 || [];
 
@@ -59,36 +57,6 @@ export default function ObrigadoClient() {
     setCarregado(true);
   }, [categoria, jogosDaCategoria]);
 
-  async function resetarVotos() {
-    if (!confirm("Tem certeza que deseja apagar seus votos para testar novamente?")) return;
-    
-    setResetando(true);
-    try {
-      // Limpa o banco D1 e os cookies no servidor
-      const res = await fetch('/api/reset', { method: 'POST' });
-      const data = await res.json();
-
-      if (!data.success) {
-        alert("Aviso do Banco: " + (data.error || "Erro desconhecido") + ". Vamos limpar o seu navegador de qualquer forma.");
-      }
-      
-      // Limpa o localStorage
-      localStorage.removeItem(`tgt_progress_${categoria}`);
-      localStorage.removeItem(`tgt_my_ranking_${categoria}`);
-      localStorage.removeItem(`tgt_has_voted_${categoria}`);
-      
-      // Força o redirecionamento
-      window.location.href = `/votar/${categoria}`;
-    } catch (e) {
-      console.error(e);
-      alert("Erro ao resetar. Limpando o navegador localmente.");
-      localStorage.removeItem(`tgt_progress_${categoria}`);
-      localStorage.removeItem(`tgt_my_ranking_${categoria}`);
-      localStorage.removeItem(`tgt_has_voted_${categoria}`);
-      window.location.href = `/votar/${categoria}`;
-    }
-  }
-
   if (!carregado) {
     return <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--purple-neon)' }}>Carregando...</main>;
   }
@@ -99,14 +67,9 @@ export default function ObrigadoClient() {
         <h1 style={{ color: 'var(--purple-neon)', fontSize: '2rem' }}>Ops! Não encontramos seu voto.</h1>
         <p style={{ color: '#a1a1aa' }}>Parece que a verificação de segurança falhou ou você acessou esta página diretamente.</p>
         
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <Link href={`/votar/${categoria}`} style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold' }}>
-            Voltar para a Votação
-          </Link>
-          <button onClick={resetarVotos} disabled={resetando} style={{ backgroundColor: 'transparent', border: '1px solid #a1a1aa', color: '#a1a1aa', padding: '1rem 2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-            {resetando ? 'Limpando...' : 'Forçar Reset'}
-          </button>
-        </div>
+        <Link href={`/votar/${categoria}`} style={{ backgroundColor: 'var(--purple-neon)', color: '#FFF', padding: '1rem 2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold' }}>
+          Voltar para a Votação
+        </Link>
       </main>
     );
   }
@@ -215,10 +178,6 @@ export default function ObrigadoClient() {
             <IconInstagram />
           </motion.button>
         </div>
-
-        <button onClick={resetarVotos} disabled={resetando} style={{ background: 'none', border: 'none', color: '#666', textDecoration: 'underline', cursor: resetando ? 'not-allowed' : 'pointer', fontSize: '0.85rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#a1a1aa'} onMouseOut={(e) => e.currentTarget.style.color = '#666'}>
-          {resetando ? 'Apagando...' : 'Apagar meus votos e testar novamente'}
-        </button>
 
       </motion.div>
     </main>

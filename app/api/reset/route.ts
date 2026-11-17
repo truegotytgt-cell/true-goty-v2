@@ -4,24 +4,34 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getDB } from '../../../lib/db';
 
 export async function POST() {
+  // 🔒 TRAVA DE SEGURANÇA: rota bloqueada em produção.
+  // Só funciona quando você está rodando localmente (npm run dev).
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { success: false, error: 'Rota de reset desabilitada em produção.' },
+      { status: 403 }
+    );
+  }
+
   try {
     const { env } = getCloudflareContext();
     const db = getDB(env);
 
-    // Deleta os dados do banco D1
-    await db.prepare("DELETE FROM results WHERE 1=1").run();
-    await db.prepare("DELETE FROM pairwise_results WHERE 1=1").run();
+    // Apaga os votos agregados e os confrontos pareados, em batch atômico.
+    await db.batch([
+      db.prepare('DELETE FROM results'),
+      db.prepare('DELETE FROM pairwise_results'),
+    ]);
 
-    // Cria a resposta de sucesso
-    const response = NextResponse.json({ success: true, message: "Banco de dados limpo com sucesso!" });
-    
-    // A MÁGICA: Manda o navegador apagar os cookies de votação
-    response.cookies.delete('tgt_voted_tgt');
-    response.cookies.delete('tgt_voted_mercado');
-    
-    return response;
-  } catch (error: any) {
-    console.error("Erro ao limpar banco:", error);
-    return NextResponse.json({ success: false, error: error.message || "Falha ao limpar banco." }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      message: 'Banco resetado com sucesso (somente em ambiente de desenvolvimento).',
+    });
+  } catch (error) {
+    console.error('Erro no reset:', error);
+    return NextResponse.json(
+      { success: false, error: 'Falha ao resetar o banco.' },
+      { status: 500 }
+    );
   }
 }
