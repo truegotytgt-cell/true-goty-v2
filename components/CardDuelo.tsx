@@ -1,7 +1,6 @@
 // components/CardDuelo.tsx
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Jogo } from '../lib/condorcet';
 
@@ -9,88 +8,99 @@ type Props = {
   jogo: Jogo;
   onClick: () => void;
   status?: 'idle' | 'winner' | 'loser';
+  isHovered: boolean;
+  isOpponentHovered: boolean;
+  onHover: (hovering: boolean) => void;
 };
 
-export default function CardDuelo({ jogo, onClick, status = 'idle' }: Props) {
-  const [isHovered, setIsHovered] = useState(false);
+export default function CardDuelo({ jogo, onClick, status = 'idle', isHovered, isOpponentHovered, onHover }: Props) {
+  const isWinner = status === 'winner';
+  const isLoser = status === 'loser';
+  const isIdle = status === 'idle';
 
-  const variantes = {
-    idle: { 
-      scale: isHovered ? 1.03 : 1, 
-      opacity: 1, 
-      filter: isHovered ? 'brightness(1.1)' : 'brightness(1)',
-      borderColor: isHovered ? 'var(--purple-neon)' : 'rgba(255,255,255,0.1)',
-      boxShadow: isHovered ? '0 0 30px rgba(176, 38, 255, 0.4), inset 0 0 50px rgba(176, 38, 255, 0.2)' : 'none' 
-    },
-    winner: { 
-      scale: 1.05, 
-      opacity: 1, 
-      filter: 'brightness(1.2)', 
-      borderColor: '#D4AF37', 
-      boxShadow: '0 0 60px rgba(212, 175, 55, 0.6), inset 0 0 50px rgba(212, 175, 55, 0.3)', 
-      zIndex: 10 
-    },
-    loser: { 
-      scale: 0.95,
-      opacity: 0.3, 
-      filter: 'grayscale(100%) brightness(0.5)', 
-      borderColor: 'transparent', 
-      boxShadow: 'none' 
-    }
-  };
+  const baseScale = isWinner ? 1.05 : isLoser ? 0.85 : (isHovered && isIdle ? 1.03 : 1);
+
+  // Definindo as sombras aqui
+  let boxShadow = '0 10px 30px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1)';
+  if (isWinner) {
+    boxShadow = '0 0 40px #FFFFFF, 0 0 80px #FFD700, 0 0 100px rgba(255, 215, 0, 0.5), inset 0 0 0 4px #FFD700';
+  } else if (isHovered && isIdle) {
+    boxShadow = '0 0 30px rgba(176, 38, 255, 0.8), inset 0 0 0 3px #B026FF';
+  }
 
   return (
-    <motion.div 
+    <motion.div
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      animate={status}
-      variants={variantes}
-      transition={{ type: "spring", stiffness: 200, damping: 20, mass: 1 }}
+      animate={{
+        scale: baseScale,
+        opacity: isLoser ? 0.2 : 1,
+        filter: isLoser ? 'grayscale(100%) blur(4px) brightness(0.3)' : 'grayscale(0%) blur(0px) brightness(1)',
+      }}
+      // A transição do Framer Motion agora cuida apenas de escala e opacidade
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
       style={{
-        cursor: status === 'idle' ? 'pointer' : 'default',
-        border: '2px solid rgba(255,255,255,0.1)',
-        borderRadius: '16px',
-        padding: '1rem',
-        backgroundColor: 'rgba(28, 28, 30, 0.8)',
-        backdropFilter: 'blur(10px)',
-        textAlign: 'center',
-        width: '100%',
-        maxWidth: '320px', 
         position: 'relative',
+        width: '100%',
+        aspectRatio: '3 / 4',
+        cursor: isIdle ? 'pointer' : 'default',
+        zIndex: isWinner ? 20 : isHovered ? 10 : 1,
+        backgroundColor: '#111114',
+        borderRadius: '20px',
         overflow: 'hidden',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        boxShadow: boxShadow,
+        // ESTA LINHA RESOLVE O ATRASO DO HOVER:
+        transition: 'box-shadow 0.15s ease-out', 
       }}
     >
-      <div style={{ width: '100%', maxHeight: '55vh', aspectRatio: '3/4', overflow: 'hidden', borderRadius: '12px', marginBottom: '0.5rem' }}>
-        <img src={jogo.imagem} alt={jogo.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.3s' }} />
-      </div>
-      
-      {/* ALTURA FIXA NO TÍTULO: Garante que todos os cards tenham o mesmo tamanho */}
-      <h3 style={{ 
-        fontSize: '1.1rem', 
-        color: status === 'winner' ? '#D4AF37' : 'var(--text-light)', 
-        fontWeight: 800, 
-        transition: 'color 0.3s', 
-        margin: 0, 
-        height: '3.2rem', // Altura exata para 2 linhas de texto
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        lineHeight: '1.2',
-        textAlign: 'center'
-      }}>
-        {jogo.titulo}
-      </h3>
+      <img 
+        src={jogo.imagem} 
+        alt={jogo.titulo} 
+        style={{ 
+          position: 'absolute', inset: 0, width: '100%', height: '100%', 
+          objectFit: 'cover', zIndex: 1,
+          transition: 'transform 0.4s ease',
+          transform: isHovered && isIdle ? 'scale(1.08)' : 'scale(1)'
+        }} 
+      />
 
-      {status === 'idle' && (
-        <div style={{ position: 'absolute', top: '0', left: '0', opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s ease', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.4)' }}>
-          <div style={{ backgroundColor: 'rgba(176, 38, 255, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid #FFF', color: '#FFF', padding: '10px 30px', borderRadius: '50px', fontWeight: 900, fontSize: '1.2rem', boxShadow: '0 0 30px rgba(176, 38, 255, 0.8)', letterSpacing: '1px' }}>
-            VOTAR
-          </div>
+      <div style={{ 
+        position: 'absolute', inset: 0, zIndex: 2,
+        background: 'linear-gradient(to top, rgba(5, 5, 8, 1) 0%, rgba(5, 5, 8, 0.8) 25%, transparent 60%)' 
+      }} />
+
+      <div style={{ position: 'relative', zIndex: 3, padding: '1.5rem 1rem', textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+        
+        {isWinner && (
+          <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} style={{ color: '#FFF', fontSize: '0.85rem', fontWeight: 900, letterSpacing: '3px', marginBottom: '0.5rem', textShadow: '0 0 10px #FFD700, 0 0 20px #FFD700' }}>
+            ★ VEREDITO SELADO ★
+          </motion.div>
+        )}
+
+        <h2 style={{ 
+          color: '#FFF', fontSize: 'clamp(1.2rem, 2vw, 1.7rem)', fontWeight: 900, margin: 0, lineHeight: 1.1, 
+          fontFamily: 'var(--font-teko)', textTransform: 'uppercase', textShadow: '0 2px 10px rgba(0,0,0,0.9)',
+          wordBreak: 'break-word'
+        }}>
+          {jogo.titulo}
+        </h2>
+        
+        <div style={{ height: '28px', marginTop: '0.5rem', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {isHovered && isIdle ? (
+            <div style={{ color: '#FFF', backgroundColor: 'var(--purple-neon)', padding: '4px 15px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '1px', textTransform: 'uppercase', borderRadius: '4px', boxShadow: '0 0 15px var(--purple-neon)' }}>
+              ESCOLHER ESTE
+            </div>
+          ) : (
+            <div style={{ color: isWinner ? '#FFD700' : '#71717a', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase' }}>
+              {isWinner ? 'SELADO' : isLoser ? 'ELIMINADO' : 'DESAFIANTE'}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </motion.div>
   );
 }

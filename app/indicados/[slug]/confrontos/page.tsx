@@ -1,7 +1,7 @@
 // app/indicados/[slug]/confrontos/page.tsx
 'use client';
 
-import { useParams, useRouter, useSearchParams, notFound } from 'next/navigation';
+import { useParams, useSearchParams, notFound } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -9,13 +9,13 @@ import jogosData from '@/lib/jogos.json';
 
 function ConfrontosJogoContent() {
   const params = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const slug = params.slug as string;
   const categoria = searchParams.get('cat') || 'tgt';
 
   const isTgt = categoria === 'tgt';
   const corPrincipal = isTgt ? 'var(--purple-neon)' : '#D4AF37';
+  const corSecundaria = isTgt ? '#D4AF37' : '#E2E8F0';
 
   const listaJogos = (jogosData as any)[categoria]?.top10 || [];
   const jogoAtual = listaJogos.find((j: any) => j.slug === slug);
@@ -23,13 +23,9 @@ function ConfrontosJogoContent() {
   const [stats, setStats] = useState<Record<string, any>>({});
   const [carregando, setCarregando] = useState(true);
 
-  if (!jogoAtual) {
-    notFound();
-  }
-
-  const oponentes = listaJogos.filter((j: any) => j.slug !== slug);
-
   useEffect(() => {
+    if (!jogoAtual) return;
+
     async function buscarTodasAsEstatisticas() {
       try {
         const res = await fetch(`/api/head-to-head?category=${categoria}&year=2026&jogoA=${encodeURIComponent(jogoAtual.titulo)}`);
@@ -45,7 +41,13 @@ function ConfrontosJogoContent() {
     }
 
     buscarTodasAsEstatisticas();
-  }, [slug, categoria]);
+  }, [slug, categoria, jogoAtual]);
+
+  if (!jogoAtual) {
+    notFound();
+  }
+
+  const oponentes = listaJogos.filter((j: any) => j.slug !== slug);
 
   const oponentesOrdenados = [...oponentes].sort((a, b) => {
     const statA = stats[a.titulo];
@@ -55,9 +57,9 @@ function ConfrontosJogoContent() {
     return Math.abs(50 - porcA) - Math.abs(50 - porcB);
   });
 
-  let maisParelho = null;
-  let maiorVitoria = null;
-  let arquiInimigo = null;
+  let maisParelho: any = null;
+  let maiorVitoria: any = null;
+  let arquiInimigo: any = null;
 
   let menorDiffParelho = 100;
   let maiorPorcVitoria = -1;
@@ -86,155 +88,325 @@ function ConfrontosJogoContent() {
     }
   });
 
+  const cardStyle = {
+    backgroundColor: 'rgba(20, 20, 24, 0.8)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.05)',
+    clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)',
+    position: 'relative' as const,
+    overflow: 'hidden',
+    boxSizing: 'border-box' as const,
+  };
+
   return (
-    <main style={{ minHeight: '100vh', padding: '100px 2rem 4rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <main className="confrontos-main">
       
       <style>{`
-        .confrontos-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%; }
-        @media (min-width: 1024px) { .confrontos-grid { grid-template-columns: repeat(2, 1fr); } }
-        .destaques-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
-        @media (max-width: 768px) { .destaques-grid { grid-template-columns: 1fr; } }
+        .confrontos-main {
+          min-height: 100vh;
+          padding: 100px 2rem 4rem 2rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .confrontos-layout {
+          max-width: 1200px;
+          width: 100%;
+          display: grid;
+          grid-template-columns: minmax(300px, 360px) 1fr;
+          gap: 3rem;
+          align-items: start;
+        }
+
+        .dossie-card {
+          position: sticky;
+          top: 100px;
+          padding: 1.5rem;
+          width: 100%;
+        }
+
+        .confrontos-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.2rem;
+          width: 100%;
+        }
+
+        @media (min-width: 1024px) {
+          .confrontos-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        .destaques-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+          margin-bottom: 2.5rem;
+        }
+
+        .oponente-card:hover .oponente-img {
+          transform: scale(1.1);
+        }
+
+        .oponente-card:hover .vs-marca {
+          opacity: 0.3;
+          transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .barra-cabo {
+          width: 100%;
+          height: 8px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 4px;
+          display: flex;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .cabo-esq {
+          height: 100%;
+          transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cabo-dir {
+          height: 100%;
+          flex: 1;
+          transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (max-width: 900px) {
+          .confrontos-main {
+            padding: 84px 1rem 3rem 1rem;
+          }
+
+          .confrontos-layout {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+          }
+
+          .dossie-card {
+            position: static;
+            top: auto;
+            padding: 1.25rem;
+          }
+
+          .destaques-grid {
+            grid-template-columns: 1fr;
+            margin-bottom: 1.75rem;
+          }
+        }
       `}</style>
 
-      <div style={{ width: '100%', maxWidth: '1200px', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', color: '#71717a', fontSize: '0.85rem' }}>
-        <Link href="/" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Início</Link>
-        <span>/</span>
-        <Link href={`/indicados?cat=${categoria}`} style={{ color: '#a1a1aa', textDecoration: 'none' }}>Indicados</Link>
-        <span>/</span>
-        <span style={{ color: corPrincipal, fontWeight: 600 }}>{jogoAtual.titulo}</span>
+      {/* BREADCRUMB LIMPO E DIRETO */}
+      <div style={{ width: '100%', maxWidth: '1200px', marginBottom: '1.5rem' }}>
+        <Link href={`/indicados?cat=${categoria}`} style={{ color: '#a1a1aa', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = corPrincipal} onMouseOut={(e) => e.currentTarget.style.color = '#a1a1aa'}>
+          ← VOLTAR AOS DESAFIANTES
+        </Link>
       </div>
 
-      <div style={{ maxWidth: '1200px', width: '100%', display: 'grid', gridTemplateColumns: 'minmax(300px, 400px) 1fr', gap: '3rem', alignItems: 'start' }}>
+      <div className="confrontos-layout">
         
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}
-          style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '1.5rem', position: 'sticky', top: '100px' }}>
-          
-          <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: '16px', overflow: 'hidden', marginBottom: '1.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+        {/* DOSSIÊ DO JOGO */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="dossie-card"
+          style={{ ...cardStyle, borderTop: `3px solid ${corPrincipal}` }}
+        >
+          <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: '4px', overflow: 'hidden', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
             <img src={jogoAtual.imagem} alt={jogoAtual.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(20,20,24,1) 0%, transparent 40%)' }} />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <span style={{ backgroundColor: isTgt ? 'rgba(176, 38, 255, 0.15)' : 'rgba(212, 175, 55, 0.15)', color: corPrincipal, padding: '4px 12px', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700 }}>
-              Indicado {categoria.toUpperCase()}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <span style={{ backgroundColor: `${corPrincipal}20`, color: corPrincipal, padding: '6px 12px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '1px', borderLeft: `3px solid ${corPrincipal}` }}>
+              FINALISTA // {isTgt ? 'ARENA TGT' : 'ARENA MERCADO'}
             </span>
             {jogoAtual.user_rating_original && (
-              <span style={{ color: '#D4AF37', fontWeight: 900, fontSize: '1.1rem' }}>★ {jogoAtual.user_rating_original}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#D4AF37', fontWeight: 900, fontSize: '1.2rem', textShadow: '0 0 10px rgba(212, 175, 55, 0.3)' }}>
+                <span style={{ fontSize: '0.9rem' }}>★</span> {jogoAtual.user_rating_original}
+              </div>
             )}
           </div>
 
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-light)', lineHeight: 1.1, marginBottom: '1rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.7rem, 6vw, 2.2rem)', fontWeight: 900, color: 'var(--text-light)', lineHeight: 1.08, margin: '0 0 1.25rem 0' }}>
             {jogoAtual.titulo}
           </h1>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.25rem' }}>
             {jogoAtual.produtora && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#71717a', fontSize: '0.85rem' }}>Produtora</span>
-                <span style={{ color: '#D1D5DB', fontSize: '0.85rem', fontWeight: 500, textAlign: 'right' }}>{jogoAtual.produtora}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <span style={{ color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Produtora</span>
+                <span style={{ color: '#D1D5DB', fontSize: '0.9rem', fontWeight: 500 }}>{jogoAtual.produtora}</span>
               </div>
             )}
             {jogoAtual.diretor && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#71717a', fontSize: '0.85rem' }}>Diretor</span>
-                <span style={{ color: '#D1D5DB', fontSize: '0.85rem', fontWeight: 500, textAlign: 'right' }}>{jogoAtual.diretor}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <span style={{ color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Diretor</span>
+                <span style={{ color: '#D1D5DB', fontSize: '0.9rem', fontWeight: 500 }}>{jogoAtual.diretor}</span>
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#71717a', fontSize: '0.85rem' }}>Plataformas</span>
-              <span style={{ color: '#D1D5DB', fontSize: '0.85rem', fontWeight: 500, textAlign: 'right' }}>{jogoAtual.plataformas?.join(', ')}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              <span style={{ color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Plataformas</span>
+              <span style={{ color: '#D1D5DB', fontSize: '0.9rem', fontWeight: 500 }}>{jogoAtual.plataformas?.join(', ')}</span>
             </div>
           </div>
-
-          <button onClick={() => router.push(`/indicados?cat=${categoria}`)} style={{ 
-            width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', 
-            color: '#FFF', padding: '0.8rem', fontSize: '0.9rem', fontWeight: 'bold', borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s' 
-          }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-            ← Voltar para Indicados
-          </button>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-          
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-light)', marginBottom: '0.5rem' }}>Confrontos Diretos</h2>
-            <p style={{ color: '#a1a1aa', fontSize: '0.95rem' }}>Veja como a comunidade votou quando {jogoAtual.titulo} enfrentou cada um dos outros indicados.</p>
+        {/* RAIO-X DE CONFRONTOS */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.08 }}
+          style={{ width: '100%', minWidth: 0 }}
+        >
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h2 style={{ fontSize: 'clamp(1.85rem, 7vw, 2.5rem)', fontWeight: 900, color: 'var(--text-light)', margin: '0 0 0.5rem 0', lineHeight: 1 }}>
+              RAIO-X DE CONFRONTOS <span style={{ color: corPrincipal }}>1v1</span>
+            </h2>
+            <p style={{ color: '#a1a1aa', fontSize: '0.95rem', margin: 0 }}>
+              Desempenho de <strong style={{ color: '#FFF' }}>{jogoAtual.titulo}</strong> no mano a mano contra os outros 9 finalistas.
+            </p>
           </div>
 
+          {/* DESTAQUES (DOMÍNIO, EQUILÍBRIO, ARQUI-INIMIGO) */}
           {!carregando && maisParelho && maiorVitoria && arquiInimigo && (
             <div className="destaques-grid">
-              <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.4)', border: `1px solid ${isTgt ? 'rgba(176, 38, 255, 0.2)' : 'rgba(212, 175, 55, 0.2)'}`, borderRadius: '16px', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: corPrincipal, fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                  Domínio Total
+              <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: `2px solid ${corPrincipal}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: corPrincipal, fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  Domínio
                 </div>
-                <p style={{ color: '#D1D5DB', fontSize: '0.9rem', margin: 0, lineHeight: 1.4 }}>
-                  <strong>{jogoAtual.titulo}</strong> não deu chances e venceu <strong>{maiorVitoria.op.titulo}</strong> em <strong>{maiorVitoria.porc}%</strong> dos confrontos globais.
+                <p style={{ color: '#D1D5DB', fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>
+                  Venceu <strong>{maiorVitoria.op.titulo}</strong> em <strong>{maiorVitoria.porc}%</strong> dos duelos.
                 </p>
               </div>
 
-              <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.4)', border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: '16px', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#D4AF37', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M5 10l7-7 7 7"/><path d="M5 14l7 7 7-7"/></svg>
-                  Equilíbrio Total
+              <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: `2px solid #FFF` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FFF', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M5 10l7-7 7 7"/><path d="M5 14l7 7 7-7"/></svg>
+                  Equilíbrio
                 </div>
-                <p style={{ color: '#D1D5DB', fontSize: '0.9rem', margin: 0, lineHeight: 1.4 }}>
-                  A comunidade está dividida contra <strong>{maisParelho.op.titulo}</strong>. O confronto terminou com <strong>{maisParelho.porc}%</strong> de vantagem.
+                <p style={{ color: '#D1D5DB', fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>
+                  A comunidade está dividida contra <strong>{maisParelho.op.titulo}</strong> ({maisParelho.porc}%).
                 </p>
               </div>
 
-              <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.4)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '16px', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ef4444', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M9.5 6.5L21 18v3h-3L6.5 9.5"/></svg>
-                  O Arqui-Inimigo
+              <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: `2px solid #ef4444` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ef4444', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M9.5 6.5L21 18v3h-3L6.5 9.5"/></svg>
+                  Arqui-Inimigo
                 </div>
-                <p style={{ color: '#D1D5DB', fontSize: '0.9rem', margin: 0, lineHeight: 1.4 }}>
-                  O maior pesadelo deste indicado. <strong>{arquiInimigo.op.titulo}</strong> leva a melhor, vencendo em <strong>{100 - arquiInimigo.porc}%</strong> dos confrontos globais.
+                <p style={{ color: '#D1D5DB', fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>
+                  Perdeu para <strong>{arquiInimigo.op.titulo}</strong> em <strong>{100 - arquiInimigo.porc}%</strong> dos duelos.
                 </p>
               </div>
             </div>
           )}
 
           {carregando ? (
-            <div style={{ color: corPrincipal, padding: '2rem', textAlign: 'center' }}>Calculando estatísticas...</div>
+            <div style={{ color: corPrincipal, padding: '3rem 1rem', textAlign: 'center', fontWeight: 'bold', letterSpacing: '2px' }}>
+              CARREGANDO HISTÓRICO...
+            </div>
           ) : (
             <div className="confrontos-grid">
               {oponentesOrdenados.map((oponente: any) => {
                 const stat = stats[oponente.titulo];
                 const semVotos = !stat || stat.total === 0;
                 const porcentagemVitoria = semVotos ? 50 : stat.porcentagemA; 
-                
-                const isVitoria = porcentagemVitoria > 50;
-                const isDerrota = porcentagemVitoria < 50;
+                const porcentagemDerrota = 100 - porcentagemVitoria;
+
+                const corBarraEsq = semVotos ? 'rgba(255,255,255,0.1)' : (porcentagemVitoria > 50 ? corPrincipal : '#ef4444');
+                const corBarraDir = semVotos ? 'rgba(255,255,255,0.1)' : (porcentagemDerrota > 50 ? '#ef4444' : corSecundaria);
 
                 return (
-                  <div key={oponente.slug} style={{ backgroundColor: 'rgba(28, 28, 30, 0.6)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <img src={oponente.imagem} alt={oponente.titulo} style={{ width: '40px', height: '54px', objectFit: 'cover', borderRadius: '6px' }} />
-                        <span style={{ fontWeight: 'bold', color: 'var(--text-light)', fontSize: '0.9rem', lineHeight: 1.2 }}>{oponente.titulo}</span>
-                      </div>
-                      
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ color: semVotos ? '#71717a' : isVitoria ? corPrincipal : '#ef4444', fontWeight: 900, fontSize: '1rem' }}>
-                          {semVotos ? '--' : `${porcentagemVitoria}%`}
-                        </span>
-                        {!semVotos && (
-                          isVitoria ? (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={corPrincipal} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          ) : isDerrota ? (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                          ) : null
-                        )}
+                  <div key={oponente.slug} className="oponente-card" style={{ 
+                    ...cardStyle, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    height: '100px',
+                    width: '100%',
+                    transition: 'border-color 0.3s'
+                  }}>
+                    {/* ARTE DIAGONAL SANGRADA */}
+                    <div style={{ width: '92px', height: '100%', position: 'absolute', left: 0, top: 0, overflow: 'hidden' }}>
+                      <img 
+                        src={oponente.imagem} 
+                        alt={oponente.titulo} 
+                        className="oponente-img"
+                        style={{ 
+                          width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease',
+                          maskImage: 'linear-gradient(to right, black 40%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 100%)'
+                        }} 
+                      />
+                      <div className="vs-marca" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: 0, transition: 'all 0.3s', color: corPrincipal, fontWeight: 900, fontSize: '2rem', pointerEvents: 'none', textShadow: '0 0 10px rgba(0,0,0,0.8)' }}>
+                        VS
                       </div>
                     </div>
 
-                    <div style={{ width: '100%', height: '4px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ width: `${porcentagemVitoria}%`, height: '100%', background: semVotos ? 'transparent' : isVitoria ? (isTgt ? 'linear-gradient(to right, #9333EA, #B026FF)' : 'linear-gradient(to right, #B8860B, #D4AF37)') : '#ef4444', borderRadius: '2px', transition: 'width 1s ease-in-out' }} />
+                    <div style={{ marginLeft: '94px', flex: 1, minWidth: 0, paddingRight: '1rem', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.7rem' }}>
+                        <span style={{ fontWeight: 'bold', color: 'var(--text-light)', fontSize: '0.92rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                          {oponente.titulo}
+                        </span>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                          {semVotos ? (
+                            <span style={{ color: '#71717a', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', whiteSpace: 'nowrap' }}>SEM DADOS</span>
+                          ) : (
+                            <>
+                              <span style={{ color: porcentagemVitoria > 50 ? corPrincipal : '#ef4444', fontWeight: 900, fontSize: '1.05rem' }}>
+                                {porcentagemVitoria}%
+                              </span>
+                              {porcentagemVitoria > 50 ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={corPrincipal} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                              ) : porcentagemVitoria < 50 ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                              ) : null}
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* BARRA CABO DE GUERRA */}
+                      <div className="barra-cabo">
+                        {semVotos ? (
+                          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(to right, transparent 49%, #71717a 50%, transparent 51%)' }} />
+                        ) : (
+                          <>
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${porcentagemVitoria}%` }} transition={{ duration: 1 }} className="cabo-esq" style={{ backgroundColor: corBarraEsq }} />
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${porcentagemDerrota}%` }} transition={{ duration: 1 }} className="cabo-dir" style={{ backgroundColor: corBarraDir }} />
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
               })}
+
+              {/* 10º CARD ESPECIAL */}
+              <div style={{
+                ...cardStyle,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                height: '100px', border: `1px dashed ${corPrincipal}80`, backgroundColor: `${corPrincipal}05`,
+                textAlign: 'center', padding: '1rem'
+              }}>
+                <span style={{ color: '#D1D5DB', fontSize: '0.8rem', marginBottom: '0.4rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  Discorda desse placar?
+                </span>
+                <Link href={`/votar/${categoria}`} style={{ 
+                  color: corPrincipal, textDecoration: 'none', fontWeight: 900, fontSize: '0.9rem',
+                  display: 'flex', alignItems: 'center', gap: '6px', transition: 'transform 0.2s'
+                }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateX(5px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateX(0)'}>
+                  ENTRAR NA ARENA E VOTAR →
+                </Link>
+              </div>
+
             </div>
           )}
         </motion.div>
@@ -245,7 +417,7 @@ function ConfrontosJogoContent() {
 
 export default function ConfrontosJogo() {
   return (
-    <Suspense fallback={<main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--purple-neon)' }}>Carregando...</main>}>
+    <Suspense fallback={<main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--purple-neon)' }}>Carregando Dossiê...</main>}>
       <ConfrontosJogoContent />
     </Suspense>
   );

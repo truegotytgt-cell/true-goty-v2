@@ -8,11 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "pack:eco": "npx repomix --compress -o repomix-mapa.md",
+    "pack:full": "npx repomix -o repomix-completo.md"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.16",
     "framer-motion": "^14.13.0",
+    "html2canvas": "^1.4.1",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
@@ -23,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.0.0"
   }
 }

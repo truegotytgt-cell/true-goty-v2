@@ -44,17 +44,14 @@ export async function POST(request: Request) {
     const confrontosUnicos = new Set<string>();
 
     for (const match of pairwise) {
-      // Verifica se os jogos existem nesta categoria
       if (!titulosValidos.has(match.winner_title) || !titulosValidos.has(match.loser_title)) {
         return NextResponse.json({ success: false, error: "Jogo inexistente na categoria." }, { status: 400 });
       }
       
-      // Impede jogo contra ele mesmo
       if (match.winner_title === match.loser_title) {
         return NextResponse.json({ success: false, error: "Um jogo não pode duelar contra si mesmo." }, { status: 400 });
       }
 
-      // Impede duplicação de confrontos (ex: GTA vs Zelda e Zelda vs GTA)
       const parOrdenado = [match.winner_title, match.loser_title].sort().join('|');
       if (confrontosUnicos.has(parOrdenado)) {
         return NextResponse.json({ success: false, error: "Confronto duplicado detectado no envio." }, { status: 400 });
@@ -62,14 +59,14 @@ export async function POST(request: Request) {
       confrontosUnicos.add(parOrdenado);
     }
 
-    // Como são 10 jogos, todos contra todos geram exatamente 45 combinações únicas.
     if (confrontosUnicos.size !== 45) {
        return NextResponse.json({ success: false, error: "Conjunto incompleto ou inválido de duelos." }, { status: 400 });
     }
 
     // 3. Validação do Turnstile
     const formData = new FormData();
-    formData.append('secret', env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY || '');
+    // Correção de Tipagem: (env as any) resolve o erro do TypeScript no build
+    formData.append('secret', (env as any).TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY || '');
     formData.append('response', turnstileToken);
 
     const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
@@ -97,7 +94,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Origem da requisição não identificada." }, { status: 400 });
     }
 
-    let salt = env.SESSION_SALT || process.env.SESSION_SALT; 
+    // Correção de Tipagem: (env as any)
+    let salt = (env as any).SESSION_SALT || process.env.SESSION_SALT; 
     
     if (!salt && process.env.NODE_ENV === 'development') {
       salt = 'tgt_local_dev_salt_apenas_para_testes';
@@ -122,13 +120,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. RECÁLCULO DOS SCORES NO BACKEND (Agora batendo com o frontend: 0 a 9)
+    // 6. RECÁLCULO DOS SCORES NO BACKEND
     const scoresMap = new Map<string, number>();
-    
-    // Inicia todos com 0
     jogosCategoria.forEach((j: any) => scoresMap.set(j.titulo, 0));
 
-    // Adiciona +1 por vitória
     for (const match of pairwise) {
       scoresMap.set(match.winner_title, (scoresMap.get(match.winner_title) || 0) + 1);
     }
@@ -140,8 +135,14 @@ export async function POST(request: Request) {
     }));
 
     // 7. Salva no banco D1 de forma ATÔMICA
+    const pairwiseSanitizado = pairwise.map(p => ({
+      winner_title: p.winner_title,
+      loser_title: p.loser_title,
+      category: categoria 
+    }));
+
     const votosStatements = prepararVotosStatements(db, scoresCalculados, session_id);
-    const pairwiseStatements = prepararPairwiseStatements(db, pairwise, session_id);
+    const pairwiseStatements = prepararPairwiseStatements(db, pairwiseSanitizado, session_id);
 
     const todosStatements = [...votosStatements, ...pairwiseStatements];
     await db.batch(todosStatements);

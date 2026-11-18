@@ -1,0 +1,46 @@
+{
+  "output": {
+    "filePath": "repomix-mapa.md",
+    "style": "markdown",
+    "fileSummary": false,
+    "directoryStructure": true,
+    "removeComments": true,
+    "removeEmptyLines": true,
+    "compress": false
+  },
+  "include": [
+    "app/**/*",
+    "components/**/*",
+    "lib/**/*",
+    "AGENTS.md",
+    "package.json",
+    "next.config.ts",
+    "open-next.config.ts",
+    "proxy.ts",
+    "schema.sql",
+    "tsconfig.json",
+    "wrangler.jsonc"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      ".next/**",
+      ".open-next/**",
+      ".wrangler/**",
+      "node_modules/**",
+      "public/**",
+      "app/favicon.ico",
+      "package-lock.json",
+      "repomix-output.*",
+      "repomix-mapa.md",
+      "repomix-completo.md",
+      ".dev.vars",
+      ".env*",
+      "schema.reset.sql",
+      "README.md",
+      "eslint.config.mjs",
+      "next-env.d.ts"
+    ]
+  }
+}

@@ -2,15 +2,22 @@
 'use client';
 
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 export default function Metodo() {
   const fases = [
     {
       num: '01',
-      title: 'A Curadoria',
-      desc: 'Selecionamos 10 jogos com base em uma Média Ponderada de Metascore, OpenCritic e User Score. O filtro anti-Review Bombing garante que a opinião pública não seja sequestrada.',
+      title: 'A PENEIRA',
+      desc: (
+        <>
+          Selecionamos os <strong style={{ color: '#FFF' }}>10 melhores jogos do ano</strong> cruzando Metascore, OpenCritic e User Score — com trava anti-Review Bombing.
+        </>
+      ),
+      accentColor: '#A1A1AA', // Prata Claro
+      glowColor: 'rgba(255, 255, 255, 0.05)',
       icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple-neon)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           <path d="M12 8v4" />
           <path d="M12 16h.01" />
@@ -19,27 +26,40 @@ export default function Metodo() {
     },
     {
       num: '02',
-      title: 'O Mata-Mata',
-      desc: 'Usamos o Método de Condorcet. São 45 combates diretos entre os 10 indicados. Você compara frente a frente. É matematicamente o método mais justo de votação.',
+      title: 'A ARENA',
+      desc: (
+        <>
+          Pelo Método de Condorcet, você encara <strong style={{ color: '#FFF' }}>45 duelos diretos</strong>. É um contra o outro, frente a frente, até formar o seu ranking.
+        </>
+      ),
+      accentColor: '#B026FF', // Roxo Neon
+      glowColor: 'rgba(176, 38, 255, 0.2)',
       icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple-neon)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
-          <path d="M13 19l6-6" />
-          <path d="M16 16l4 4" />
-          <path d="M19 21l2-2" />
-          <path d="M9.5 6.5L21 18v3h-3L6.5 9.5" />
-          <path d="M11 5l6 6" />
-          <path d="M8 8l-4-4" />
-          <path d="M5 3l-2 2" />
-        </svg>
+        <div style={{ 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', 
+          color: '#B026FF', transform: 'skewX(-10deg)' 
+        }}>
+          <span className="font-arena" style={{ 
+            fontSize: '2.8rem', fontWeight: 900, fontStyle: 'italic', lineHeight: 1,
+            textShadow: '0 0 15px rgba(176, 38, 255, 0.8), 0 0 30px rgba(176, 38, 255, 0.4)', letterSpacing: '-2px'
+          }}>
+            VS
+          </span>
+        </div>
       )
     },
     {
       num: '03',
-      title: 'O Placar',
-      desc: 'Cada vitória no confronto direto vale +1 ponto (podendo chegar de 0 a 9 pontos). Ao final, o seu ranking é somado ao Placar Global. O jogo com a maior pontuação da comunidade leva o título de True GOTY. Empates são resolvidos no mano a mano.',
+      title: 'O VEREDITO',
+      desc: (
+        <>
+          Cada vitória vale <strong style={{ color: '#D4AF37' }}>+1 ponto</strong> (de 0 a 9). O campeão absoluto leva o <strong style={{ color: '#D4AF37' }}>True GOTY</strong>. Empates são resolvidos no mano a mano.
+        </>
+      ),
+      accentColor: '#D4AF37', // Dourado
+      glowColor: 'rgba(212, 175, 55, 0.2)',
       icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
           <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
           <path d="M4 22h16" />
@@ -52,97 +72,139 @@ export default function Metodo() {
   ];
 
   return (
-    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '90px 2rem 1rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '100px 2rem 4rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       
-      {/* CSS PURO PARA O HOVER (Sem as linhas conectoras) */}
-      <style>{`
-        .metodo-card {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .metodo-card:hover {
-          border-color: var(--purple-neon) !important;
-          transform: translateY(-5px);
-          box-shadow: 0 15px 30px rgba(176, 38, 255, 0.15) !important;
-        }
-      `}</style>
-
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#D4AF37', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '0.8rem', backgroundColor: 'rgba(212, 175, 55, 0.08)', padding: '6px 16px', borderRadius: '50px', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-          Como Funciona
-        </span>
-        <h1 style={{ color: 'var(--text-light)', fontSize: '3rem', fontWeight: 900, marginBottom: '0.8rem', letterSpacing: '-1px', lineHeight: 1.1 }}>
-          O NOSSO MÉTODO
-        </h1>
-        <p style={{ color: '#a1a1aa', fontSize: '1rem', lineHeight: 1.5, maxWidth: '650px', margin: '0 auto' }}>
-          O TGT não é apenas mais um prêmio de "jogo do ano". Construímos um sistema de votação em 3 fases, inspirado em modelos estatísticos, para garantir que o vencedor seja verdadeiramente a escolha da comunidade.
-        </p>
+      {/* CABEÇALHO (Continua animando no load da página) */}
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#D4AF37', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1rem', backgroundColor: 'rgba(212, 175, 55, 0.1)', padding: '8px 20px', transform: 'skewX(-10deg)', borderLeft: '3px solid #D4AF37' }}
+        >
+          <span style={{ transform: 'skewX(10deg)' }}>[ PROTOCOLO DE VOTAÇÃO ]</span>
+        </motion.div>
+        
+        <motion.h1 
+          initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+          className="font-arena" 
+          style={{ color: 'var(--text-light)', fontSize: '4rem', fontWeight: 900, marginBottom: '1rem', lineHeight: 0.9, textShadow: '0 10px 30px rgba(0,0,0,0.8)' }}
+        >
+          AS REGRAS DA ARENA
+        </motion.h1>
+        
+        <motion.p 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+          style={{ color: '#a1a1aa', fontSize: '1.1rem', lineHeight: 1.6, maxWidth: '650px', margin: '0 auto' }}
+        >
+          Sem júri de gabinete. Sem voto por hype. Um sistema matemático de 3 fases onde cada jogo precisa provar seu valor no mano a mano.
+        </motion.p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'stretch', width: '100%', position: 'relative' }}>
-        
+      {/* CARDS DAS FASES (Animação ao rolar a tela) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'stretch', width: '100%', marginBottom: '4rem' }}>
         {fases.map((fase, index) => (
-          <div key={index} className="metodo-card" style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.02)', 
-            backdropFilter: 'blur(16px)', 
-            border: '1px solid rgba(176, 38, 255, 0.2)', 
-            borderRadius: '20px', 
-            padding: '2rem 1.5rem', 
-            position: 'relative', 
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-          }}>
-            {/* Container isolado para o número fantasma */}
-            <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, overflow: 'hidden', borderRadius: '20px', pointerEvents: 'none', zIndex: 0 }}>
-              <span style={{ 
-                position: 'absolute', top: '20px', right: '15px', fontSize: '5.5rem', fontWeight: 900, 
-                color: 'rgba(255, 255, 255, 0.01)', WebkitTextStroke: '1px rgba(212, 175, 55, 0.15)', 
-                lineHeight: 1
+          <motion.div 
+            key={index}
+            // 🟢 AQUI ESTÁ A MÁGICA DO SCROLL REVEAL
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }} // once: true garante que anima só uma vez
+            transition={{ delay: index * 0.15, duration: 0.6, ease: "easeOut" }}
+            style={{ display: 'flex', flexDirection: 'column' }}
+          >
+            <div style={{ 
+              flex: 1,
+              backgroundColor: '#111114',
+              padding: '2rem 1.5rem',
+              clipPath: 'polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)',
+              boxShadow: `inset 0 0 0 1px ${fase.accentColor}, inset 0 0 30px ${fase.glowColor}`,
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+            }}>
+              
+              <span className="font-arena" style={{ 
+                position: 'absolute', top: '10px', right: '15px', fontSize: '8rem', fontWeight: 900, 
+                color: '#1a1a1f', lineHeight: 0.8, pointerEvents: 'none', zIndex: 0,
+                textShadow: `1px 1px 0 ${fase.accentColor}40`
               }}>
                 {fase.num}
               </span>
-            </div>
 
-            <div style={{ marginBottom: '1rem', position: 'relative', display: 'flex', alignItems: 'center', height: '32px', zIndex: 1 }}>
-              {fase.icon}
-            </div>
+              <div style={{ marginBottom: '1rem', position: 'relative', zIndex: 1, color: fase.accentColor }}>
+                {fase.icon}
+              </div>
 
-            <h2 style={{ color: 'var(--text-light)', fontSize: '1.25rem', marginBottom: '0.8rem', fontWeight: 800, position: 'relative', zIndex: 1 }}>
-              {fase.title}
-            </h2>
-            
-            <p style={{ color: '#E5E7EB', lineHeight: 1.6, fontSize: '0.9rem', position: 'relative', flex: 1, zIndex: 1 }}>
-              {fase.desc}
-            </p>
-          </div>
+              <h2 className="font-arena" style={{ color: 'var(--text-light)', fontSize: '1.6rem', marginBottom: '0.8rem', fontWeight: 700, position: 'relative', zIndex: 1, letterSpacing: '1px', borderBottom: `2px solid ${fase.accentColor}40`, paddingBottom: '0.3rem', display: 'inline-block' }}>
+                {fase.title}
+              </h2>
+              
+              <p style={{ color: '#b0b0b8', lineHeight: 1.5, fontSize: '0.9rem', position: 'relative', flex: 1, zIndex: 1 }}>
+                {fase.desc}
+              </p>
+
+              <div style={{ marginTop: '1.5rem', width: '100%', height: '2px', background: `linear-gradient(to right, ${fase.accentColor}, transparent)` }} />
+            </div>
+          </motion.div>
         ))}
-
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
-        <Link href="/votar/tgt" style={{ 
-          display: 'inline-block', background: 'linear-gradient(135deg, #9333EA, #B026FF)', color: '#FFF', 
-          padding: '1rem 3rem', fontSize: '1rem', fontWeight: 900, borderRadius: '50px', 
-          textDecoration: 'none', boxShadow: '0 0 30px rgba(176, 38, 255, 0.4)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          border: '1px solid rgba(255,255,255,0.2)', letterSpacing: '1px'
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(176, 38, 255, 0.6)' }}
-        onMouseOut={(e) { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(176, 38, 255, 0.4)' }}
-        >
-          ENTENDI, QUERO VOTAR
-        </Link>
+      {/* SELEÇÃO DE MODOS (Duas Arenas - Animação ao rolar) */}
+      <motion.div 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        style={{ width: '100%', marginBottom: '4rem' }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h2 className="font-arena" style={{ color: '#FFF', fontSize: '2rem', letterSpacing: '1px' }}>DUAS ARENAS // ESCOLHA O CENÁRIO</h2>
+          <p style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>Você pode testar seus favoritos em dois cenários diferentes.</p>
+        </div>
         
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#71717a', fontWeight: 500, letterSpacing: '0.5px' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          Leva menos de 2 minutos • 10 jogos • 45 duelos
-        </span>
-      </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          
+          {/* MODO 1: TRUE GOTY */}
+          <div style={{ backgroundColor: 'rgba(176, 38, 255, 0.05)', border: '1px solid rgba(176, 38, 255, 0.3)', padding: '2rem', borderRadius: '8px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#B026FF' }} />
+            <h3 className="font-arena" style={{ color: '#B026FF', fontSize: '1.5rem', marginBottom: '0.5rem' }}>MODO 01: O VOTO PURISTA</h3>
+            <p style={{ color: '#d4d4d8', fontSize: '0.9rem', lineHeight: 1.5 }}>A nossa curadoria oficial. Os 10 jogos mais bem avaliados do ano pela soma real de crítica e público, livres de lobby. O teste definitivo de qualidade.</p>
+          </div>
+
+          {/* MODO 2: MERCADO */}
+          <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', border: '1px solid rgba(212, 175, 55, 0.3)', padding: '2rem', borderRadius: '8px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#D4AF37' }} />
+            <h3 className="font-arena" style={{ color: '#D4AF37', fontSize: '1.5rem', marginBottom: '0.5rem' }}>MODO 02: O VOTO POPULAR</h3>
+            <p style={{ color: '#d4d4d8', fontSize: '0.9rem', lineHeight: 1.5 }}>Os finalistas escolhidos pela indústria e pela mídia tradicional. Entre nessa arena para descobrir quem vence no mano a mano entre os indicados oficiais do mercado.</p>
+          </div>
+
+        </div>
+      </motion.div>
+
+      {/* CTA E AVISO DE INDEPENDÊNCIA */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem', width: '100%' }}
+      >
+        
+        <div>
+          <Link href="/votar/tgt" className="btn-arena" style={{ padding: '1.2rem 4rem', fontSize: '1.5rem' }}>
+            ESTOU PRONTO • ENTRAR NA ARENA
+          </Link>
+        </div>
+        
+        {/* Selo de Independência */}
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '1.5rem', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+            <span style={{ color: '#a1a1aa', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '2px' }}>[ NOTA DE INDEPENDÊNCIA ]</span>
+          </div>
+          <p style={{ color: '#71717a', fontSize: '0.75rem', lineHeight: 1.5 }}>
+            O True GOTY (TGT) é uma plataforma independente criada exclusivamente para entretenimento, debate e celebração da cultura gamer. Não possuímos qualquer vínculo, patrocínio ou afiliação oficial com o The Game Awards (TGA), Metacritic, OpenCritic ou qualquer outra premiação e veículo da indústria.
+          </p>
+        </div>
+      </motion.div>
     </main>
   );
 }

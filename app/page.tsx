@@ -8,7 +8,7 @@ import { useLanguage } from '../components/LanguageProvider';
 
 export default function Home() {
   const [votos, setVotos] = useState<number | null>(null);
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
 
   useEffect(() => {
     fetch('/api/stats')
@@ -26,87 +26,151 @@ export default function Home() {
   };
 
   return (
-    <main style={{ 
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-      minHeight: 'calc(100vh - 80px)', textAlign: 'center', padding: '2rem 2rem 1rem 2rem', 
-      boxSizing: 'border-box' 
-    }}>
-      
-      <motion.h1 
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
-        style={{ fontSize: '4.5rem', fontWeight: 900, color: '#F4F4F0', lineHeight: 1.05, marginBottom: '1rem', textShadow: '0 4px 20px rgba(0,0,0,0.8)', letterSpacing: '-1.5px' }}
+    <main
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        textAlign: 'center',
+        padding: 'clamp(96px, 13vh, 130px) 1.25rem 3.5rem 1.25rem',
+        boxSizing: 'border-box',
+        width: '100%',
+      }}
+    >
+      {/* TÍTULO PRINCIPAL */}
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        style={{
+          fontSize: 'clamp(2.6rem, 10vw, 5rem)',
+          fontWeight: 900,
+          color: '#F4F4F0',
+          lineHeight: 0.92,
+          margin: '0 0 1.5rem 0',
+          letterSpacing: '0px',
+          textShadow: '0 10px 30px rgba(0,0,0,0.8)',
+          maxWidth: '100%',
+        }}
       >
-        {t.home_titulo1}<br/>
-        <span style={{ background: 'linear-gradient(to right, #C084FC, #B026FF, #D4AF37)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'inline-block' }}>
-          {t.home_titulo2}
+        QUEM É O VERDADEIRO
+        <br />
+        <span className="title-shine" style={{ fontSize: '1.1em', display: 'inline-block' }}>
+          GAME OF THE YEAR?
         </span>
       </motion.h1>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.2)', padding: '6px 18px', borderRadius: '50px', marginBottom: '2rem', backdropFilter: 'blur(5px)' }}
+      {/* SELO / BADGE */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          backgroundColor: 'rgba(176, 38, 255, 0.1)',
+          border: '1px solid rgba(176, 38, 255, 0.4)',
+          padding: '8px 20px',
+          marginBottom: '1.75rem',
+          transform: 'skewX(-10deg)',
+          maxWidth: '92%',
+          boxSizing: 'border-box',
+        }}
       >
-        <span style={{ color: '#D4AF37', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-          ★ A verdadeira voz da comunidade
+        <span
+          style={{
+            color: '#D4AF37',
+            fontSize: 'clamp(0.75rem, 2.8vw, 0.9rem)',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            transform: 'skewX(10deg)',
+          }}
+        >
+          SEM JÚRI DE GABINETE • 100% VOTO GAMER
         </span>
       </motion.div>
 
-      <motion.p 
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }}
-        style={{ fontSize: '1.2rem', color: '#d4d4d8', maxWidth: '650px', marginBottom: '3rem', lineHeight: 1.6, fontWeight: 400 }}
+      {/* TEXTO DE APOIO */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.3 }}
+        style={{
+          fontSize: 'clamp(0.98rem, 3.6vw, 1.1rem)',
+          color: '#a1a1aa',
+          maxWidth: '600px',
+          margin: '0 0 clamp(2rem, 5vh, 3.5rem) 0',
+          lineHeight: 1.6,
+          fontWeight: 400,
+        }}
       >
-        Chega de premiações compradas e painéis desconectados. Aqui, o veredito é escrito por quem realmente joga, em confrontos diretos e implacáveis. Descubra qual jogo o mundo elegeu.
+        Chega de premiações de fachada. Aqui, os maiores jogos do ano se enfrentam em duelos 1v1 implacáveis até sobrar apenas um campeão. Quem leva a coroa?
       </motion.p>
 
-      {/* BOTÕES DIRETOS */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }}
-        style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '4rem' }}
+      {/* BOTÕES AÇÃO */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        style={{
+          display: 'flex',
+          gap: '1rem',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          marginBottom: 'clamp(2.5rem, 7vh, 5rem)',
+          width: '100%',
+        }}
       >
-        <Link href="/votar/tgt" style={{ 
-          background: 'linear-gradient(135deg, #9333EA, #B026FF)', color: '#FFF', 
-          padding: '1.1rem 2.8rem', fontSize: '1.1rem', fontWeight: 900, borderRadius: '50px', 
-          textDecoration: 'none', boxShadow: '0 0 35px rgba(176, 38, 255, 0.45)', 
-          border: '1px solid rgba(255,255,255,0.2)', letterSpacing: '1px', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          display: 'flex', alignItems: 'center', gap: '10px'
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(176, 38, 255, 0.6)' }}
-        onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 35px rgba(176, 38, 255, 0.45)' }}
-        >
-          Votar no True GOTY
+        <Link href="/votar/tgt" className="btn-arena">
+          ENTRAR NA ARENA
         </Link>
-        <Link href="/votar/mercado" style={{ 
-          backgroundColor: 'rgba(212, 175, 55, 0.1)', backdropFilter: 'blur(10px)', color: '#D4AF37', 
-          padding: '1.1rem 2.5rem', fontSize: '1.1rem', fontWeight: 900, borderRadius: '50px', 
-          border: '1px solid rgba(212, 175, 55, 0.4)', letterSpacing: '1px',
-          display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', transition: 'all 0.3s'
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(212, 175, 55, 0.2)' }}
-        onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
-        >
-          Votar no Mercado (TGA)
+
+        <Link href="/votar/mercado" className="btn-mercado">
+          COMPARAR COM A MÍDIA
         </Link>
       </motion.div>
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.8, type: 'spring', bounce: 0.4 }}
-        style={{ 
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)',
-          padding: '1.5rem 4rem', borderRadius: '30px', backdropFilter: 'blur(16px)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
-        }}
+      {/* PLACAR / CONTADOR */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 0.8, type: 'spring', bounce: 0.4 }}
+        className="hud-placar"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '0.2rem' }}>
-          <div style={{ height: '1px', width: '50px', background: 'linear-gradient(to right, transparent, rgba(212, 175, 55, 0.6))' }} />
-          <span style={{ fontSize: '3.5rem', fontWeight: 900, color: '#FFF', textShadow: '0 0 30px rgba(176, 38, 255, 0.7)', lineHeight: 1 }}>
-            {votos === null ? '...' : formatarVotos(votos)}
+        <div className="hud-placar-inner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(1rem, 4vw, 2rem)', marginBottom: '0.5rem' }}>
+            <div style={{ height: '2px', width: '36px', background: 'linear-gradient(to right, transparent, #D4AF37)' }} />
+            <span
+              className="font-arena"
+              style={{
+                fontSize: 'clamp(2.8rem, 11vw, 4rem)',
+                color: '#FFF',
+                textShadow: '0 0 20px rgba(176, 38, 255, 0.8)',
+                lineHeight: 0.9,
+                letterSpacing: '2px',
+              }}
+            >
+              {votos === null ? '...' : formatarVotos(votos)}
+            </span>
+            <div style={{ height: '2px', width: '36px', background: 'linear-gradient(to left, transparent, #D4AF37)' }} />
+          </div>
+          <span
+            style={{
+              fontSize: 'clamp(0.68rem, 2.5vw, 0.8rem)',
+              color: '#a1a1aa',
+              textTransform: 'uppercase',
+              letterSpacing: '0.25em',
+              fontWeight: 600,
+            }}
+          >
+            VEREDITOS REGISTRADOS NA ARENA
           </span>
-          <div style={{ height: '1px', width: '50px', background: 'linear-gradient(to left, transparent, rgba(212, 175, 55, 0.6))' }} />
         </div>
-        <span style={{ fontSize: '0.8rem', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700 }}>
-          {t.home_contador}
-        </span>
       </motion.div>
     </main>
   );

@@ -4,99 +4,230 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { useLanguage } from './LanguageProvider'; 
+import { useLanguage } from './LanguageProvider';
+import styles from './Header.module.css';
 
 export default function Header() {
   const pathname = usePathname();
   const [langOpen, setLangOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { lang, setLang, t } = useLanguage(); 
+  const { lang, setLang, t } = useLanguage();
 
+  // Fecha o dropdown de idioma ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setLangOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fecha o menu gaveta e o seletor sempre que mudar de página
+  useEffect(() => {
+    setMenuOpen(false);
+    setLangOpen(false);
+  }, [pathname]);
+
+  // Trava a rolagem do fundo enquanto o menu mobile estiver aberto
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen]);
+
+  // Fecha o menu gaveta se a tela crescer para desktop ou apertar ESC
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 900) {
+        setMenuOpen(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+        setLangOpen(false);
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const navLinks = [
     { name: t.nav_inicio, path: '/' },
     { name: t.nav_metodo, path: '/metodo' },
     { name: t.nav_indicados, path: '/indicados' },
-    { name: t.nav_goty, path: '/resultados' }, 
-    { name: 'História', path: '/historia' }, 
-    { name: t.nav_votar, path: '/votar/tgt' },
+    { name: t.nav_goty, path: '/resultados' },
+    { name: 'HISTÓRIA', path: '/historia' },
+    { name: t.nav_votar, path: '/votar' },
     { name: t.nav_sobre, path: '/sobre' },
   ];
 
   const flagAtual = lang === 'pt' ? 'br' : lang === 'en' ? 'us' : 'es';
   const labelAtual = lang === 'pt' ? 'PT-BR' : lang === 'en' ? 'EN' : 'ES';
 
+  const isLinkActive = (path: string) => {
+    if (path === '/') return pathname === '/';
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
+
   return (
-    <header style={{ position: 'fixed', top: 0, width: '100%', backgroundColor: 'rgba(5, 0, 10, 0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', zIndex: 100, boxSizing: 'border-box', padding: '0.5rem 2rem', minHeight: '75px', display: 'flex', alignItems: 'center' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-        
-        {/* LOGO AJUSTADA: Mais equilibrada, sem espremer a tela */}
-        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-          <img 
-            src="/logo-tgt.png" 
-            alt="TGT - True GOTY" 
-            style={{ height: '75px', width: 'auto', objectFit: 'contain', margin: '-10px 0' }} 
-          />
-        </Link>
-
-        {/* NAVEGAÇÃO CENTRAL MAIS SOFISTICADA */}
-        <nav style={{ display: 'flex', gap: '0.2rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '0.4rem', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          {navLinks.map((link) => {
-            const isActive = pathname === link.path || (link.path === '/votar/tgt' && pathname.startsWith('/votar'));
-            return (
-              <Link key={link.name} href={link.path} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '50px', textDecoration: 'none', transition: 'all 0.3s ease', backgroundColor: isActive ? 'var(--purple-neon)' : 'transparent', color: isActive ? '#FFF' : '#a1a1aa', boxShadow: isActive ? '0 0 20px rgba(176, 38, 255, 0.3)' : 'none' }}>
-                {link.name}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
-          
-          <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <button onClick={() => setLangOpen(!langOpen)} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', color: '#a1a1aa', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s' }}>
-              <img src={`https://flagcdn.com/${flagAtual}.svg`} width="20" alt={labelAtual} style={{ borderRadius: '2px', boxShadow: '0 0 2px rgba(255,255,255,0.5)' }} />
-              {labelAtual}
-            </button>
-            
-            {langOpen && (
-              <div style={{ position: 'absolute', top: '120%', right: 0, backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px', padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: '180px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 200 }}>
-                <button onClick={() => { setLang('pt'); setLangOpen(false); }} style={{ background: 'transparent', border: 'none', color: '#FFF', padding: '0.6rem 1rem', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', gap: '0.5rem', fontSize: '0.9rem', alignItems: 'center' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#222'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <img src="https://flagcdn.com/br.svg" width="20" alt="BR" style={{ borderRadius: '2px' }} />
-                  <img src="https://flagcdn.com/pt.svg" width="20" alt="PT" style={{ borderRadius: '2px' }} />
-                  <span style={{ marginLeft: '5px' }}>Português</span>
-                </button>
-                <button onClick={() => { setLang('en'); setLangOpen(false); }} style={{ background: 'transparent', border: 'none', color: '#FFF', padding: '0.6rem 1rem', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', gap: '0.5rem', fontSize: '0.9rem', alignItems: 'center' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#222'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <img src="https://flagcdn.com/us.svg" width="20" alt="US" style={{ borderRadius: '2px' }} />
-                  <img src="https://flagcdn.com/gb.svg" width="20" alt="GB" style={{ borderRadius: '2px' }} />
-                  <span style={{ marginLeft: '5px' }}>English</span>
-                </button>
-                <button onClick={() => { setLang('es'); setLangOpen(false); }} style={{ background: 'transparent', border: 'none', color: '#FFF', padding: '0.6rem 1rem', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', gap: '0.5rem', fontSize: '0.9rem', alignItems: 'center' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#222'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <img src="https://flagcdn.com/es.svg" width="20" alt="ES" style={{ borderRadius: '2px' }} />
-                  <span style={{ marginLeft: '5px' }}>Español</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* BOTÃO CONTATO COM FUNDO ROXO PREMIUM */}
-          <Link href="/contato" style={{ padding: '0.6rem 1.5rem', border: '1px solid var(--purple-neon)', borderRadius: '8px', backgroundColor: 'var(--purple-neon)', color: '#FFF', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.85rem', boxShadow: '0 0 15px rgba(176, 38, 255, 0.2)', transition: 'all 0.2s' }}
-          onMouseOver={(e) => { e.currentTarget.style.boxShadow = '0 0 25px rgba(176, 38, 255, 0.5)'; e.currentTarget.style.transform = 'scale(1.02)' }}
-          onMouseOut={(e) => { e.currentTarget.style.boxShadow = '0 0 15px rgba(176, 38, 255, 0.2)'; e.currentTarget.style.transform = 'scale(1)' }}
+    <>
+      <header className={styles.header}>
+        <div className={styles.inner}>
+          {/* ESQUERDA: LOGO TGT */}
+          <Link
+            href="/"
+            className={styles.logoLink}
+            onClick={() => setMenuOpen(false)}
           >
-            {t.nav_contato}
+            <img
+              src="/logo-tgt.png"
+              alt="TGT - True GOTY"
+              className={styles.logoImg}
+            />
           </Link>
+
+          {/* CENTRO: NAVEGAÇÃO DESKTOP */}
+          <nav className={styles.desktopNav} aria-label="Navegação principal">
+            {navLinks.map((link) => {
+              const active = isLinkActive(link.path);
+              return (
+                <Link
+                  key={link.path}
+                  href={link.path}
+                  className={`${styles.desktopNavLink} ${active ? styles.desktopNavLinkActive : ''}`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* DIREITA: IDIOMA + CONTATO (DESKTOP) + HAMBÚRGUER (MOBILE) */}
+          <div className={styles.rightActions}>
+            <div className={styles.langWrapper} ref={dropdownRef}>
+              <button
+                type="button"
+                className={styles.langButton}
+                aria-label="Selecionar idioma"
+                aria-expanded={langOpen}
+                onClick={() => setLangOpen((prev) => !prev)}
+              >
+                <img
+                  src={`https://flagcdn.com/${flagAtual}.svg`}
+                  width="18"
+                  alt={labelAtual}
+                  className={styles.flagIcon}
+                />
+                <span>{labelAtual}</span>
+              </button>
+
+              {langOpen && (
+                <div className={styles.langDropdown}>
+                  <button
+                    type="button"
+                    className={styles.langOption}
+                    onClick={() => {
+                      setLang('pt');
+                      setLangOpen(false);
+                    }}
+                  >
+                    <img src="https://flagcdn.com/br.svg" width="18" alt="BR" className={styles.flagIcon} />
+                    <img src="https://flagcdn.com/pt.svg" width="18" alt="PT" className={styles.flagIcon} />
+                    <span className={styles.langOptionLabel}>Português</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.langOption}
+                    onClick={() => {
+                      setLang('en');
+                      setLangOpen(false);
+                    }}
+                  >
+                    <img src="https://flagcdn.com/us.svg" width="18" alt="US" className={styles.flagIcon} />
+                    <img src="https://flagcdn.com/gb.svg" width="18" alt="GB" className={styles.flagIcon} />
+                    <span className={styles.langOptionLabel}>English</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.langOption}
+                    onClick={() => {
+                      setLang('es');
+                      setLangOpen(false);
+                    }}
+                  >
+                    <img src="https://flagcdn.com/es.svg" width="18" alt="ES" className={styles.flagIcon} />
+                    <span className={styles.langOptionLabel}>Español</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <Link href="/contato" className={styles.desktopContactBtn}>
+              {t.nav_contato}
+            </Link>
+
+            <button
+              type="button"
+              className={`${styles.hamburgerBtn} ${menuOpen ? styles.hamburgerBtnOpen : ''}`}
+              aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={menuOpen}
+              onClick={() => {
+                setLangOpen(false);
+                setMenuOpen((prev) => !prev);
+              }}
+            >
+              <span className={`${styles.hamburgerLine} ${styles.hamburgerLineTop}`} />
+              <span className={`${styles.hamburgerLine} ${styles.hamburgerLineMiddle}`} />
+              <span className={`${styles.hamburgerLine} ${styles.hamburgerLineBottom}`} />
+            </button>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* MENU GAVETA MOBILE */}
+      {menuOpen && (
+        <div className={styles.mobileDrawer} role="dialog" aria-label="Menu de navegação">
+          <nav className={styles.mobileNavList}>
+            {navLinks.map((link) => {
+              const active = isLinkActive(link.path);
+              return (
+                <Link
+                  key={link.path}
+                  href={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  className={`${styles.mobileNavLink} ${active ? styles.mobileNavLinkActive : ''}`}
+                >
+                  <span>{link.name}</span>
+                  {active && <span className={styles.activeDot} />}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className={styles.mobileDrawerFooter}>
+            <Link
+              href="/contato"
+              onClick={() => setMenuOpen(false)}
+              className={styles.mobileContactBtn}
+            >
+              {t.nav_contato}
+            </Link>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -2,69 +2,134 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
+export const runtime = 'edge'; // Otimização para Cloudflare
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const t1 = searchParams.get('t1') || 'Jogo 1';
-    const t2 = searchParams.get('t2') || 'Jogo 2';
-    const t3 = searchParams.get('t3') || 'Jogo 3';
-    
-    // Transforma o caminho relativo (ex: /zelda.jpg) em URL absoluta (https://site.com/zelda.jpg)
-    const getAbsoluteUrl = (imagePath: string) => {
-      if (!imagePath) return '';
-      const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-      return new URL(cleanPath, request.url).toString();
+    const { searchParams, origin } = new URL(request.url);
+
+    // 1. SEGURANÇA: Sanitiza o texto para evitar estouro de memória no Worker
+    const sanitizeText = (val: string | null, defaultText: string) => {
+      const text = (val || defaultText).replace(/[<>]/g, ''); // Evita HTML injection
+      return text.length > 35 ? text.substring(0, 35) + '...' : text;
     };
 
-    const i1 = getAbsoluteUrl(searchParams.get('i1') || '');
-    const i2 = getAbsoluteUrl(searchParams.get('i2') || '');
-    const i3 = getAbsoluteUrl(searchParams.get('i3') || '');
+    const t1 = sanitizeText(searchParams.get('t1'), 'Campeão TGT');
+    const t2 = sanitizeText(searchParams.get('t2'), '2º Lugar');
+    const t3 = sanitizeText(searchParams.get('t3'), '3º Lugar');
+
+    // 2. SEGURANÇA: Trava as imagens no seu próprio domínio (evita SSRF)
+    const resolveLocalImage = (rawPath: string | null) => {
+      if (!rawPath) return '';
+      // Só aceita caminhos que começam com '/' e não têm 'http' ou '//'
+      if (!rawPath.startsWith('/') || rawPath.startsWith('//') || rawPath.includes(':')) {
+        return '';
+      }
+      const resolved = new URL(rawPath, origin);
+      return resolved.origin === origin ? resolved.toString() : '';
+    };
+
+    const i1 = resolveLocalImage(searchParams.get('i1'));
+    const i2 = resolveLocalImage(searchParams.get('i2'));
+    const i3 = resolveLocalImage(searchParams.get('i3'));
 
     return new ImageResponse(
       (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: '#020005', backgroundImage: `radial-gradient(circle at 50% 30%, rgba(88, 28, 135, 0.4) 0%, transparent 60%)`, fontFamily: 'sans-serif', padding: '40px' }}>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
-            <h1 style={{ color: '#FFF', fontSize: '50px', margin: 0, fontWeight: 900 }}>MEU TRUE GOTY</h1>
-            <h2 style={{ color: '#B026FF', fontSize: '30px', margin: 0, marginTop: '5px' }}>TOP 3</h2>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#050508',
+            // Gradiente simples (Satori suporta)
+            backgroundImage: 'radial-gradient(circle at 50% 35%, rgba(176, 38, 255, 0.28) 0%, transparent 65%)',
+            border: '2px solid #D4AF37',
+            padding: '36px 48px',
+            fontFamily: 'sans-serif',
+          }}
+        >
+          {/* Cabeçalho */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <span style={{ color: '#B026FF', fontSize: '18px', fontWeight: 800, letterSpacing: '4px' }}>
+              TEMPORADA 2026 • VEREDITO OFICIAL
+            </span>
+            <h1 style={{ color: '#FFFFFF', fontSize: '44px', margin: '6px 0 0 0', fontWeight: 900, letterSpacing: '2px' }}>
+              MEU PÓDIO TRUE GOTY
+            </h1>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '30px', width: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '300px' }}>
-              <div style={{ position: 'relative' }}>
-                {i1 ? <img src={i1} style={{ width: '280px', height: '280px', borderRadius: '16px', border: '6px solid #D4AF37', objectFit: 'cover' }} /> : <div style={{ width: '280px', height: '280px', backgroundColor: '#222', borderRadius: '16px' }}></div>}
-                <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#D4AF37', color: '#000', padding: '4px 16px', borderRadius: '50px', fontSize: '18px', fontWeight: 'bold' }}>1º</div>
-              </div>
-              <h3 style={{ color: '#D4AF37', fontSize: '24px', margin: '10px 0 0 0', textAlign: 'center', fontWeight: 'bold' }}>{t1}</h3>
+          {/* Pódio com capas na proporção 3:4 e cantos retos */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '40px', width: '100%' }}>
+            
+            {/* 2º Lugar (Prata) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '210px' }}>
+              <span style={{ color: '#E2E8F0', fontSize: '15px', fontWeight: 800, letterSpacing: '2px', marginBottom: '8px' }}>
+                2º LUGAR
+              </span>
+              {i2 ? (
+                <img src={i2} style={{ width: '195px', height: '260px', border: '2px solid #E2E8F0', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '195px', height: '260px', backgroundColor: '#141419', border: '2px solid #E2E8F0' }} />
+              )}
+              <span style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 700, marginTop: '10px', textAlign: 'center' }}>
+                {t2}
+              </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '220px' }}>
-              <div style={{ position: 'relative' }}>
-                {i2 ? <img src={i2} style={{ width: '200px', height: '200px', borderRadius: '12px', border: '4px solid #E2E8F0', objectFit: 'cover' }} /> : <div style={{ width: '200px', height: '200px', backgroundColor: '#222', borderRadius: '12px' }}></div>}
-                <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#E2E8F0', color: '#000', padding: '4px 16px', borderRadius: '50px', fontSize: '16px', fontWeight: 'bold' }}>2º</div>
-              </div>
-              <h3 style={{ color: '#FFF', fontSize: '20px', margin: '10px 0 0 0', textAlign: 'center' }}>{t2}</h3>
+            {/* 1º Lugar (Ouro - Destaque) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '250px' }}>
+              <span style={{ color: '#D4AF37', fontSize: '18px', fontWeight: 900, letterSpacing: '3px', marginBottom: '8px' }}>
+                ★ CAMPEÃO ★
+              </span>
+              {i1 ? (
+                <img src={i1} style={{ width: '240px', height: '320px', border: '3px solid #D4AF37', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '240px', height: '320px', backgroundColor: '#141419', border: '3px solid #D4AF37' }} />
+              )}
+              <span style={{ color: '#D4AF37', fontSize: '22px', fontWeight: 900, marginTop: '10px', textAlign: 'center' }}>
+                {t1}
+              </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '220px' }}>
-              <div style={{ position: 'relative' }}>
-                {i3 ? <img src={i3} style={{ width: '200px', height: '200px', borderRadius: '12px', border: '4px solid #CD7F32', objectFit: 'cover' }} /> : <div style={{ width: '200px', height: '200px', backgroundColor: '#222', borderRadius: '12px' }}></div>}
-                <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#CD7F32', color: '#000', padding: '4px 16px', borderRadius: '50px', fontSize: '16px', fontWeight: 'bold' }}>3º</div>
-              </div>
-              <h3 style={{ color: '#FFF', fontSize: '20px', margin: '10px 0 0 0', textAlign: 'center' }}>{t3}</h3>
+            {/* 3º Lugar (Bronze) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '210px' }}>
+              <span style={{ color: '#CD7F32', fontSize: '15px', fontWeight: 800, letterSpacing: '2px', marginBottom: '8px' }}>
+                3º LUGAR
+              </span>
+              {i3 ? (
+                <img src={i3} style={{ width: '195px', height: '260px', border: '2px solid #CD7F32', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '195px', height: '260px', backgroundColor: '#141419', border: '2px solid #CD7F32' }} />
+              )}
+              <span style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 700, marginTop: '10px', textAlign: 'center' }}>
+                {t3}
+              </span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', marginTop: '30px', alignItems: 'center', gap: '10px' }}>
-            <span style={{ color: '#a1a1aa', fontSize: '20px' }}>Faça o seu em</span>
-            <span style={{ color: '#FFF', fontSize: '24px', fontWeight: 'bold' }}>truegoty.com</span>
+          {/* Rodapé */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#A1A1AA', fontSize: '18px' }}>DEFINA O SEU EM</span>
+            <span style={{ color: '#D4AF37', fontSize: '20px', fontWeight: 900, letterSpacing: '1px' }}>
+              TRUEGOTY.COM
+            </span>
           </div>
         </div>
       ),
-      { width: 1200, height: 630 } // Formato paisagem para preview de link
+      {
+        width: 1200,
+        height: 630,
+        headers: {
+          // O Cache é essencial para não sobrecarregar o Cloudflare
+          'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400',
+        },
+      }
     );
-  } catch (e: any) {
-    console.error("Erro ao gerar imagem OG:", e);
+  } catch (e) {
+    console.error('Erro ao gerar imagem OG:', e);
     return new Response('Falha ao gerar imagem', { status: 500 });
   }
 }
