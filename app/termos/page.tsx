@@ -1,4 +1,3 @@
-// app/termos/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -12,10 +11,10 @@ export default function Termos() {
       <h1 style={{ color: 'var(--purple-neon)', fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem' }}>
         {t.termos_titulo}
       </h1>
-      
+
       <div style={{ color: '#a1a1aa', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <p dangerouslySetInnerHTML={{ __html: t.termos_p1 }} />
-        
+        <p>{t.termos_p1}</p>
+
         <h2 style={{ color: 'white', fontSize: '1.5rem', marginTop: '1rem' }}>{t.termos_h2_1}</h2>
         <p>{t.termos_p2}</p>
 

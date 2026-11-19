@@ -23,10 +23,16 @@ export async function POST() {
       db.prepare('DELETE FROM pairwise_results'),
     ]);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      message: 'Banco resetado com sucesso (somente em ambiente de desenvolvimento).',
+      message: 'Banco e cookies resetados com sucesso (somente em ambiente de desenvolvimento).',
     });
+
+    // Apaga os cookies de voto para o proxy.ts liberar o acesso à arena novamente
+    response.cookies.set('tgt_voted_tgt', '', { path: '/', maxAge: 0 });
+    response.cookies.set('tgt_voted_mercado', '', { path: '/', maxAge: 0 });
+
+    return response;
   } catch (error) {
     console.error('Erro no reset:', error);
     return NextResponse.json(

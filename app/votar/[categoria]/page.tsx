@@ -1,18 +1,22 @@
-// app/votar/[categoria]/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter, notFound } from 'next/navigation';
 import Script from 'next/script';
 import jogosData from '../../../lib/jogos.json';
 import { calcularPlacar, Jogo } from '../../../lib/condorcet';
-import { useVotingProgress } from '../../../lib/useVotingProgress'; 
+import { useVotingProgress } from '../../../lib/useVotingProgress';
 import { motion } from 'framer-motion';
 import ArenaDuelo from '../../../components/ArenaDuelo';
 import CartaoVeredito from '../../../components/CartaoVeredito';
 
+const CATEGORIAS_VALIDAS = ['tgt', 'mercado'] as const;
+type CategoriaValida = (typeof CATEGORIAS_VALIDAS)[number];
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
+
 const IconLockClock = () => (
-  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" />
     <polyline points="12 6 12 12 16 14" />
   </svg>
@@ -21,25 +25,59 @@ const IconLockClock = () => (
 export default function Votar() {
   const params = useParams();
   const router = useRouter();
-  const categoria = (params?.categoria as string) || 'tgt'; 
-  
+  const categoriaParam = params?.categoria;
+
+  const isCategoriaValida =
+    typeof categoriaParam === 'string' &&
+    (CATEGORIAS_VALIDAS as readonly string[]).includes(categoriaParam);
+
+  if (!isCategoriaValida) {
+    notFound();
+  }
+
+  const categoria: CategoriaValida = categoriaParam as CategoriaValida;
+  const isTgt = categoria === 'tgt';
+
+  const corPrincipal = isTgt ? '#B026FF' : '#D4AF37';
+  const corGlow = isTgt ? 'rgba(176, 38, 255, 0.16)' : 'rgba(212, 175, 55, 0.16)';
+  const corSeloBg = isTgt ? 'rgba(176, 38, 255, 0.1)' : 'rgba(212, 175, 55, 0.12)';
+  const corSeloBorda = isTgt ? 'rgba(176, 38, 255, 0.45)' : 'rgba(212, 175, 55, 0.55)';
+  const corCardBg = isTgt ? 'rgba(20, 20, 24, 0.85)' : 'rgba(24, 20, 12, 0.88)';
+  const corCardBorda = isTgt ? 'rgba(255, 255, 255, 0.1)' : 'rgba(212, 175, 55, 0.3)';
+
   const jogosDaCategoria = (jogosData as any)[categoria];
-  const jogos = jogosDaCategoria?.top10 || [];
-  
-  const { votos, duelos, dueloAtual, carregado, registrarVoto, desfazerVoto } = useVotingProgress(categoria, jogos);
-  
-  const [animacao, setAnimacao] = useState<{jogo1: 'idle'|'winner'|'loser', jogo2: 'idle'|'winner'|'loser'}>({ jogo1: 'idle', jogo2: 'idle' });
+  const jogos: Jogo[] = jogosDaCategoria?.top10 || [];
+
+  const { votos, duelos, dueloAtual, carregado, registrarVoto, desfazerVoto } = useVotingProgress(
+    categoria,
+    jogos
+  );
+
+  const [animacao, setAnimacao] = useState<{
+    jogo1: 'idle' | 'winner' | 'loser';
+    jogo2: 'idle' | 'winner' | 'loser';
+  }>({
+    jogo1: 'idle',
+    jogo2: 'idle',
+  });
   const [enviando, setEnviando] = useState(false);
   const [iniciou, setIniciou] = useState(false);
-
-  const cardClip = 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)';
+  const votoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (duelos.length > 0 && dueloAtual >= duelos.length) {
+    return () => {
+      if (votoTimerRef.current) {
+        clearTimeout(votoTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (duelos.length > 0 && dueloAtual >= duelos.length && TURNSTILE_SITE_KEY) {
       const timer = setTimeout(() => {
         if ((window as any).turnstile) {
           (window as any).turnstile.render('.cf-turnstile', {
-            sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+            sitekey: TURNSTILE_SITE_KEY,
             theme: 'dark',
           });
         }
@@ -50,40 +88,145 @@ export default function Votar() {
 
   function executarVoto(vencedor: Jogo, perdedor: Jogo, jogo1Venceu: boolean) {
     if (animacao.jogo1 !== 'idle') return;
-    setAnimacao({ jogo1: jogo1Venceu ? 'winner' : 'loser', jogo2: jogo1Venceu ? 'loser' : 'winner' });
-    setTimeout(() => {
+    setAnimacao({
+      jogo1: jogo1Venceu ? 'winner' : 'loser',
+      jogo2: jogo1Venceu ? 'loser' : 'winner',
+    });
+
+    if (votoTimerRef.current) {
+      clearTimeout(votoTimerRef.current);
+    }
+
+    votoTimerRef.current = setTimeout(() => {
       registrarVoto(vencedor.titulo, perdedor.titulo);
-      setAnimacao({ jogo1: 'idle', jogo2: 'idle' }); 
-    }, 400); 
+      setAnimacao({ jogo1: 'idle', jogo2: 'idle' });
+    }, 400);
   }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!carregado || duelos.length === 0 || dueloAtual >= duelos.length || enviando || !iniciou) return;
+      if (!carregado || duelos.length === 0 || dueloAtual >= duelos.length || enviando || !iniciou) {
+        return;
+      }
       const duelo = duelos[dueloAtual];
-      if (e.key === 'ArrowLeft') { e.preventDefault(); executarVoto(duelo.jogo1, duelo.jogo2, true); } 
-      else if (e.key === 'ArrowRight') { e.preventDefault(); executarVoto(duelo.jogo2, duelo.jogo1, false); }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        executarVoto(duelo.jogo1, duelo.jogo2, true);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        executarVoto(duelo.jogo2, duelo.jogo1, false);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [carregado, duelos, dueloAtual, animacao, enviando, iniciou]);
 
-  if (!jogosDaCategoria) { notFound(); }
+  if (!jogosDaCategoria) {
+    notFound();
+  }
 
+  // ==========================================
+  // TELA DE PORTÕES FECHADOS (SEM JOGOS AINDA)
+  // ==========================================
   if (jogos.length === 0) {
     return (
-      <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', textAlign: 'center', padding: '140px 2rem 2rem' }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ marginBottom: '1.5rem' }}><IconLockClock /></div>
-          <h1 style={{ color: '#D4AF37', fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', fontFamily: 'var(--font-teko)' }}>PORTÕES FECHADOS ATÉ 19/11</h1>
-          <p style={{ color: '#a1a1aa', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            Assim que os indicados oficiais do mercado forem revelados no dia <strong>19/11</strong>, esta arena será destravada para os confrontos.
+      <main
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          textAlign: 'center',
+          padding: 'clamp(100px, 14vh, 140px) 1.25rem 3rem',
+          boxSizing: 'border-box',
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            width: '100%',
+            maxWidth: '640px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '2.75rem 2rem',
+            backgroundColor: 'rgba(24, 20, 12, 0.88)',
+            backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.16), transparent 65%)',
+            border: '1px solid rgba(212, 175, 55, 0.45)',
+            borderTop: '2px solid #D4AF37',
+            borderRadius: '0px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div style={{ marginBottom: '1.25rem', filter: 'drop-shadow(0 0 16px rgba(212, 175, 55, 0.45))' }}>
+            <IconLockClock />
+          </div>
+
+          <div
+            style={{
+              display: 'inline-block',
+              border: '1px solid rgba(212, 175, 55, 0.45)',
+              backgroundColor: 'rgba(212, 175, 55, 0.1)',
+              color: '#F4D06F',
+              padding: '5px 14px',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              letterSpacing: '2px',
+              marginBottom: '1rem',
+              borderRadius: '0px',
+            }}
+          >
+            [ ARENA MERCADO (TGA) • ABERTURA EM 19/11 ]
+          </div>
+
+          <h1 style={{ color: '#FFF', fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontWeight: 900, margin: '0 0 0.85rem 0', lineHeight: 1, fontFamily: 'var(--font-teko)' }}>
+            PORTÕES FECHADOS <span style={{ color: '#D4AF37' }}>ATÉ 19/11</span>
+          </h1>
+
+          <p style={{ color: '#D1D5DB', fontSize: '1rem', lineHeight: 1.6, margin: '0 0 1rem 0', maxWidth: '500px' }}>
+            Assim que os indicados do mercado forem revelados no dia <strong>19/11</strong>, esta arena será destravada para os confrontos diretos.
           </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => router.push('/votar')} style={{ backgroundColor: 'transparent', border: '1px solid #555', color: '#a1a1aa', padding: '1rem 2rem', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', borderRadius: '50px' }} onMouseOver={(e) => e.currentTarget.style.color = '#FFF'} onMouseOut={(e) => e.currentTarget.style.color = '#a1a1aa'}>
+
+          <p style={{ color: '#8b8b94', fontSize: '0.78rem', lineHeight: 1.5, margin: '0 0 2.25rem 0', maxWidth: '480px' }}>
+            Simulação independente sem vínculo oficial com o The Game Awards.
+          </p>
+
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
+            <button
+              type="button"
+              onClick={() => router.push('/votar')}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.16)',
+                borderRadius: '0px',
+                color: '#d4d4d8',
+                padding: '0.95rem 1.8rem',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                letterSpacing: '1.5px',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.color = '#FFF';
+                e.currentTarget.style.borderColor = '#D4AF37';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.color = '#d4d4d8';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.16)';
+              }}
+            >
               ← Voltar
             </button>
-            <button onClick={() => router.push('/votar/tgt')} className="btn-arena" style={{ padding: '1rem 2rem', fontSize: '1rem' }}>
+            <button
+              type="button"
+              onClick={() => router.push('/votar/tgt')}
+              className="btn-arena"
+              style={{ padding: '0.95rem 2.2rem', fontSize: '1.25rem' }}
+            >
               ENTRAR NA ARENA TRUE GOTY
             </button>
           </div>
@@ -94,98 +237,293 @@ export default function Votar() {
 
   async function enviarParaPlacarGlobal(placarFinal: any[], votosBrutos: any[]) {
     const turnstileToken = (window as any).turnstile?.getResponse();
-    if (!turnstileToken) { alert("Por favor, aguarde a verificação de segurança aparecer e clique novamente."); return; }
+    if (!turnstileToken) {
+      alert('Por favor, aguarde a verificação de segurança aparecer e clique novamente.');
+      return;
+    }
 
     setEnviando(true);
-    const pairwiseParaEnviar = votosBrutos.map(v => ({ winner_title: v.vencedor, loser_title: v.perdedor, category: categoria }));
+    const pairwiseParaEnviar = votosBrutos.map((v) => ({
+      winner_title: v.vencedor,
+      loser_title: v.perdedor,
+      category: categoria,
+    }));
 
     try {
       const resposta = await fetch('/api/vote', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: categoria, turnstileToken, pairwise: pairwiseParaEnviar })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: categoria, turnstileToken, pairwise: pairwiseParaEnviar }),
       });
       const resultado = await resposta.json();
-      
+
       if (resultado.success) {
         localStorage.setItem(`tgt_has_voted_${categoria}`, 'true');
         localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
         window.location.href = `/obrigado?categoria=${categoria}`;
       } else {
-        if (resultado.error && resultado.error.includes("já votou")) {
+        if (resultado.error && resultado.error.includes('já votou')) {
           localStorage.setItem(`tgt_has_voted_${categoria}`, 'true');
           localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
-          alert("Parece que você já votou nesta categoria! Vamos te levar para a página de resultados.");
+          alert('Parece que você já votou nesta categoria! Vamos te levar para a página de resultados.');
           window.location.href = `/obrigado?categoria=${categoria}`;
         } else {
-          alert("Ops! Ocorreu um erro: " + resultado.error);
-          (window as any).turnstile?.reset(); 
-          setEnviando(false); 
+          alert('Ops! Ocorreu um erro: ' + resultado.error);
+          (window as any).turnstile?.reset();
+          setEnviando(false);
         }
       }
-    } catch (erro) {
-      alert("Erro de conexão. Tente novamente.");
+    } catch {
+      alert('Erro de conexão. Tente novamente.');
       (window as any).turnstile?.reset();
-      setEnviando(false); 
+      setEnviando(false);
     }
   }
 
   // ==========================================
-  // TELA DE BRIEFING
+  // TELA DE BRIEFING (CANTOS RETOS + CTA .btn-arena)
   // ==========================================
   if (!iniciou && dueloAtual === 0 && votos.length === 0) {
+    const totalDuelosPrevisto = (jogos.length * (jogos.length - 1)) / 2;
+    const duelosPorJogo = jogos.length - 1;
+
+    const passos = [
+      {
+        num: '01',
+        cor: isTgt ? '#B026FF' : '#D4AF37',
+        titulo: 'ESCOLHA O VENCEDOR',
+        texto: 'Clique no jogo superior em cada confronto direto ou use as setas do teclado.',
+      },
+      {
+        num: '02',
+        cor: isTgt ? '#D4AF37' : '#F4D06F',
+        titulo: 'CONSTRUA O PLACAR',
+        texto: `Cada vitória vale +1 ponto. Cada finalista disputa ${duelosPorJogo} duelos na arena.`,
+      },
+      {
+        num: '03',
+        cor: '#F4F4F0',
+        titulo: 'COROE O CAMPEÃO',
+        texto: 'No fim, a matemática revela o campeão. Empates são resolvidos no mano a mano.',
+      },
+    ];
+
     return (
-      <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', minHeight: '100vh', padding: '120px 2rem 4rem', backgroundColor: 'transparent' }}>
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-          style={{ width: '100%', maxWidth: '900px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}
+      <main
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: 'clamp(100px, 13vh, 130px) 1.25rem 3.5rem',
+          backgroundColor: 'transparent',
+          boxSizing: 'border-box',
+          width: '100%',
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          style={{
+            width: '100%',
+            maxWidth: '940px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            position: 'relative',
+          }}
         >
-          <div style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', width: '100%', height: '250px', background: 'radial-gradient(ellipse at top, rgba(176,38,255,0.15) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-          <div style={{ color: 'var(--purple-neon)', fontSize: '0.9rem', fontWeight: 800, letterSpacing: '4px', marginBottom: '0.5rem', zIndex: 1, fontFamily: 'var(--font-teko)' }}>
-            TEMPORADA 2026
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: '-30px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '100%',
+              height: '260px',
+              background: `radial-gradient(ellipse at top, ${corGlow} 0%, transparent 70%)`,
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+          />
+
+          <div
+            style={{
+              display: 'inline-block',
+              border: `1px solid ${corSeloBorda}`,
+              backgroundColor: corSeloBg,
+              color: corPrincipal,
+              padding: '6px 18px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              letterSpacing: '2.5px',
+              marginBottom: '1.1rem',
+              borderRadius: '0px',
+              zIndex: 1,
+            }}
+          >
+            {isTgt ? '[ TEMPORADA 2026 • ARENA TRUE GOTY ]' : '[ TEMPORADA 2026 • ARENA MERCADO (TGA) ]'}
           </div>
-          <h1 style={{ color: '#FFF', fontSize: 'clamp(3rem, 6vw, 4.5rem)', fontWeight: 900, margin: 0, lineHeight: 0.9, zIndex: 1, fontFamily: 'var(--font-teko)' }}>
-            ESCOLHA O SEU<br />
-            <span className="title-shine" style={{ fontSize: 'clamp(3.5rem, 7vw, 5.5rem)', display: 'inline-block', marginTop: '0.2rem' }}>
-              TRUE GAME OF THE YEAR
-            </span>
+
+          <h1
+            style={{
+              color: '#F4F4F0',
+              fontSize: 'clamp(2.5rem, 6vw, 4.3rem)',
+              fontWeight: 900,
+              margin: 0,
+              lineHeight: 0.92,
+              zIndex: 1,
+              fontFamily: 'var(--font-teko)',
+              textShadow: '0 10px 30px rgba(0,0,0,0.75)',
+            }}
+          >
+            ESCOLHA O SEU
+            <br />
+            {isTgt ? (
+              <span className="title-shine" style={{ fontSize: 'clamp(3rem, 7vw, 5.2rem)', display: 'inline-block', marginTop: '0.15rem' }}>
+                TRUE GAME OF THE YEAR
+              </span>
+            ) : (
+              <span style={{ color: '#D4AF37', fontSize: 'clamp(3rem, 7vw, 5.2rem)', display: 'inline-block', marginTop: '0.15rem' }}>
+                CAMPEÃO DO MERCADO (TGA)
+              </span>
+            )}
           </h1>
-          <p style={{ color: '#D1D5DB', fontSize: '1.1rem', margin: '1rem auto 2.5rem', lineHeight: 1.5, maxWidth: '600px', zIndex: 1, fontWeight: 500 }}>
-            45 duelos. Um campeão. Quem decide é quem joga.
+
+          <p
+            style={{
+              color: '#D1D5DB',
+              fontSize: 'clamp(1rem, 3vw, 1.15rem)',
+              margin: '1rem auto 2.5rem',
+              lineHeight: 1.5,
+              maxWidth: '600px',
+              zIndex: 1,
+              fontWeight: 500,
+            }}
+          >
+            {totalDuelosPrevisto} duelos diretos. Um campeão. Quem decide é quem joga.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', width: '100%', marginBottom: '2.5rem', zIndex: 1 }}>
-            <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.8)', border: '1px solid rgba(176, 38, 255, 0.3)', padding: '1.2rem', clipPath: cardClip, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div style={{ color: 'var(--purple-neon)', fontSize: '2rem', fontWeight: 900, lineHeight: 1, fontFamily: 'var(--font-teko)' }}>01</div>
-              <h3 style={{ color: '#FFF', fontSize: '1.1rem', margin: 0, fontWeight: 900, fontFamily: 'var(--font-teko)', letterSpacing: '1px' }}>ESCOLHA O VENCEDOR</h3>
-              <p style={{ color: '#a1a1aa', fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>Clique no jogo superior em cada confronto ou use as setas.</p>
-            </div>
-            <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.8)', border: '1px solid rgba(176, 38, 255, 0.3)', padding: '1.2rem', clipPath: cardClip, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div style={{ color: '#D4AF37', fontSize: '2rem', fontWeight: 900, lineHeight: 1, fontFamily: 'var(--font-teko)' }}>02</div>
-              <h3 style={{ color: '#FFF', fontSize: '1.1rem', margin: 0, fontWeight: 900, fontFamily: 'var(--font-teko)', letterSpacing: '1px' }}>CONSTRUA O PLACAR</h3>
-              <p style={{ color: '#a1a1aa', fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>Cada vitória vale 1 ponto. Cada jogo disputa 9 duelos.</p>
-            </div>
-            <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.8)', border: '1px solid rgba(176, 38, 255, 0.3)', padding: '1.2rem', clipPath: cardClip, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div style={{ color: '#FFF', fontSize: '2rem', fontWeight: 900, lineHeight: 1, fontFamily: 'var(--font-teko)' }}>03</div>
-              <h3 style={{ color: '#FFF', fontSize: '1.1rem', margin: 0, fontWeight: 900, fontFamily: 'var(--font-teko)', letterSpacing: '1px' }}>COROE O CAMPEÃO</h3>
-              <p style={{ color: '#a1a1aa', fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>No fim, a matemática revela o campeão. Empate se resolve no mano a mano.</p>
-            </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '1.25rem',
+              width: '100%',
+              marginBottom: '2.75rem',
+              zIndex: 1,
+            }}
+          >
+            {passos.map((passo) => (
+              <div
+                key={passo.num}
+                style={{
+                  backgroundColor: corCardBg,
+                  backdropFilter: 'blur(10px)',
+                  border: `1px solid ${corCardBorda}`,
+                  borderTop: `2px solid ${passo.cor}`,
+                  borderRadius: '0px',
+                  padding: '1.6rem 1.4rem',
+                  textAlign: 'left',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.55rem',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <div
+                  style={{
+                    color: passo.cor,
+                    fontSize: '2.4rem',
+                    fontWeight: 900,
+                    lineHeight: 0.9,
+                    fontFamily: 'var(--font-teko)',
+                    letterSpacing: '1px',
+                  }}
+                >
+                  {passo.num}
+                </div>
+                <h3
+                  style={{
+                    color: '#F4F4F0',
+                    fontSize: '1.35rem',
+                    margin: 0,
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-teko)',
+                    letterSpacing: '1px',
+                    lineHeight: 1.05,
+                  }}
+                >
+                  {passo.titulo}
+                </h3>
+                <p style={{ color: '#a1a1aa', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>
+                  {passo.texto}
+                </p>
+              </div>
+            ))}
           </div>
 
-          <button onClick={() => setIniciou(true)} style={{ 
-            padding: '1.2rem 5rem', fontSize: '1.8rem', zIndex: 1, width: '100%', maxWidth: '500px',
-            backgroundColor: 'var(--purple-neon)', color: '#FFF', fontWeight: 900, border: '2px solid #FFF',
-            clipPath: cardClip, cursor: 'pointer', boxShadow: '0 0 40px rgba(176, 38, 255, 0.6), inset 0 0 20px rgba(255,255,255,0.2)',
-            transition: 'all 0.2s ease', textTransform: 'uppercase', letterSpacing: '2px',
-            fontFamily: 'var(--font-teko)', animation: 'pulseGlow 1.5s infinite'
-          }}
-          onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(176, 38, 255, 0.9), inset 0 0 30px rgba(255,255,255,0.4)'; }}
-          onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(176, 38, 255, 0.6), inset 0 0 20px rgba(255,255,255,0.2)'; }}
+          <button
+            type="button"
+            onClick={() => setIniciou(true)}
+            className="btn-arena"
+            style={{
+              width: '100%',
+              maxWidth: '460px',
+              padding: '1.15rem 3rem',
+              fontSize: '1.75rem',
+              letterSpacing: '2px',
+              zIndex: 1,
+              background: isTgt
+                ? 'linear-gradient(135deg, #7e22ce, #B026FF)'
+                : 'linear-gradient(135deg, #B8860B, #D4AF37)',
+              color: isTgt ? '#FFFFFF' : '#0A0A0A',
+              boxShadow: isTgt
+                ? '0 14px 40px rgba(176, 38, 255, 0.45), inset 0 0 20px rgba(255,255,255,0.16)'
+                : '0 14px 40px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(255,255,255,0.25)',
+            }}
           >
-            VOTE AGORA
+            VOTE AGORA →
           </button>
 
-          <button onClick={() => router.push('/votar')} style={{ marginTop: '1.5rem', background: 'transparent', border: 'none', color: '#71717a', fontSize: '0.9rem', cursor: 'pointer', zIndex: 1, transition: 'color 0.2s', fontWeight: 'bold' }} onMouseOver={(e) => e.currentTarget.style.color = '#FFF'} onMouseOut={(e) => e.currentTarget.style.color = '#71717a'}>
-            ← Trocar arena
+          {!isTgt && (
+            <p style={{ color: '#71717a', fontSize: '0.78rem', marginTop: '1rem', maxWidth: '500px', lineHeight: 1.45, zIndex: 1 }}>
+              Simulação independente sem vínculo oficial com o The Game Awards — votos computados apenas no placar da comunidade True GOTY.
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={() => router.push('/votar')}
+            style={{
+              marginTop: '1.5rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
+              borderRadius: '0px',
+              color: '#a1a1aa',
+              padding: '0.6rem 1.3rem',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              zIndex: 1,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = '#FFF';
+              e.currentTarget.style.borderColor = corPrincipal;
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = '#a1a1aa';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+            }}
+          >
+            ← Trocar de arena
           </button>
         </motion.div>
       </main>
@@ -196,31 +534,36 @@ export default function Votar() {
   // TELA DE CARREGAMENTO
   // ==========================================
   if (!carregado || duelos.length === 0) {
-    return <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', paddingTop: '120px' }}><h1 style={{ color: 'var(--purple-neon)' }}>Preparando o tapete vermelho...</h1></main>;
+    return (
+      <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', paddingTop: '120px' }}>
+        <h1 style={{ color: corPrincipal }}>Preparando o tapete vermelho...</h1>
+      </main>
+    );
   }
 
   // ==========================================
-  // TELA DE SELEÇÃO FINAL (USANDO O NOVO COMPONENTE)
+  // TELA DE SELEÇÃO FINAL
   // ==========================================
   if (dueloAtual >= duelos.length) {
     const placar = calcularPlacar(jogos, votos);
-    
-    // Aqui a gente enriquece o placar com as imagens antes de mandar pro componente
-    const placarComImagens = placar.map(item => {
+
+    const placarComImagens = placar.map((item) => {
       const jogoInfo = jogos.find((j: any) => j.titulo === item.titulo);
       return {
         ...item,
-        imagem: jogoInfo?.imagem || '/placeholder.jpg'
+        imagem: jogoInfo?.imagem || '/placeholder.jpg',
       };
     });
 
     return (
       <>
-        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-        <CartaoVeredito 
-          ranking={placarComImagens} 
-          enviando={enviando} 
-          onEnviar={() => enviarParaPlacarGlobal(placar, votos)} 
+        {TURNSTILE_SITE_KEY && (
+          <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+        )}
+        <CartaoVeredito
+          ranking={placarComImagens}
+          enviando={enviando}
+          onEnviar={() => enviarParaPlacarGlobal(placar, votos)}
           onVoltar={() => {
             setIniciou(true);
             desfazerVoto();
@@ -231,15 +574,17 @@ export default function Votar() {
   }
 
   // ==========================================
-  // TELA DE DUELO (RENDERIZA O COMPONENTE)
+  // TELA DE DUELO
   // ==========================================
   const duelo = duelos[dueloAtual];
-  const progressoPorcentagem = ((dueloAtual) / duelos.length) * 100;
+  const progressoPorcentagem = (dueloAtual / duelos.length) * 100;
 
   return (
     <>
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-      <ArenaDuelo 
+      {TURNSTILE_SITE_KEY && (
+        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+      )}
+      <ArenaDuelo
         duelo={duelo}
         animacao={animacao}
         dueloAtual={dueloAtual}

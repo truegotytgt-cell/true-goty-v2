@@ -30,8 +30,9 @@ export function getDominioVisual(): string {
   return host.toUpperCase();
 }
 
-export function getTextoCompartilhamento(top3: JogoTop3[]): string {
+export function getTextoCompartilhamento(top3: JogoTop3[], categoria = 'tgt'): string {
   const url = getUrlDinamica();
+  const isTgt = categoria !== 'mercado';
   const primeiro = top3[0]?.titulo || 'meu favorito';
   const segundo = top3[1]?.titulo;
   const terceiro = top3[2]?.titulo;
@@ -44,6 +45,17 @@ export function getTextoCompartilhamento(top3: JogoTop3[]): string {
     .filter(Boolean)
     .join('\n');
 
+  if (!isTgt) {
+    return [
+      'Coloquei os indicados do TGA frente a frente em 15 duelos diretos. Só um sobreviveu. ⚔️🏆',
+      '',
+      'Meu Pódio nos Indicados do Mercado (TGA 2026):',
+      linhasPodio,
+      '',
+      `Discorda? Faça o teste nos 15 duelos da comunidade no True GOTY: ${url}`,
+    ].join('\n');
+  }
+
   return [
     '45 duelos frente a frente. Só um jogo sobreviveu. ⚔️🏆',
     '',
@@ -54,9 +66,18 @@ export function getTextoCompartilhamento(top3: JogoTop3[]): string {
   ].join('\n');
 }
 
-export function getTituloReddit(top3: JogoTop3[]): string {
+export function getTituloReddit(top3: JogoTop3[], categoria = 'tgt'): string {
   const campeao = top3[0]?.titulo || 'Meu campeão';
+  if (categoria === 'mercado') {
+    return `15 duelos frente a frente nos indicados do TGA 2026 e meu campeão foi ${campeao} — qual foi o de vocês?`;
+  }
   return `45 duelos frente a frente e meu True GOTY 2026 foi ${campeao} — qual foi o de vocês?`;
+}
+
+export function getNomeArquivoStory(categoria = 'tgt'): string {
+  return categoria === 'mercado'
+    ? 'meu-veredito-tga-2026-story.png'
+    : 'meu-true-goty-2026-story.png';
 }
 
 export function salvarBlobComoArquivo(blob: Blob, nomeArquivo = 'meu-true-goty-2026-story.png') {

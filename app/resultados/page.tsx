@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ÍCONES SVG (desenhados no estilo TGT — traço fino, sem emoji)
+// ÍCONES SVG (estilo TGT — traço fino, sem emoji)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const IconCoroa = () => (
@@ -22,7 +22,7 @@ const IconCoroa = () => (
       stroke="url(#gradCoroa)"
       strokeWidth="2.5"
       strokeLinejoin="round"
-      fill="rgba(168, 85, 247, 0.1)"
+      fill="rgba(168, 85, 247, 0.12)"
     />
     <path d="M14 48 L50 48 L46 56 L18 56 Z" fill="#D4AF37" opacity="0.9" />
     <circle cx="32" cy="12" r="3" fill="#D4AF37" />
@@ -35,38 +35,37 @@ const IconMonolito = () => (
   <svg width="56" height="56" viewBox="0 0 64 64" fill="none">
     <polygon
       points="32,4 56,18 56,46 32,60 8,46 8,18"
-      stroke="#9CA3AF"
+      stroke="#D4AF37"
       strokeWidth="2.5"
       strokeLinejoin="round"
-      fill="rgba(156, 163, 175, 0.05)"
+      fill="rgba(212, 175, 55, 0.12)"
     />
     <polygon
       points="32,16 44,23 44,37 32,44 20,37 20,23"
-      fill="#9CA3AF"
-      opacity="0.35"
+      fill="#D4AF37"
+      opacity="0.4"
     />
-    <path d="M32 22 L32 38 M24 30 L40 30" stroke="#E5E7EB" strokeWidth="2" strokeLinecap="round" />
+    <path d="M32 22 L32 38 M24 30 L40 30" stroke="#FFF3C4" strokeWidth="2.2" strokeLinecap="round" />
   </svg>
 );
 
-const IconGlobo = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" y1="12" x2="22" y2="12" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+const IconGloboPortal = () => (
+  <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9.5" />
+    <line x1="2.5" y1="12" x2="21.5" y2="12" />
+    <path d="M12 2.5a14.5 14.5 0 0 1 4 9.5 14.5 14.5 0 0 1-4 9.5 14.5 14.5 0 0 1-4-9.5 14.5 14.5 0 0 1 4-9.5z" />
+    <path d="M4.2 7.5h15.6" opacity="0.55" />
+    <path d="M4.2 16.5h15.6" opacity="0.55" />
   </svg>
 );
 
-const IconPodium = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
+const IconCoroaPessoal = () => (
+  <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 8.5L7.5 12L12 5L16.5 12L21 8.5L19 17.5H5L3 8.5Z" />
+    <line x1="5" y1="20.5" x2="19" y2="20.5" />
+    <circle cx="12" cy="3.5" r="1" fill="currentColor" stroke="none" />
   </svg>
 );
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PÁGINA
-// ─────────────────────────────────────────────────────────────────────────────
 
 type Categoria = 'tgt' | 'mercado';
 type StatusVeredito = 'concluido' | 'pendente';
@@ -101,75 +100,166 @@ export default function Resultados() {
     setStatusVeredito({ tgt: checar('tgt'), mercado: checar('mercado') });
   }, []);
 
+  const isTgtAtiva = categoriaSelecionada === 'tgt';
+  const corTema = isTgtAtiva ? '#B026FF' : '#D4AF37';
+  const corTemaClaro = isTgtAtiva ? '#C084FC' : '#F4D06F';
+  const corGlow = isTgtAtiva ? 'rgba(176, 38, 255, 0.28)' : 'rgba(212, 175, 55, 0.28)';
+  const corBordaPortal = isTgtAtiva ? 'rgba(176, 38, 255, 0.48)' : 'rgba(212, 175, 55, 0.55)';
+  const corBgPortal = isTgtAtiva ? 'rgba(20, 15, 30, 0.9)' : 'rgba(24, 20, 12, 0.92)';
+  const corTextoCtaHover = isTgtAtiva ? '#FFFFFF' : '#0A0A0A';
+
   return (
     <main
       style={{
         minHeight: '100vh',
-        // 🔥 CORREÇÃO AQUI: paddingTop ajustado para 120px (igual Indicados) e centralização vertical removida
         padding: '120px 2rem 4rem 2rem',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start', 
+        justifyContent: 'flex-start',
+        width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       <style>{`
         .arena-card {
-          clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+          border-radius: 0px;
           position: relative;
           overflow: hidden;
-          transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.35s ease;
+          transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.35s ease, border-color 0.25s ease;
         }
         .arena-card::before {
           content: '';
           position: absolute;
           inset: 0;
-          opacity: 0;
+          opacity: 0.7;
           transition: opacity 0.35s ease;
           pointer-events: none;
           z-index: 1;
         }
-        .arena-card-tgt::before { background: radial-gradient(circle at 30% 0%, rgba(168, 85, 247, 0.25), transparent 60%); }
-        .arena-card-mercado::before { background: radial-gradient(circle at 30% 0%, rgba(229, 231, 235, 0.15), transparent 60%); }
-        .arena-card:hover::before { opacity: 1; }
-        .arena-card-tgt:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 25px 60px -15px rgba(168, 85, 247, 0.6); }
-        .arena-card-mercado:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 25px 60px -15px rgba(229, 231, 235, 0.25); }
-        .menu-card {
-          clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
-          transition: transform 0.25s ease, border-color 0.25s ease;
+        .arena-card-tgt::before {
+          background: radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.26), transparent 68%);
         }
-        .menu-card:hover { transform: translateY(-3px); }
+        .arena-card-mercado::before {
+          background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.26), transparent 68%);
+        }
+        .arena-card:hover::before {
+          opacity: 1;
+        }
+        .arena-card-tgt:hover {
+          transform: translateY(-6px) scale(1.015);
+          border-color: #B026FF !important;
+          box-shadow: 0 25px 60px -15px rgba(168, 85, 247, 0.6);
+        }
+        .arena-card-mercado:hover {
+          transform: translateY(-6px) scale(1.015);
+          border-color: #F4D06F !important;
+          box-shadow: 0 25px 60px -15px rgba(212, 175, 55, 0.55);
+        }
+
         .grid-categorias {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.5rem;
+          gap: 1.75rem;
           width: 100%;
-          max-width: 900px;
+          max-width: 960px;
+          align-items: stretch;
         }
+
+        /* BARRA DE CONTEXTO SUPERIOR (ETAPA 2) */
+        .context-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-wrap: wrap;
+          width: 100%;
+          padding-bottom: 1.25rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .portal-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+          width: 100%;
+          align-items: stretch;
+        }
+
+        .portal-card {
+          position: relative;
+          overflow: hidden;
+          border-radius: 0px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          height: 100%;
+          box-sizing: border-box;
+          transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .portal-card:hover {
+          transform: translateY(-6px);
+        }
+
+        .portal-cta {
+          width: 100%;
+          padding: 1rem 1.25rem;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          font-family: var(--font-teko), sans-serif;
+          font-size: 1.25rem;
+          font-weight: 700;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        .portal-arrow {
+          display: inline-block;
+          transition: transform 0.25s ease;
+        }
+
+        .portal-card:hover .portal-arrow {
+          transform: translateX(5px);
+        }
+
         @media (max-width: 720px) {
-          .grid-categorias { grid-template-columns: 1fr; }
+          .grid-categorias,
+          .portal-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .context-bar {
+            justify-content: center;
+          }
         }
       `}</style>
 
-      {/* CABEÇALHO (Agora fica fixo no topo) */}
-      <div style={{ textAlign: 'center', marginBottom: '3rem', width: '100%', maxWidth: '900px' }}>
+      {/* CABEÇALHO */}
+      <div style={{ textAlign: 'center', marginBottom: '3rem', width: '100%', maxWidth: '920px' }}>
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
             display: 'inline-block',
             color: '#D4AF37',
-            fontSize: '0.7rem',
+            fontSize: '0.72rem',
             fontWeight: 800,
-            letterSpacing: '0.25em',
+            letterSpacing: '0.24em',
             textTransform: 'uppercase',
             marginBottom: '1.25rem',
             padding: '8px 18px',
-            border: '1px solid rgba(212, 175, 55, 0.3)',
-            backgroundColor: 'rgba(212, 175, 55, 0.05)',
+            border: '1px solid rgba(212, 175, 55, 0.35)',
+            backgroundColor: 'rgba(212, 175, 55, 0.06)',
+            borderRadius: '0px',
           }}
         >
-          [ APURAÇÃO OFICIAL // TEMPORADA 2026 ]
+          [ VEREDITO DA COMUNIDADE // TEMPORADA 2026 ]
         </motion.div>
 
         <motion.h1
@@ -178,16 +268,21 @@ export default function Resultados() {
           transition={{ delay: 0.05 }}
           style={{
             color: 'var(--text-light)',
-            fontSize: 'clamp(2.2rem, 5vw, 3.5rem)',
+            fontSize: 'clamp(2.3rem, 5.5vw, 4rem)',
             fontWeight: 900,
-            letterSpacing: '-1px',
-            marginBottom: '0.8rem',
+            letterSpacing: '0px',
+            margin: '0 0 1rem 0',
             textTransform: 'uppercase',
-            lineHeight: 1,
+            lineHeight: 0.95,
           }}
         >
-          A HORA DA <span style={{ color: 'var(--purple-neon)' }}>VERDADE</span>
+          QUEM É O VERDADEIRO
+          <br />
+          <span className="title-shine" style={{ fontSize: '1.08em', display: 'inline-block' }}>
+            GAME OF THE YEAR?
+          </span>
         </motion.h1>
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -210,8 +305,8 @@ export default function Resultados() {
             onClick={() => setCategoriaSelecionada('tgt')}
             className="arena-card arena-card-tgt"
             style={{
-              backgroundColor: 'rgba(20, 15, 30, 0.85)',
-              border: '1px solid rgba(168, 85, 247, 0.35)',
+              backgroundColor: 'rgba(20, 15, 30, 0.88)',
+              border: '1px solid rgba(168, 85, 247, 0.45)',
               padding: '2.5rem 2rem',
               display: 'flex',
               flexDirection: 'column',
@@ -222,15 +317,17 @@ export default function Resultados() {
               color: 'inherit',
               position: 'relative',
               zIndex: 2,
+              boxShadow: '0 16px 40px rgba(0, 0, 0, 0.65), inset 0 0 60px rgba(168, 85, 247, 0.12)',
             }}
           >
-            <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ position: 'relative', zIndex: 2, filter: 'drop-shadow(0 0 16px rgba(168, 85, 247, 0.45))' }}>
               <IconCoroa />
             </div>
+
             <h2
               style={{
                 color: '#FFF',
-                fontSize: '1.8rem',
+                fontSize: '2rem',
                 fontWeight: 900,
                 margin: 0,
                 letterSpacing: '1px',
@@ -240,34 +337,47 @@ export default function Resultados() {
             >
               ARENA <span style={{ color: '#A855F7' }}>TRUE GOTY</span>
             </h2>
-            <p style={{ color: '#D1D5DB', fontSize: '0.9rem', margin: 0, lineHeight: 1.5, position: 'relative', zIndex: 2 }}>
+
+            <p style={{ color: '#D1D5DB', fontSize: '0.94rem', margin: 0, lineHeight: 1.55, position: 'relative', zIndex: 2 }}>
               A elite avaliada pelos jogadores. Sem lobby, sem filtro.
             </p>
+
             <div
               style={{
-                marginTop: '0.5rem',
-                padding: '6px 14px',
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                letterSpacing: '0.15em',
-                color: '#D4AF37',
-                border: '1px solid rgba(212, 175, 55, 0.4)',
-                backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                marginTop: 'auto',
+                paddingTop: '1rem',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.75rem',
                 position: 'relative',
                 zIndex: 2,
               }}
             >
-              {votosPorCategoria.tgt.toLocaleString('pt-BR')} VEREDITOS COMPUTADOS
+              <div
+                style={{
+                  padding: '6px 14px',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.15em',
+                  color: '#D4AF37',
+                  border: '1px solid rgba(212, 175, 55, 0.45)',
+                  backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                }}
+              >
+                {votosPorCategoria.tgt.toLocaleString('pt-BR')} VEREDITOS COMPUTADOS
+              </div>
             </div>
           </button>
 
-          {/* Card MERCADO */}
+          {/* Card ARENA MERCADO (TGA) — OURO METÁLICO VIBRANTE */}
           <button
             onClick={() => setCategoriaSelecionada('mercado')}
             className="arena-card arena-card-mercado"
             style={{
-              backgroundColor: 'rgba(22, 22, 24, 0.85)',
-              border: '1px solid rgba(156, 163, 175, 0.35)',
+              backgroundColor: 'rgba(24, 20, 12, 0.9)',
+              border: '1px solid rgba(212, 175, 55, 0.55)',
               padding: '2.5rem 2rem',
               display: 'flex',
               flexDirection: 'column',
@@ -278,15 +388,17 @@ export default function Resultados() {
               color: 'inherit',
               position: 'relative',
               zIndex: 2,
+              boxShadow: '0 16px 40px rgba(0, 0, 0, 0.65), inset 0 0 65px rgba(212, 175, 55, 0.14)',
             }}
           >
-            <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ position: 'relative', zIndex: 2, filter: 'drop-shadow(0 0 16px rgba(212, 175, 55, 0.55))' }}>
               <IconMonolito />
             </div>
+
             <h2
               style={{
                 color: '#FFF',
-                fontSize: '1.8rem',
+                fontSize: '2rem',
                 fontWeight: 900,
                 margin: 0,
                 letterSpacing: '1px',
@@ -294,193 +406,353 @@ export default function Resultados() {
                 zIndex: 2,
               }}
             >
-              ARENA <span style={{ color: '#E5E7EB' }}>MERCADO</span>
+              ARENA <span style={{ color: '#D4AF37' }}>MERCADO (TGA)</span>
             </h2>
-            <p style={{ color: '#D1D5DB', fontSize: '0.9rem', margin: 0, lineHeight: 1.5, position: 'relative', zIndex: 2 }}>
-              Os finalistas da indústria colocados à prova no mano a mano.
+
+            <p style={{ color: '#E4E4E7', fontSize: '0.94rem', margin: 0, lineHeight: 1.55, position: 'relative', zIndex: 2 }}>
+              Os indicados escolhidos pela mídia e pelo Geoff Keighley colocados à prova no mano a mano.
             </p>
-            <div
+
+            <p
               style={{
-                marginTop: '0.5rem',
-                padding: '6px 14px',
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                letterSpacing: '0.15em',
-                color: '#E5E7EB',
-                border: '1px solid rgba(229, 231, 235, 0.3)',
-                backgroundColor: 'rgba(229, 231, 235, 0.05)',
+                color: '#a1a1aa',
+                fontSize: '0.76rem',
+                margin: '0.2rem 0 0 0',
+                lineHeight: 1.45,
+                paddingTop: '0.75rem',
+                borderTop: '1px solid rgba(212, 175, 55, 0.22)',
                 position: 'relative',
                 zIndex: 2,
               }}
             >
-              {votosPorCategoria.mercado.toLocaleString('pt-BR')} VEREDITOS COMPUTADOS
+              Simulação independente sem vínculo oficial. Estes votos não contam para o TGA, apenas para a estatística do True GOTY.
+            </p>
+
+            <div
+              style={{
+                marginTop: 'auto',
+                paddingTop: '0.5rem',
+                position: 'relative',
+                zIndex: 2,
+              }}
+            >
+              <div
+                style={{
+                  padding: '6px 14px',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.15em',
+                  color: '#F4D06F',
+                  border: '1px solid rgba(212, 175, 55, 0.55)',
+                  backgroundColor: 'rgba(212, 175, 55, 0.12)',
+                }}
+              >
+                {votosPorCategoria.mercado.toLocaleString('pt-BR')} VEREDITOS COMPUTADOS
+              </div>
             </div>
           </button>
         </motion.div>
       )}
 
-      {/* ETAPA 2: MENU DA ARENA ESCOLHIDA */}
+      {/* ETAPA 2: CARDS PORTAIS LADO A LADO COM TEMA DINÂMICO */}
       {categoriaSelecionada && (
         <motion.div
           key={categoriaSelecionada}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+          style={{ width: '100%', maxWidth: '960px', display: 'flex', flexDirection: 'column', gap: '1.75rem' }}
         >
-          <button
-            onClick={() => setCategoriaSelecionada(null)}
-            style={{
-              alignSelf: 'flex-start',
-              background: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#a1a1aa',
-              padding: '0.6rem 1.2rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              letterSpacing: '0.15em',
-              transition: 'all 0.2s',
-              clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.color = '#FFF';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.color = '#a1a1aa';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-            }}
-          >
-            ← TROCAR DE ARENA
-          </button>
+          <style>{`
+            .portal-card-dinamico:hover {
+              border-color: ${corTema} !important;
+              box-shadow: 0 24px 60px -14px ${corGlow}, inset 0 0 85px ${corGlow} !important;
+            }
+            .portal-card-dinamico:hover .portal-cta-dinamico {
+              background-color: ${corTema} !important;
+              color: ${corTextoCtaHover} !important;
+              border-top-color: ${corTema} !important;
+            }
+          `}</style>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.2))' }} />
-            <h2
+          {/* BARRA DE CONTEXTO SUPERIOR */}
+          <div className="context-bar">
+            <button
+              type="button"
+              onClick={() => setCategoriaSelecionada(null)}
               style={{
-                color: categoriaSelecionada === 'tgt' ? '#A855F7' : '#E5E7EB',
-                fontSize: '1.4rem',
-                fontWeight: 900,
-                margin: 0,
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.16)',
+                borderRadius: '0px',
+                color: '#d4d4d8',
+                padding: '0.65rem 1.25rem',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                letterSpacing: '0.15em',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.color = '#FFF';
+                e.currentTarget.style.borderColor = corTema;
+                e.currentTarget.style.backgroundColor = `${corTema}18`;
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.color = '#d4d4d8';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.16)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
               }}
             >
-              {categoriaSelecionada === 'tgt' ? 'TRUE GOTY' : 'MERCADO (TGA)'}
-            </h2>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.2))' }} />
+              ← TROCAR DE ARENA
+            </button>
+
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '0.55rem 1.25rem',
+                border: `1px solid ${corBordaPortal}`,
+                backgroundColor: `${corTema}14`,
+                borderRadius: '0px',
+              }}
+            >
+              <span
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: corTema,
+                  boxShadow: `0 0 12px ${corTema}`,
+                }}
+              />
+              <span
+                className="font-arena"
+                style={{
+                  color: corTemaClaro,
+                  fontSize: '1.2rem',
+                  fontWeight: 800,
+                  letterSpacing: '2px',
+                  lineHeight: 1,
+                }}
+              >
+                {isTgtAtiva ? 'ARENA TRUE GOTY' : 'ARENA MERCADO (TGA)'}
+              </span>
+            </div>
           </div>
 
-          <Link href={`/resultados/global?cat=${categoriaSelecionada}`} style={{ textDecoration: 'none' }}>
-            <div
-              className="menu-card"
-              style={{
-                backgroundColor: 'rgba(22, 22, 24, 0.6)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                padding: '1.5rem 1.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1.25rem',
-                cursor: 'pointer',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.borderColor =
-                  categoriaSelecionada === 'tgt' ? 'rgba(168, 85, 247, 0.6)' : 'rgba(229, 231, 235, 0.5)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-              }}
+          {/* GRID DE 2 PORTAIS LADO A LADO */}
+          <div className="portal-grid">
+            {/* PORTAL ESQUERDO: PLACAR GLOBAL */}
+            <Link
+              href={`/resultados/global?cat=${categoriaSelecionada}`}
+              style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
             >
               <div
+                className="portal-card portal-card-dinamico"
                 style={{
-                  color: categoriaSelecionada === 'tgt' ? '#A855F7' : '#E5E7EB',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '48px',
-                  height: '48px',
-                  border: `1px solid ${categoriaSelecionada === 'tgt' ? 'rgba(168,85,247,0.4)' : 'rgba(229,231,235,0.3)'}`,
-                  backgroundColor: categoriaSelecionada === 'tgt' ? 'rgba(168,85,247,0.08)' : 'rgba(229,231,235,0.05)',
-                  flexShrink: 0,
+                  backgroundColor: corBgPortal,
+                  backgroundImage: `radial-gradient(circle at 50% 0%, ${corGlow}, transparent 68%)`,
+                  border: `1px solid ${corBordaPortal}`,
+                  boxShadow: `0 16px 42px rgba(0, 0, 0, 0.7), inset 0 0 60px ${isTgtAtiva ? 'rgba(176, 38, 255, 0.12)' : 'rgba(212, 175, 55, 0.12)'}`,
                 }}
               >
-                <IconGlobo />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ color: 'var(--text-light)', fontSize: '1.15rem', fontWeight: 800, margin: 0, marginBottom: '0.25rem', letterSpacing: '0.5px' }}>
-                  PLACAR MUNDIAL DA ARENA
-                </h3>
-                <p style={{ color: '#a1a1aa', fontSize: '0.85rem', margin: 0 }}>
-                  O consenso implacável de todos os vereditos selados.
-                </p>
-              </div>
-              <span style={{ color: '#71717a', fontSize: '1.5rem', fontWeight: 300 }}>›</span>
-            </div>
-          </Link>
+                <div
+                  style={{
+                    padding: '2.75rem 2rem 2rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    flex: 1,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '88px',
+                      height: '88px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: corTema,
+                      border: `1px solid ${corBordaPortal}`,
+                      backgroundColor: `${corTema}14`,
+                      filter: `drop-shadow(0 0 18px ${corGlow})`,
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    <IconGloboPortal />
+                  </div>
 
-          <Link href={`/resultados/pessoal?cat=${categoriaSelecionada}`} style={{ textDecoration: 'none' }}>
-            <div
-              className="menu-card"
-              style={{
-                backgroundColor: 'rgba(22, 22, 24, 0.6)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                padding: '1.5rem 1.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1.25rem',
-                cursor: 'pointer',
-                position: 'relative',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.borderColor =
-                  categoriaSelecionada === 'tgt' ? 'rgba(168, 85, 247, 0.6)' : 'rgba(229, 231, 235, 0.5)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-              }}
+                  <h2
+                    className="font-arena"
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: '2.1rem',
+                      fontWeight: 900,
+                      margin: 0,
+                      lineHeight: 1,
+                      letterSpacing: '1.5px',
+                    }}
+                  >
+                    PLACAR GLOBAL DA ARENA
+                  </h2>
+
+                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', margin: 0, lineHeight: 1.55, maxWidth: '340px' }}>
+                    O consenso implacável de todos os vereditos selados pela comunidade gamer.
+                  </p>
+
+                  <div
+                    style={{
+                      marginTop: 'auto',
+                      paddingTop: '0.75rem',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '5px 12px',
+                        fontSize: '0.7rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.16em',
+                        color: corTemaClaro,
+                        border: `1px solid ${corBordaPortal}`,
+                        backgroundColor: `${corTema}12`,
+                      }}
+                    >
+                      {votosPorCategoria[categoriaSelecionada].toLocaleString('pt-BR')} VEREDITOS NO RANKING
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  className="portal-cta portal-cta-dinamico"
+                  style={{
+                    borderTop: `1px solid ${corBordaPortal}`,
+                    backgroundColor: `${corTema}14`,
+                    color: corTemaClaro,
+                  }}
+                >
+                  <span>VER RANKING MUNDIAL</span>
+                  <span className="portal-arrow">→</span>
+                </div>
+              </div>
+            </Link>
+
+            {/* PORTAL DIREITO: MEU PÓDIO INDIVIDUAL */}
+            <Link
+              href={`/resultados/pessoal?cat=${categoriaSelecionada}`}
+              style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
             >
               <div
+                className="portal-card portal-card-dinamico"
                 style={{
-                  color: categoriaSelecionada === 'tgt' ? '#A855F7' : '#E5E7EB',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '48px',
-                  height: '48px',
-                  border: `1px solid ${categoriaSelecionada === 'tgt' ? 'rgba(168,85,247,0.4)' : 'rgba(229,231,235,0.3)'}`,
-                  backgroundColor: categoriaSelecionada === 'tgt' ? 'rgba(168,85,247,0.08)' : 'rgba(229,231,235,0.05)',
-                  flexShrink: 0,
+                  backgroundColor: corBgPortal,
+                  backgroundImage: `radial-gradient(circle at 50% 0%, ${corGlow}, transparent 68%)`,
+                  border: `1px solid ${corBordaPortal}`,
+                  boxShadow: `0 16px 42px rgba(0, 0, 0, 0.7), inset 0 0 60px ${isTgtAtiva ? 'rgba(176, 38, 255, 0.12)' : 'rgba(212, 175, 55, 0.12)'}`,
                 }}
               >
-                <IconPodium />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
-                  <h3 style={{ color: 'var(--text-light)', fontSize: '1.15rem', fontWeight: 800, margin: 0, letterSpacing: '0.5px' }}>
+                <div
+                  style={{
+                    padding: '2.75rem 2rem 2rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    flex: 1,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '88px',
+                      height: '88px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: corTema,
+                      border: `1px solid ${corBordaPortal}`,
+                      backgroundColor: `${corTema}14`,
+                      filter: `drop-shadow(0 0 18px ${corGlow})`,
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    <IconCoroaPessoal />
+                  </div>
+
+                  <h2
+                    className="font-arena"
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: '2.1rem',
+                      fontWeight: 900,
+                      margin: 0,
+                      lineHeight: 1,
+                      letterSpacing: '1.5px',
+                    }}
+                  >
                     MEU PÓDIO INDIVIDUAL
-                  </h3>
-                  {statusVeredito[categoriaSelecionada] === 'concluido' ? (
-                    <span style={{ fontSize: '0.6rem', fontWeight: 900, letterSpacing: '0.15em', padding: '3px 8px', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.4)', backgroundColor: 'rgba(16, 185, 129, 0.08)' }}>
-                      ✓ CONCLUÍDO
-                    </span>
-                  ) : (
-                    <span style={{ fontSize: '0.6rem', fontWeight: 900, letterSpacing: '0.15em', padding: '3px 8px', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.4)', backgroundColor: 'rgba(212, 175, 55, 0.08)' }}>
-                      ⚠ PENDENTE • VOTAR
-                    </span>
-                  )}
+                  </h2>
+
+                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', margin: 0, lineHeight: 1.55, maxWidth: '340px' }}>
+                    A hierarquia exata forjada nos seus 45 confrontos diretos nesta arena.
+                  </p>
+
+                  {/* SELO DE STATUS BEM VISÍVEL */}
+                  <div style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
+                    {statusVeredito[categoriaSelecionada] === 'concluido' ? (
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '6px 14px',
+                          fontSize: '0.72rem',
+                          fontWeight: 900,
+                          letterSpacing: '0.16em',
+                          color: '#34d399',
+                          border: '1px solid rgba(52, 211, 153, 0.55)',
+                          backgroundColor: 'rgba(16, 185, 129, 0.14)',
+                        }}
+                      >
+                        ✓ VEREDITO CONCLUÍDO
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '6px 14px',
+                          fontSize: '0.72rem',
+                          fontWeight: 900,
+                          letterSpacing: '0.16em',
+                          color: '#F4D06F',
+                          border: '1px solid rgba(212, 175, 55, 0.6)',
+                          backgroundColor: 'rgba(212, 175, 55, 0.14)',
+                        }}
+                      >
+                        PENDENTE — VOTAR AGORA
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <p style={{ color: '#a1a1aa', fontSize: '0.85rem', margin: 0 }}>
-                  A hierarquia exata forjada nos seus 45 confrontos.
-                </p>
+
+                <div
+                  className="portal-cta portal-cta-dinamico"
+                  style={{
+                    borderTop: `1px solid ${corBordaPortal}`,
+                    backgroundColor: `${corTema}14`,
+                    color: corTemaClaro,
+                  }}
+                >
+                  <span>VER MEU TOP 10</span>
+                  <span className="portal-arrow">→</span>
+                </div>
               </div>
-              <span style={{ color: '#71717a', fontSize: '1.5rem', fontWeight: 300 }}>›</span>
-            </div>
-          </Link>
+            </Link>
+          </div>
         </motion.div>
       )}
     </main>

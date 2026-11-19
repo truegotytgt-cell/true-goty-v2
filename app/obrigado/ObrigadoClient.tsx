@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import html2canvas from 'html2canvas';
@@ -12,6 +12,7 @@ import { IconShare, SocialShareBar } from './ShareIcons';
 import {
   JogoTop3,
   RedeSocial,
+  getNomeArquivoStory,
   getTextoCompartilhamento,
   getTituloReddit,
   isDispositivoMobile,
@@ -25,9 +26,11 @@ type ToastState = {
 
 export default function ObrigadoClient() {
   const searchParams = useSearchParams();
-  const categoria = searchParams.get('categoria') || 'tgt';
+  const router = useRouter();
+  const categoria = searchParams.get('categoria') === 'mercado' ? 'mercado' : 'tgt';
 
   const [top3, setTop3] = useState<JogoTop3[]>([]);
+  const [verificado, setVerificado] = useState(false);
   const [previewScale, setPreviewScale] = useState(0.38);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -42,8 +45,8 @@ export default function ObrigadoClient() {
     ? 'rgba(176, 38, 255, 0.16)'
     : 'rgba(212, 175, 55, 0.16)';
   const corOuro = '#D4AF37';
+  const nomeArquivo = getNomeArquivoStory(categoria);
 
-  // Ajusta o tamanho do preview para dar presença monumental no PC e caber bem no celular
   useEffect(() => {
     const atualizarEscala = () => {
       const larguraDisponivel = window.innerWidth - 48;
@@ -66,27 +69,37 @@ export default function ObrigadoClient() {
 
   useEffect(() => {
     const rankingSalvo = localStorage.getItem(`tgt_my_ranking_${categoria}`);
-    if (rankingSalvo) {
-      try {
-        const parsed = JSON.parse(rankingSalvo);
-        const jogosJSON = (jogosData as any)[categoria]?.top10 || [];
-
-        const comImagens: JogoTop3[] = parsed.slice(0, 3).map((item: any) => {
-          const infoJogo = jogosJSON.find((j: any) => j.titulo === item.titulo);
-          return {
-            titulo: item.titulo,
-            pontos: typeof item.pontos === 'number' ? item.pontos : undefined,
-            imagem: infoJogo?.imagem || '/placeholder.jpg',
-          };
-        });
-
-        blobCacheRef.current = null;
-        setTop3(comImagens);
-      } catch (e) {
-        console.error('Erro ao ler ranking', e);
-      }
+    if (!rankingSalvo) {
+      router.replace('/votar');
+      return;
     }
-  }, [categoria]);
+
+    try {
+      const parsed = JSON.parse(rankingSalvo);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        router.replace('/votar');
+        return;
+      }
+
+      const jogosJSON = (jogosData as any)[categoria]?.top10 || [];
+
+      const comImagens: JogoTop3[] = parsed.slice(0, 3).map((item: any) => {
+        const infoJogo = jogosJSON.find((j: any) => j.titulo === item.titulo);
+        return {
+          titulo: item.titulo,
+          pontos: typeof item.pontos === 'number' ? item.pontos : undefined,
+          imagem: infoJogo?.imagem || '/placeholder.jpg',
+        };
+      });
+
+      blobCacheRef.current = null;
+      setTop3(comImagens);
+      setVerificado(true);
+    } catch (e) {
+      console.error('Erro ao ler ranking', e);
+      router.replace('/votar');
+    }
+  }, [categoria, router]);
 
   useEffect(() => {
     return () => {
@@ -125,14 +138,13 @@ export default function ObrigadoClient() {
     }
   }, []);
 
-  // Pré-gera o PNG 1080x1920 em segundo plano para cliques instantâneos
   useEffect(() => {
-    if (top3.length === 0) return;
+    if (!verificado || top3.length === 0) return;
     const timer = setTimeout(() => {
       gerarImagemStory(false);
     }, 500);
     return () => clearTimeout(timer);
-  }, [top3, gerarImagemStory]);
+  }, [verificado, top3, categoria, gerarImagemStory]);
 
   const mostrarToast = (mensagem: string, mostrarBotaoTexto = false, duracao = 5500) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -144,7 +156,7 @@ export default function ObrigadoClient() {
 
   const copiarTextoELink = async () => {
     try {
-      await navigator.clipboard.writeText(getTextoCompartilhamento(top3));
+      await navigator.clipboard.writeText(getTextoCompartilhamento(top3, categoria));
       mostrarToast('✓ Texto e link copiados! Agora é só colar.', false, 3500);
     } catch {
       mostrarToast('Não foi possível copiar o texto automaticamente.', false, 3500);
@@ -166,11 +178,10 @@ export default function ObrigadoClient() {
   const copiarImagemOuBaixar = async (blob: Blob): Promise<'copiado' | 'baixado'> => {
     const copiou = await copiarImagemParaClipboard(blob);
     if (copiou) return 'copiado';
-    salvarBlobComoArquivo(blob, 'meu-true-goty-2026-story.png');
+    salvarBlobComoArquivo(blob, nomeArquivo);
     return 'baixado';
   };
 
-  // BOTÃO PRINCIPAL: Compartilhamento nativo no mobile, ou download + cópia no desktop
   const compartilharPrincipal = async () => {
     setIsGenerating(true);
     const blob = await gerarImagemStory(true);
@@ -181,10 +192,9 @@ export default function ObrigadoClient() {
       return;
     }
 
-    const texto = getTextoCompartilhamento(top3);
-    const file = new File([blob], 'meu-true-goty-2026-story.png', { type: 'image/png' });
+    const texto = getTextoCompartilhamento(top3, categoria);
+    const file = new File([blob], nomeArquivo, { type: 'image/png' });
 
-    // Mobile real: abre a gaveta nativa já com o PNG + texto
     if (
       isDispositivoMobile() &&
       typeof navigator !== 'undefined' &&
@@ -194,7 +204,7 @@ export default function ObrigadoClient() {
       try {
         await navigator.share({
           files: [file],
-          title: 'O Verdadeiro Game of the Year',
+          title: isTgt ? 'O Verdadeiro Game of the Year' : 'Meu Veredito nos Indicados do TGA',
           text: texto,
         });
         setIsGenerating(false);
@@ -207,8 +217,7 @@ export default function ObrigadoClient() {
       }
     }
 
-    // Desktop: baixa o PNG em alta definição E copia para a área de transferência
-    salvarBlobComoArquivo(blob, 'meu-true-goty-2026-story.png');
+    salvarBlobComoArquivo(blob, nomeArquivo);
     const copiou = await copiarImagemParaClipboard(blob);
 
     if (copiou) {
@@ -230,7 +239,7 @@ export default function ObrigadoClient() {
 
   const compartilharRede = async (rede: RedeSocial) => {
     setIsGenerating(true);
-    const texto = getTextoCompartilhamento(top3);
+    const texto = getTextoCompartilhamento(top3, categoria);
     const blob = await gerarImagemStory(true);
 
     if (!blob) {
@@ -239,9 +248,8 @@ export default function ObrigadoClient() {
       return;
     }
 
-    const file = new File([blob], 'meu-true-goty-2026-story.png', { type: 'image/png' });
+    const file = new File([blob], nomeArquivo, { type: 'image/png' });
 
-    // 1. APENAS EM CELULARES REAIS: abre gaveta nativa com PNG + texto
     if (
       isDispositivoMobile() &&
       typeof navigator !== 'undefined' &&
@@ -251,7 +259,7 @@ export default function ObrigadoClient() {
       try {
         await navigator.share({
           files: [file],
-          title: 'O Verdadeiro Game of the Year',
+          title: isTgt ? 'O Verdadeiro Game of the Year' : 'Meu Veredito nos Indicados do TGA',
           text: texto,
         });
         setIsGenerating(false);
@@ -264,9 +272,8 @@ export default function ObrigadoClient() {
       }
     }
 
-    // 2. DESKTOP: Instagram (baixa Story 9:16 + copia legenda)
     if (rede === 'instagram') {
-      salvarBlobComoArquivo(blob, 'meu-true-goty-2026-story.png');
+      salvarBlobComoArquivo(blob, nomeArquivo);
       try {
         await navigator.clipboard.writeText(texto);
         mostrarToast(
@@ -285,7 +292,6 @@ export default function ObrigadoClient() {
       return;
     }
 
-    // 3. DESKTOP: Discord (copia imagem + abre Discord Web em nova aba)
     if (rede === 'discord') {
       const resultado = await copiarImagemOuBaixar(blob);
       window.open('https://discord.com/channels/@me', '_blank', 'noopener,noreferrer');
@@ -307,7 +313,6 @@ export default function ObrigadoClient() {
       return;
     }
 
-    // 4. DESKTOP: WhatsApp, X e Reddit (copia imagem + abre a rede com texto pronto)
     const resultadoImg = await copiarImagemOuBaixar(blob);
 
     let intentUrl = '';
@@ -316,7 +321,7 @@ export default function ObrigadoClient() {
     } else if (rede === 'x') {
       intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}`;
     } else if (rede === 'reddit') {
-      const tituloReddit = getTituloReddit(top3);
+      const tituloReddit = getTituloReddit(top3, categoria);
       intentUrl = `https://www.reddit.com/submit?title=${encodeURIComponent(tituloReddit)}&text=${encodeURIComponent(texto)}`;
     }
 
@@ -341,6 +346,25 @@ export default function ObrigadoClient() {
 
     setIsGenerating(false);
   };
+
+  if (!verificado) {
+    return (
+      <main
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          color: corPrincipal,
+          fontFamily: 'var(--font-teko)',
+          fontSize: '1.5rem',
+          letterSpacing: '2px',
+        }}
+      >
+        CARREGANDO SEU VEREDITO...
+      </main>
+    );
+  }
 
   const previewWidth = Math.round(1080 * previewScale);
   const previewHeight = Math.round(1920 * previewScale);
@@ -369,7 +393,7 @@ export default function ObrigadoClient() {
           zIndex: -1,
         }}
       >
-        <StoryExportCard ref={exportRef} top3={top3} />
+        <StoryExportCard ref={exportRef} top3={top3} categoria={categoria} />
       </div>
 
       {/* TOAST DE FEEDBACK */}
@@ -460,21 +484,20 @@ export default function ObrigadoClient() {
         {/* COLUNA ESQUERDA: PRÉVIA AMPLIADA 9:16 COM AURA DE PALCO */}
         <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
           <div style={{ position: 'relative', width: `${previewWidth}px`, height: `${previewHeight}px` }}>
-            {/* AURA DE PALCO INTENSA ATRÁS DO CARTÃO */}
             <div
               aria-hidden="true"
               style={{
                 position: 'absolute',
                 inset: '-48px',
-                background:
-                  'radial-gradient(ellipse at 50% 44%, rgba(176, 38, 255, 0.58) 0%, rgba(212, 175, 55, 0.36) 38%, rgba(5, 5, 8, 0) 72%)',
+                background: isTgt
+                  ? 'radial-gradient(ellipse at 50% 44%, rgba(176, 38, 255, 0.58) 0%, rgba(212, 175, 55, 0.36) 38%, rgba(5, 5, 8, 0) 72%)'
+                  : 'radial-gradient(ellipse at 50% 44%, rgba(212, 175, 55, 0.62) 0%, rgba(244, 208, 111, 0.28) 38%, rgba(5, 5, 8, 0) 72%)',
                 filter: 'blur(38px)',
                 pointerEvents: 'none',
                 zIndex: 0,
               }}
             />
 
-            {/* MOLDURA DO PÔSTER 9:16 */}
             <div
               style={{
                 position: 'relative',
@@ -484,8 +507,9 @@ export default function ObrigadoClient() {
                 overflow: 'hidden',
                 borderRadius: '0px',
                 border: `1px solid ${corOuro}`,
-                boxShadow:
-                  '0 0 46px rgba(176, 38, 255, 0.36), 0 0 24px rgba(212, 175, 55, 0.28), 0 28px 65px rgba(0, 0, 0, 0.92)',
+                boxShadow: isTgt
+                  ? '0 0 46px rgba(176, 38, 255, 0.36), 0 0 24px rgba(212, 175, 55, 0.28), 0 28px 65px rgba(0, 0, 0, 0.92)'
+                  : '0 0 46px rgba(212, 175, 55, 0.42), 0 0 24px rgba(244, 208, 111, 0.24), 0 28px 65px rgba(0, 0, 0, 0.92)',
                 backgroundColor: '#050508',
               }}
             >
@@ -498,7 +522,7 @@ export default function ObrigadoClient() {
                   pointerEvents: 'none',
                 }}
               >
-                <StoryExportCard top3={top3} />
+                <StoryExportCard top3={top3} categoria={categoria} />
               </div>
             </div>
           </div>
@@ -526,7 +550,9 @@ export default function ObrigadoClient() {
               fontFamily: 'var(--font-teko)',
             }}
           >
-            [ VEREDITO REGISTRADO • TEMPORADA 2026 ]
+            {isTgt
+              ? '[ VEREDITO REGISTRADO • ARENA TRUE GOTY ]'
+              : '[ VEREDITO REGISTRADO • ARENA MERCADO (TGA) ]'}
           </div>
 
           <h1
@@ -558,10 +584,11 @@ export default function ObrigadoClient() {
               maxWidth: '420px',
             }}
           >
-            Sua escolha já entrou no Placar Global. Compartilhe seu pôster oficial em alta definição ou desafie a comunidade nas redes.
+            {isTgt
+              ? 'Sua escolha já entrou no Placar Global da Arena True GOTY. Compartilhe seu pôster oficial em alta definição ou desafie a comunidade nas redes.'
+              : 'Sua escolha já entrou no Placar Global da Arena Mercado (TGA). Compartilhe seu pôster em alta definição e desafie a comunidade.'}
           </p>
 
-          {/* BOTÃO PRINCIPAL (COMPARTILHAR • CANTOS RETOS 90°) */}
           <button
             type="button"
             onClick={compartilharPrincipal}
@@ -571,9 +598,10 @@ export default function ObrigadoClient() {
               maxWidth: '460px',
               padding: '1.15rem 1.4rem',
               fontSize: '1.15rem',
-              background:
-                'linear-gradient(90deg, #4C1D95 0%, #7e22ce 50%, #9333EA 85%, #8B6508 100%)',
-              color: '#FFF',
+              background: isTgt
+                ? 'linear-gradient(90deg, #4C1D95 0%, #7e22ce 50%, #9333EA 85%, #8B6508 100%)'
+                : 'linear-gradient(90deg, #8B6508 0%, #B8860B 45%, #D4AF37 100%)',
+              color: isTgt ? '#FFF' : '#0A0A0A',
               fontWeight: 900,
               border: `1px solid ${corOuro}`,
               borderRadius: '0px',
@@ -587,7 +615,7 @@ export default function ObrigadoClient() {
               justifyContent: 'center',
               gap: '10px',
               marginBottom: '1.5rem',
-              textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+              textShadow: isTgt ? '0 1px 3px rgba(0,0,0,0.8)' : 'none',
               lineHeight: 1.1,
             }}
             onMouseOver={(e) => {
@@ -601,12 +629,14 @@ export default function ObrigadoClient() {
               'GERANDO PÔSTER...'
             ) : (
               <>
-                <IconShare /> COMPARTILHAR O VERDADEIRO GAME OF THE YEAR
+                <IconShare />{' '}
+                {isTgt
+                  ? 'COMPARTILHAR O VERDADEIRO GAME OF THE YEAR'
+                  : 'COMPARTILHAR MEU VEREDITO (ARENA TGA)'}
               </>
             )}
           </button>
 
-          {/* ÍCONES SOCIAIS (CANTOS RETOS 90°) */}
           <SocialShareBar
             corPrincipal={corPrincipal}
             corHoverBg={corPrincipalHoverBg}

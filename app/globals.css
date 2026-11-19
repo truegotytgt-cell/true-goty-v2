@@ -47,13 +47,13 @@ h1, h2, h3, .font-arena {
   animation: shine 6s linear infinite;
 }
 
-/* --- BOTÕES CHANFRADOS (CORTADOS) --- */
+/* --- BOTÃO PRINCIPAL DE AÇÃO (EXCLUSIVO COM CORTE CHANFRADO 45°) --- */
 .btn-arena {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 3rem;
+  padding: 1rem 2.6rem;
   font-family: var(--font-teko), sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
@@ -74,50 +74,62 @@ h1, h2, h3, .font-arena {
   box-shadow: 0 10px 30px rgba(176, 38, 255, 0.5), inset 0 0 20px rgba(255,255,255,0.3);
 }
 
+/* --- BOTÃO MERCADO / TGA (OURO METÁLICO VIBRANTE • CANTOS RETOS) --- */
 .btn-mercado {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 3rem;
+  padding: 1rem 2.6rem;
   font-family: var(--font-teko), sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   text-decoration: none;
-  color: #D4AF37;
-  background: rgba(212, 175, 55, 0.05);
-  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #F4D06F;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.22), rgba(139, 101, 8, 0.3));
+  border-radius: 0px;
+  border: 2px solid #D4AF37;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 22px rgba(212, 175, 55, 0.22), inset 0 0 18px rgba(212, 175, 55, 0.14);
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.45);
   box-sizing: border-box;
 }
 
 .btn-mercado:hover {
   transform: translateY(-2px) scale(1.02);
-  background: rgba(212, 175, 55, 0.15);
-  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+  color: #FFF8DC;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.36), rgba(161, 120, 12, 0.44));
+  border-color: #F4D06F;
+  box-shadow: 0 10px 34px rgba(212, 175, 55, 0.45), inset 0 0 22px rgba(212, 175, 55, 0.28);
 }
 
-/* --- HUD PLACAR --- */
+/* --- HUD PLACAR (BORDA REAL COM GRADIENTE • SEM BUG DE SUBPIXEL) --- */
 .hud-placar {
   position: relative;
-  padding: 1px;
-  background: linear-gradient(to right, rgba(212, 175, 55, 0.2), rgba(176, 38, 255, 0.5), rgba(212, 175, 55, 0.2));
-  clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+  padding: 0;
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid rgba(176, 38, 255, 0.45);
+  border-image: linear-gradient(
+    to right,
+    rgba(212, 175, 55, 0.45),
+    rgba(176, 38, 255, 0.65),
+    rgba(212, 175, 55, 0.45)
+  ) 1;
+  border-radius: 0px;
   max-width: 100%;
   box-sizing: border-box;
+  backdrop-filter: blur(10px);
 }
 
 .hud-placar-inner {
-  background: rgba(10, 10, 10, 0.9);
+  background: transparent;
   padding: 1.5rem 4rem;
-  clip-path: polygon(19px 0, 100% 0, 100% calc(100% - 19px), calc(100% - 19px) 100%, 0 100%, 0 19px);
+  border-radius: 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  backdrop-filter: blur(10px);
   box-sizing: border-box;
 }
 

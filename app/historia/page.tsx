@@ -1,4 +1,3 @@
-// app/historia/page.tsx
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
@@ -7,15 +6,14 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import jogosData from '../../lib/jogos.json';
 
-// Ícones SVG Minimalistas
-const IconZebra = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple-neon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const IconZebra = ({ color }: { color: string }) => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
   </svg>
 );
 
-const IconParelho = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const IconParelho = ({ color }: { color: string }) => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
     <path d="M13 19l6-6" />
     <path d="M16 16l4 4" />
@@ -27,19 +25,21 @@ const IconParelho = () => (
   </svg>
 );
 
-const IconAtropelo = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+const IconChama = ({ color }: { color: string }) => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
   </svg>
 );
 
 function HistoriaContent() {
   const searchParams = useSearchParams();
-  const catUrl = searchParams.get('cat') as 'tgt' | 'mercado' | null;
-  
-  const [categoria, setCategoria] = useState<'tgt' | 'mercado'>(catUrl || 'tgt');
-  const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
-  
+  const catUrl = searchParams.get('cat');
+
+  const [categoria, setCategoria] = useState<'tgt' | 'mercado'>(
+    catUrl === 'mercado' ? 'mercado' : 'tgt'
+  );
+  const [anoSelecionado, setAnoSelecionado] = useState<number>(2026);
+
   const [highlights, setHighlights] = useState<any>(null);
   const [carregando, setCarregando] = useState(true);
 
@@ -48,11 +48,26 @@ function HistoriaContent() {
   const [h2h, setH2h] = useState<any>(null);
   const [buscandoH2h, setBuscandoH2h] = useState(false);
 
-  const anosDisponiveis = [2026, 2025]; 
+  const anosDisponiveis = [2026];
 
-  const cardClip = 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)';
-  const btnClip = 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)';
-  const selectClip = 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)';
+  useEffect(() => {
+    if (catUrl === 'mercado' || catUrl === 'tgt') {
+      setCategoria(catUrl);
+    }
+  }, [catUrl]);
+
+  // Tema dinâmico: Roxo Imperial (True GOTY) vs Ouro Metálico (Mercado / TGA)
+  const isTgt = categoria === 'tgt';
+  const corPrincipal = isTgt ? 'var(--purple-neon)' : '#D4AF37';
+  const corSecundaria = isTgt ? '#D4AF37' : '#E2E8F0';
+  const corSeloBg = isTgt ? 'rgba(176, 38, 255, 0.1)' : 'rgba(212, 175, 55, 0.12)';
+  const corSeloBorda = isTgt ? 'rgba(176, 38, 255, 0.4)' : 'rgba(212, 175, 55, 0.55)';
+  const corBordaPainel = isTgt ? 'rgba(255, 255, 255, 0.1)' : 'rgba(212, 175, 55, 0.35)';
+  const corBgPainel = isTgt ? 'rgba(20, 20, 24, 0.85)' : 'rgba(24, 20, 12, 0.88)';
+  const corGlowPrincipal = isTgt ? 'rgba(176, 38, 255, 0.45)' : 'rgba(212, 175, 55, 0.45)';
+  const corGlowSecundaria = isTgt ? 'rgba(212, 175, 55, 0.45)' : 'rgba(226, 232, 240, 0.35)';
+  const corSelectAtivoA = isTgt ? 'rgba(176, 38, 255, 0.12)' : 'rgba(212, 175, 55, 0.14)';
+  const corSelectAtivoB = isTgt ? 'rgba(212, 175, 55, 0.12)' : 'rgba(226, 232, 240, 0.1)';
 
   useEffect(() => {
     async function buscarHighlights() {
@@ -62,14 +77,17 @@ function HistoriaContent() {
         const json = await res.json();
         if (json.success) {
           setHighlights(json.data);
+        } else {
+          setHighlights(null);
         }
       } catch (erro) {
-        console.error("Erro ao buscar highlights", erro);
+        console.error('Erro ao buscar highlights', erro);
+        setHighlights(null);
       } finally {
         setCarregando(false);
       }
     }
-    
+
     buscarHighlights();
     setJogoA('');
     setJogoB('');
@@ -84,7 +102,9 @@ function HistoriaContent() {
       }
       setBuscandoH2h(true);
       try {
-        const res = await fetch(`/api/head-to-head?category=${categoria}&year=${anoSelecionado}&jogoA=${encodeURIComponent(jogoA)}&jogoB=${encodeURIComponent(jogoB)}`);
+        const res = await fetch(
+          `/api/head-to-head?category=${categoria}&year=${anoSelecionado}&jogoA=${encodeURIComponent(jogoA)}&jogoB=${encodeURIComponent(jogoB)}`
+        );
         const json = await res.json();
         if (json.success) setH2h(json.data);
       } catch (erro) {
@@ -119,8 +139,7 @@ function HistoriaContent() {
         }
 
         .historia-filtros {
-          background-color: rgba(28, 28, 30, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 0px;
           padding: 1rem 2rem;
           display: flex;
           flex-wrap: wrap;
@@ -131,6 +150,7 @@ function HistoriaContent() {
           backdrop-filter: blur(10px);
           max-width: 100%;
           box-sizing: border-box;
+          transition: border-color 0.3s ease, background-color 0.3s ease;
         }
 
         .historia-destaques-grid {
@@ -145,12 +165,12 @@ function HistoriaContent() {
         .rivalidade-box {
           width: 100%;
           max-width: 820px;
-          background-color: rgba(28, 28, 30, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 0px;
           padding: 3rem 2rem;
           text-align: center;
           backdrop-filter: blur(5px);
           box-sizing: border-box;
+          transition: border-color 0.3s ease, background-color 0.3s ease;
         }
 
         .rivalidade-duelo {
@@ -218,28 +238,87 @@ function HistoriaContent() {
         }
       `}</style>
 
-      {/* HEADER */}
+      {/* HEADER COM TEMA DINÂMICO */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: '2.5rem', width: '100%' }}>
-        <div style={{ display: 'inline-block', border: '1px solid rgba(176, 38, 255, 0.4)', backgroundColor: 'rgba(176, 38, 255, 0.1)', color: 'var(--purple-neon)', padding: '6px 16px', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '2px', marginBottom: '1rem', clipPath: btnClip }}>
-          [ ARQUIVO OFICIAL • TELEMETRIA & RECORDES ]
+        <div
+          style={{
+            display: 'inline-block',
+            border: `1px solid ${corSeloBorda}`,
+            backgroundColor: corSeloBg,
+            color: corPrincipal,
+            padding: '6px 16px',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            letterSpacing: '2px',
+            marginBottom: '1rem',
+            borderRadius: '0px',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          [ ARQUIVO DA ARENA • TELEMETRIA & RECORDES ]
         </div>
+
         <h1 style={{ color: 'white', fontSize: 'clamp(2.3rem, 8vw, 4rem)', fontWeight: 900, margin: 0, lineHeight: 1 }}>
-          MEMÓRIA DA <span style={{ color: 'var(--purple-neon)' }}>ARENA</span>
+          MEMÓRIA DA{' '}
+          <span style={{ color: corPrincipal, transition: 'color 0.3s ease' }}>
+            ARENA
+          </span>
         </h1>
-        <p style={{ color: '#a1a1aa', fontSize: '1rem', margin: '1rem auto 0', maxWidth: '600px' }}>
-          Reviva os maiores massacres, as zebras improváveis e os duelos mais sangrentos de cada temporada.
+
+        <p style={{ color: '#a1a1aa', fontSize: '1rem', margin: '1rem auto 0', maxWidth: '600px', lineHeight: 1.5 }}>
+          Reviva os maiores massacres, as zebras improváveis e os duelos mais sangrentos da temporada.
         </p>
+
+        {!isTgt && (
+          <p style={{ color: '#8b8b94', fontSize: '0.78rem', margin: '0.6rem auto 0', maxWidth: '580px' }}>
+            Estatísticas da simulação independente dos indicados do mercado (TGA) — sem vínculo oficial com o The Game Awards.
+          </p>
+        )}
       </motion.div>
 
-      {/* CONSOLE DE FILTROS (Chanfrado) */}
-      <div className="historia-filtros" style={{ clipPath: cardClip }}>
+      {/* CONSOLE DE FILTROS */}
+      <div
+        className="historia-filtros"
+        style={{
+          backgroundColor: corBgPainel,
+          border: `1px solid ${corBordaPainel}`,
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <span style={{ color: '#a1a1aa', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>ARENA</span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => setCategoria('tgt')} style={{ padding: '0.6rem 1.3rem', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: categoria === 'tgt' ? 'var(--purple-neon)' : 'rgba(255,255,255,0.05)', color: categoria === 'tgt' ? '#FFF' : '#a1a1aa', transition: 'all 0.3s', clipPath: btnClip }}>
+            <button
+              type="button"
+              onClick={() => setCategoria('tgt')}
+              style={{
+                padding: '0.6rem 1.3rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                border: '1px solid',
+                borderColor: categoria === 'tgt' ? 'var(--purple-neon)' : 'rgba(255,255,255,0.1)',
+                borderRadius: '0px',
+                backgroundColor: categoria === 'tgt' ? 'var(--purple-neon)' : 'rgba(255,255,255,0.04)',
+                color: categoria === 'tgt' ? '#FFF' : '#a1a1aa',
+                transition: 'all 0.25s',
+              }}
+            >
               TRUE GOTY
             </button>
-            <button onClick={() => setCategoria('mercado')} style={{ padding: '0.6rem 1.3rem', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: categoria === 'mercado' ? '#D4AF37' : 'rgba(255,255,255,0.05)', color: categoria === 'mercado' ? '#000' : '#a1a1aa', transition: 'all 0.3s', clipPath: btnClip }}>
+            <button
+              type="button"
+              onClick={() => setCategoria('mercado')}
+              style={{
+                padding: '0.6rem 1.3rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                border: '1px solid',
+                borderColor: categoria === 'mercado' ? '#D4AF37' : 'rgba(255,255,255,0.1)',
+                borderRadius: '0px',
+                backgroundColor: categoria === 'mercado' ? '#D4AF37' : 'rgba(255,255,255,0.04)',
+                color: categoria === 'mercado' ? '#000' : '#a1a1aa',
+                transition: 'all 0.25s',
+              }}
+            >
               MERCADO
             </button>
           </div>
@@ -248,8 +327,33 @@ function HistoriaContent() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <span style={{ color: '#a1a1aa', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>TEMPORADA</span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {anosDisponiveis.map(ano => (
-              <button key={ano} onClick={() => setAnoSelecionado(ano)} style={{ padding: '0.6rem 1.3rem', fontWeight: 'bold', cursor: 'pointer', border: 'none', backgroundColor: anoSelecionado === ano ? '#F4F4F0' : 'rgba(255,255,255,0.05)', color: anoSelecionado === ano ? '#000' : '#a1a1aa', transition: 'all 0.3s', clipPath: btnClip }}>
+            {anosDisponiveis.map((ano) => (
+              <button
+                type="button"
+                key={ano}
+                onClick={() => setAnoSelecionado(ano)}
+                style={{
+                  padding: '0.6rem 1.3rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  border: '1px solid',
+                  borderColor:
+                    anoSelecionado === ano
+                      ? isTgt
+                        ? '#F4F4F0'
+                        : '#D4AF37'
+                      : 'rgba(255,255,255,0.1)',
+                  borderRadius: '0px',
+                  backgroundColor:
+                    anoSelecionado === ano
+                      ? isTgt
+                        ? '#F4F4F0'
+                        : '#D4AF37'
+                      : 'rgba(255,255,255,0.04)',
+                  color: anoSelecionado === ano ? '#000' : '#a1a1aa',
+                  transition: 'all 0.25s',
+                }}
+              >
                 {ano}
               </button>
             ))}
@@ -259,72 +363,214 @@ function HistoriaContent() {
 
       <AnimatePresence mode="wait">
         {carregando ? (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ color: 'var(--purple-neon)', fontSize: '1.2rem', marginBottom: '4rem', fontWeight: 'bold', letterSpacing: '2px', textAlign: 'center' }}>
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ color: corPrincipal, fontSize: '1.2rem', marginBottom: '4rem', fontWeight: 'bold', letterSpacing: '2px', textAlign: 'center' }}
+          >
             CONSULTANDO OS ARQUIVOS DO TEMPO...
           </motion.div>
         ) : !highlights || (!highlights.zebra && !highlights.parelho && !highlights.desequilibrado) ? (
-          
-          /* ESTADO VAZIO */
-          <motion.div key="empty" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: '800px', padding: '3rem 1.5rem', border: '2px dashed rgba(255,255,255,0.1)', backgroundColor: 'rgba(28, 28, 30, 0.5)', clipPath: cardClip, textAlign: 'center', marginBottom: '4rem', boxSizing: 'border-box' }}>
-            <h2 style={{ color: '#F4F4F0', fontSize: '2rem', marginBottom: '1rem' }}>ARQUIVO DE {anoSelecionado} EM BRANCO</h2>
-            <p style={{ color: '#a1a1aa', marginBottom: '2rem', maxWidth: '500px' }}>
+          <motion.div
+            key={`empty-${categoria}-${anoSelecionado}`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              maxWidth: '800px',
+              padding: '3rem 1.5rem',
+              border: `1px solid ${corBordaPainel}`,
+              borderTop: `2px solid ${corPrincipal}`,
+              borderRadius: '0px',
+              backgroundColor: corBgPainel,
+              backgroundImage: isTgt
+                ? 'radial-gradient(circle at 50% 0%, rgba(176, 38, 255, 0.12), transparent 65%)'
+                : 'radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.16), transparent 65%)',
+              textAlign: 'center',
+              marginBottom: '4rem',
+              boxSizing: 'border-box',
+            }}
+          >
+            <h2 style={{ color: '#F4F4F0', fontSize: '2rem', marginBottom: '1rem' }}>
+              ARQUIVO DE <span style={{ color: corPrincipal }}>{anoSelecionado}</span> EM BRANCO
+            </h2>
+            <p style={{ color: '#a1a1aa', marginBottom: '2rem', maxWidth: '500px', lineHeight: 1.55 }}>
               Nenhum recorde foi cravado nesta arena ainda. Entre nos duelos agora e escreva as primeiras estatísticas da temporada.
             </p>
-            <Link href={`/votar/${categoria}`} className="btn-arena" style={{ padding: '1rem 3rem', fontSize: '1.2rem' }}>
+            <Link
+              href={`/votar/${categoria}`}
+              className="btn-arena"
+              style={{
+                padding: '1rem 3rem',
+                fontSize: '1.25rem',
+                background: isTgt
+                  ? 'linear-gradient(135deg, #7e22ce, #B026FF)'
+                  : 'linear-gradient(135deg, #B8860B, #D4AF37)',
+                color: isTgt ? '#FFF' : '#0A0A0A',
+                boxShadow: isTgt
+                  ? '0 10px 30px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(255,255,255,0.15)'
+                  : '0 10px 30px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(255,255,255,0.25)',
+              }}
+            >
               INAUGURAR A ARENA
             </Link>
           </motion.div>
-
         ) : (
-          <motion.div key="content" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-            
-            {/* CARDS DE DESTAQUES */}
+          <motion.div
+            key={`content-${categoria}-${anoSelecionado}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
+          >
             <div className="historia-destaques-grid">
-              
               {highlights.zebra && (
-                <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.8)', border: '1px solid rgba(176, 38, 255, 0.3)', padding: '2rem', clipPath: cardClip, position: 'relative', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}><IconZebra /></div>
-                  <div style={{ marginBottom: '1.5rem' }}><IconZebra /></div>
-                  <h2 style={{ color: 'var(--purple-neon)', fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '1px' }}>A GRANDE ZEBRA</h2>
-                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.5 }}>O azarão <strong>{highlights.zebra.lanterna}</strong> derrubou o gigante <strong>{highlights.zebra.jogo_derrotado}</strong> em <strong>{highlights.zebra.vitorias} ocasiões</strong>!</p>
+                <div
+                  style={{
+                    backgroundColor: corBgPainel,
+                    border: `1px solid ${corBordaPainel}`,
+                    borderTop: `2px solid ${corPrincipal}`,
+                    borderRadius: '0px',
+                    padding: '2rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
+                    <IconZebra color={corPrincipal} />
+                  </div>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <IconZebra color={corPrincipal} />
+                  </div>
+                  <h2 style={{ color: corPrincipal, fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '1px' }}>
+                    A GRANDE ZEBRA
+                  </h2>
+                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                    O azarão <strong>{highlights.zebra.lanterna}</strong> derrubou o gigante{' '}
+                    <strong>{highlights.zebra.jogo_derrotado}</strong> em <strong>{highlights.zebra.vitorias} ocasiões</strong>!
+                  </p>
                 </div>
               )}
 
               {highlights.parelho && (
-                <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.8)', border: '1px solid rgba(212, 175, 55, 0.3)', padding: '2rem', clipPath: cardClip, position: 'relative', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}><IconParelho /></div>
-                  <div style={{ marginBottom: '1.5rem' }}><IconParelho /></div>
-                  <h2 style={{ color: '#D4AF37', fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '1px' }}>CHOQUE DE TITÃS</h2>
-                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>Decidido voto a voto entre <strong>{highlights.parelho.jogo_a}</strong> e <strong>{highlights.parelho.jogo_b}</strong>.</p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                    <span style={{ color: 'var(--purple-neon)' }}>{highlights.parelho.porcentagem_a}%</span>
-                    <span style={{ color: '#D4AF37' }}>{highlights.parelho.porcentagem_b}%</span>
+                <div
+                  style={{
+                    backgroundColor: corBgPainel,
+                    border: `1px solid ${corBordaPainel}`,
+                    borderTop: '2px solid #D4AF37',
+                    borderRadius: '0px',
+                    padding: '2rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
+                    <IconParelho color="#D4AF37" />
                   </div>
-                  <div style={{ width: '100%', height: '12px', backgroundColor: '#1C1C1E', display: 'flex', overflow: 'hidden', clipPath: selectClip }}>
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${highlights.parelho.porcentagem_a}\%` }} transition={{ duration: 1 }} style={{ backgroundColor: 'var(--purple-neon)' }} /> <motion.div initial={{ width: 0 }} animate={{ width: `${highlights.parelho.porcentagem_b}%` }} transition={{ duration: 1 }} style={{ backgroundColor: '#D4AF37' }} />
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <IconParelho color="#D4AF37" />
+                  </div>
+                  <h2 style={{ color: '#D4AF37', fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '1px' }}>
+                    CHOQUE DE TITÃS
+                  </h2>
+                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+                    Decidido voto a voto entre <strong>{highlights.parelho.jogo_a}</strong> e{' '}
+                    <strong>{highlights.parelho.jogo_b}</strong>.
+                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                    <span style={{ color: corPrincipal }}>{highlights.parelho.porcentagem_a}%</span>
+                    <span style={{ color: corSecundaria }}>{highlights.parelho.porcentagem_b}%</span>
+                  </div>
+                  <div style={{ width: '100%', height: '10px', backgroundColor: '#1C1C1E', display: 'flex', overflow: 'hidden', borderRadius: '0px' }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${highlights.parelho.porcentagem_a}%` }}
+                      transition={{ duration: 1 }}
+                      style={{ backgroundColor: corPrincipal }}
+                    />
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${highlights.parelho.porcentagem_b}%` }}
+                      transition={{ duration: 1 }}
+                      style={{ backgroundColor: corSecundaria }}
+                    />
                   </div>
                 </div>
               )}
 
               {highlights.desequilibrado && (
-                <div style={{ backgroundColor: 'rgba(28, 28, 30, 0.8)', border: '1px solid rgba(255,255,255,0.2)', padding: '2rem', clipPath: cardClip, position: 'relative', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}><IconAtropelo /></div>
-                  <div style={{ marginBottom: '1.5rem' }}><IconAtropelo /></div>
-                  <h2 style={{ color: '#F4F4F0', fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '1px' }}>MASSACRE NA ARENA</h2>
-                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.5 }}><strong>{highlights.desequilibrado.jogo_a}</strong> não deu a mínima chance para <strong>{highlights.desequilibrado.jogo_b}</strong>.</p>
+                <div
+                  style={{
+                    backgroundColor: corBgPainel,
+                    border: `1px solid ${corBordaPainel}`,
+                    borderTop: `2px solid ${isTgt ? '#F4F4F0' : '#D4AF37'}`,
+                    borderRadius: '0px',
+                    padding: '2rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
+                    <IconChama color="#D4AF37" />
+                  </div>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <IconChama color="#D4AF37" />
+                  </div>
+                  <h2
+                    style={{
+                      color: isTgt ? '#F4F4F0' : '#F4D06F',
+                      fontSize: '1.5rem',
+                      fontWeight: 900,
+                      marginBottom: '0.5rem',
+                      letterSpacing: '1px',
+                    }}
+                  >
+                    MASSACRE NA ARENA
+                  </h2>
+                  <p style={{ color: '#D1D5DB', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+                    <strong>{highlights.desequilibrado.jogo_a}</strong> não deu a mínima chance para{' '}
+                    <strong>{highlights.desequilibrado.jogo_b}</strong>.
+                  </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                    <span style={{ color: '#F4F4F0' }}>{highlights.desequilibrado.porcentagem_a}%</span>
+                    <span style={{ color: isTgt ? '#F4F4F0' : '#D4AF37' }}>{highlights.desequilibrado.porcentagem_a}%</span>
                     <span style={{ color: '#a1a1aa' }}>{highlights.desequilibrado.porcentagem_b}%</span>
                   </div>
-                  <div style={{ width: '100%', height: '12px', backgroundColor: '#0A0A0A', display: 'flex', overflow: 'hidden', clipPath: selectClip, border: '1px solid #333' }}>
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${highlights.desequilibrado.porcentagem_a}\%` }} transition={{ duration: 1 }} style={{ backgroundColor: '#F4F4F0' }} /> <motion.div initial={{ width: 0 }} animate={{ width: `${highlights.desequilibrado.porcentagem_b}%` }} transition={{ duration: 1 }} style={{ backgroundColor: '#333333' }} />
+                  <div style={{ width: '100%', height: '10px', backgroundColor: '#0A0A0A', display: 'flex', overflow: 'hidden', borderRadius: '0px', border: '1px solid #333' }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${highlights.desequilibrado.porcentagem_a}%` }}
+                      transition={{ duration: 1 }}
+                      style={{ backgroundColor: isTgt ? '#F4F4F0' : '#D4AF37' }}
+                    />
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${highlights.desequilibrado.porcentagem_b}%` }}
+                      transition={{ duration: 1 }}
+                      style={{ backgroundColor: '#333333' }}
+                    />
                   </div>
                 </div>
               )}
             </div>
 
             {/* CONFRONTO DIRETO (ARQUIVO DE RIVALIDADE) */}
-            <div className="rivalidade-box" style={{ clipPath: cardClip }}>
+            <div
+              className="rivalidade-box"
+              style={{
+                backgroundColor: isTgt ? 'rgba(20, 20, 24, 0.72)' : 'rgba(24, 20, 12, 0.78)',
+                border: `1px solid ${corBordaPainel}`,
+                borderTop: `2px solid ${corPrincipal}`,
+              }}
+            >
               <h2 style={{ color: 'white', fontSize: 'clamp(1.7rem, 6vw, 2.2rem)', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '0.5px' }}>
                 ARQUIVO DE RIVALIDADE
               </h2>
@@ -336,13 +582,136 @@ function HistoriaContent() {
                 {/* Lutador A */}
                 <div className="rivalidade-lutador">
                   {jogoA && getImagem(jogoA) ? (
-                    <motion.img initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} src={getImagem(jogoA)!} alt="Jogo A" style={{ width: '92px', aspectRatio: '3/4', objectFit: 'cover', border: '2px solid var(--purple-neon)', clipPath: selectClip, boxShadow: '0 0 18px rgba(176, 38, 255, 0.45)' }} />
+                    <motion.img
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      src={getImagem(jogoA)!}
+                      alt="Jogo A"
+                      style={{
+                        width: '92px',
+                        aspectRatio: '3/4',
+                        objectFit: 'cover',
+                        border: `2px solid ${corPrincipal}`,
+                        borderRadius: '0px',
+                        boxShadow: `0 0 18px ${corGlowPrincipal}`,
+                      }}
+                    />
                   ) : (
-                    <div style={{ width: '92px', aspectRatio: '3/4', border: '2px dashed rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444', clipPath: selectClip, fontSize: '1.5rem', fontWeight: 800 }}>?</div>
+                    <div
+                      style={{
+                        width: '92px',
+                        aspectRatio: '3/4',
+                        border: '1px dashed rgba(255,255,255,0.15)',
+                        borderRadius: '0px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#444',
+                        fontSize: '1.5rem',
+                        fontWeight: 800,
+                      }}
+                    >
+                      ?
+                    </div>
                   )}
-                  <select value={jogoA} onChange={(e) => setJogoA(e.target.value)} disabled={semJogos} style={{ width: '100%', padding: '0.95rem 1rem', backgroundColor: jogoA ? 'rgba(176, 38, 255, 0.12)' : '#1C1C1E', color: jogoA ? 'var(--purple-neon)' : 'white', border: '1px solid', borderColor: jogoA ? 'var(--purple-neon)' : '#333', fontSize: '0.95rem', cursor: semJogos ? 'not-allowed' : 'pointer', outline: 'none', clipPath: selectClip, textAlign: 'center', fontWeight: 'bold', boxSizing: 'border-box' }}>
-                    <option value="" style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>Escolha o Lutador A</option>
-                    {listaJogos.map((jogo: any) => <option key={`A-${jogo.titulo}`} value={jogo.titulo} style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>{jogo.titulo}</option>)} </select> </div>  <div className="rivalidade-vs">VS</div>  {/* Lutador B */} <div className="rivalidade-lutador"> {jogoB && getImagem(jogoB) ? ( <motion.img initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} src={getImagem(jogoB)!} alt="Jogo B" style={{ width: '92px', aspectRatio: '3/4', objectFit: 'cover', border: '2px solid #D4AF37', clipPath: selectClip, boxShadow: '0 0 18px rgba(212, 175, 55, 0.45)' }} /> ) : ( <div style={{ width: '92px', aspectRatio: '3/4', border: '2px dashed rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444', clipPath: selectClip, fontSize: '1.5rem', fontWeight: 800 }}>?</div> )} <select value={jogoB} onChange={(e) => setJogoB(e.target.value)} disabled={semJogos} style={{ width: '100\%', padding: '0.95rem 1rem', backgroundColor: jogoB ? 'rgba(212, 175, 55, 0.12)' : '#1C1C1E', color: jogoB ? '#D4AF37' : 'white', border: '1px solid', borderColor: jogoB ? '#D4AF37' : '#333', fontSize: '0.95rem', cursor: semJogos ? 'not-allowed' : 'pointer', outline: 'none', clipPath: selectClip, textAlign: 'center', fontWeight: 'bold', boxSizing: 'border-box' }}> <option value="" style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>Escolha o Lutador B</option> {listaJogos.map((jogo: any) => <option key={`B-${jogo.titulo}`} value={jogo.titulo} style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>{jogo.titulo}</option>)}
+                  <select
+                    value={jogoA}
+                    onChange={(e) => setJogoA(e.target.value)}
+                    disabled={semJogos}
+                    style={{
+                      width: '100%',
+                      padding: '0.95rem 1rem',
+                      backgroundColor: jogoA ? corSelectAtivoA : '#1C1C1E',
+                      color: jogoA ? corPrincipal : 'white',
+                      border: '1px solid',
+                      borderColor: jogoA ? corPrincipal : 'rgba(255,255,255,0.12)',
+                      borderRadius: '0px',
+                      fontSize: '0.95rem',
+                      cursor: semJogos ? 'not-allowed' : 'pointer',
+                      outline: 'none',
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <option value="" style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
+                      Escolha o Lutador A
+                    </option>
+                    {listaJogos.map((jogo: any) => (
+                      <option key={`A-${jogo.titulo}`} value={jogo.titulo} style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
+                        {jogo.titulo}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="rivalidade-vs" style={{ color: isTgt ? '#F4F4F0' : '#F4D06F' }}>
+                  VS
+                </div>
+
+                {/* Lutador B */}
+                <div className="rivalidade-lutador">
+                  {jogoB && getImagem(jogoB) ? (
+                    <motion.img
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      src={getImagem(jogoB)!}
+                      alt="Jogo B"
+                      style={{
+                        width: '92px',
+                        aspectRatio: '3/4',
+                        objectFit: 'cover',
+                        border: `2px solid ${corSecundaria}`,
+                        borderRadius: '0px',
+                        boxShadow: `0 0 18px ${corGlowSecundaria}`,
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '92px',
+                        aspectRatio: '3/4',
+                        border: '1px dashed rgba(255,255,255,0.15)',
+                        borderRadius: '0px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#444',
+                        fontSize: '1.5rem',
+                        fontWeight: 800,
+                      }}
+                    >
+                      ?
+                    </div>
+                  )}
+                  <select
+                    value={jogoB}
+                    onChange={(e) => setJogoB(e.target.value)}
+                    disabled={semJogos}
+                    style={{
+                      width: '100%',
+                      padding: '0.95rem 1rem',
+                      backgroundColor: jogoB ? corSelectAtivoB : '#1C1C1E',
+                      color: jogoB ? corSecundaria : 'white',
+                      border: '1px solid',
+                      borderColor: jogoB ? corSecundaria : 'rgba(255,255,255,0.12)',
+                      borderRadius: '0px',
+                      fontSize: '0.95rem',
+                      cursor: semJogos ? 'not-allowed' : 'pointer',
+                      outline: 'none',
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <option value="" style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
+                      Escolha o Lutador B
+                    </option>
+                    {listaJogos.map((jogo: any) => (
+                      <option key={`B-${jogo.titulo}`} value={jogo.titulo} style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
+                        {jogo.titulo}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -350,30 +719,72 @@ function HistoriaContent() {
               {semJogos ? (
                 <div style={{ color: '#a1a1aa' }}>Aguardando revelação dos jogos...</div>
               ) : buscandoH2h ? (
-                <div style={{ color: 'var(--purple-neon)', fontWeight: 'bold' }}>BUSCANDO NO ARQUIVO...</div>
+                <div style={{ color: corPrincipal, fontWeight: 'bold' }}>BUSCANDO NO ARQUIVO...</div>
               ) : jogoA && jogoB && jogoA === jogoB ? (
-                <div style={{ color: 'var(--purple-neon)', fontWeight: 'bold' }}>Um jogo não luta contra ele mesmo. Escolha outro adversário.</div>
+                <div style={{ color: corPrincipal, fontWeight: 'bold' }}>
+                  Um jogo não luta contra ele mesmo. Escolha outro adversário.
+                </div>
               ) : h2h && h2h.total > 0 ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.8rem' }}>
                     <div style={{ flex: 1, textAlign: 'left' }}>
-                      <span style={{ color: 'var(--purple-neon)', fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 900 }}>{h2h.porcentagemA}%</span>
+                      <span style={{ color: corPrincipal, fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 900 }}>
+                        {h2h.porcentagemA}%
+                      </span>
                     </div>
                     <div style={{ flex: 1, textAlign: 'right' }}>
-                      <span style={{ color: '#D4AF37', fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 900 }}>{h2h.porcentagemB}%</span>
+                      <span style={{ color: corSecundaria, fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 900 }}>
+                        {h2h.porcentagemB}%
+                      </span>
                     </div>
                   </div>
-                  
-                  <div style={{ width: '100%', height: '24px', backgroundColor: '#1C1C1E', display: 'flex', overflow: 'hidden', border: '1px solid #333', clipPath: selectClip }}>
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${h2h.porcentagemA}\%` }} transition={{ duration: 1 }} style={{ backgroundColor: 'var(--purple-neon)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black', fontWeight: 900, fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden' }}>{h2h.vitoriasA} VITÓRIAS</motion.div> <motion.div initial={{ width: 0 }} animate={{ width: `${h2h.porcentagemB}%` }} transition={{ duration: 1 }} style={{ backgroundColor: '#D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black', fontWeight: 900, fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden' }}>{h2h.vitoriasB} VITÓRIAS</motion.div>
+
+                  <div style={{ width: '100%', height: '24px', backgroundColor: '#1C1C1E', display: 'flex', overflow: 'hidden', border: '1px solid #333', borderRadius: '0px' }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${h2h.porcentagemA}%` }}
+                      transition={{ duration: 1 }}
+                      style={{
+                        backgroundColor: corPrincipal,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'black',
+                        fontWeight: 900,
+                        fontSize: '0.75rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {h2h.vitoriasA} VITÓRIAS
+                    </motion.div>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${h2h.porcentagemB}%` }}
+                      transition={{ duration: 1 }}
+                      style={{
+                        backgroundColor: corSecundaria,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'black',
+                        fontWeight: 900,
+                        fontSize: '0.75rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {h2h.vitoriasB} VITÓRIAS
+                    </motion.div>
                   </div>
-                  <p style={{ color: '#71717a', fontSize: '0.8rem', marginTop: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Veredito de {h2h.total} votos da comunidade.</p>
+                  <p style={{ color: '#71717a', fontSize: '0.8rem', marginTop: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Veredito de {h2h.total} votos da comunidade.
+                  </p>
                 </motion.div>
-              ) : (jogoA && jogoB) ? (
+              ) : jogoA && jogoB ? (
                 <div style={{ color: '#a1a1aa' }}>Esses dois ainda não se encontraram na arena. O duelo está em aberto.</div>
               ) : null}
             </div>
-
           </motion.div>
         )}
       </AnimatePresence>
@@ -383,7 +794,13 @@ function HistoriaContent() {
 
 export default function Historia() {
   return (
-    <Suspense fallback={<main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--purple-neon)' }}>Carregando...</main>}>
+    <Suspense
+      fallback={
+        <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--purple-neon)' }}>
+          Carregando...
+        </main>
+      }
+    >
       <HistoriaContent />
     </Suspense>
   );

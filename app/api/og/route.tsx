@@ -1,16 +1,21 @@
-// app/api/og/route.tsx
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import jogosData from '../../../lib/jogos.json';
 
-export const runtime = 'edge'; // Otimização para Cloudflare
+const IMAGENS_PERMITIDAS = new Set<string>([
+  '/placeholder.jpg',
+  ...((jogosData as any).tgt?.top10 || []).map((j: any) => j.imagem).filter(Boolean),
+  ...((jogosData as any).mercado?.top10 || []).map((j: any) => j.imagem).filter(Boolean),
+]);
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams, origin } = new URL(request.url);
 
-    // 1. SEGURANÇA: Sanitiza o texto para evitar estouro de memória no Worker
+    // 1. Sanitiza o texto para evitar estouro de memória ou marcação indevida
     const sanitizeText = (val: string | null, defaultText: string) => {
-      const text = (val || defaultText).replace(/[<>]/g, ''); // Evita HTML injection
+      const text = (val || defaultText).replace(/[<>]/g, '').trim();
+      if (!text) return defaultText;
       return text.length > 35 ? text.substring(0, 35) + '...' : text;
     };
 
@@ -18,13 +23,9 @@ export async function GET(request: NextRequest) {
     const t2 = sanitizeText(searchParams.get('t2'), '2º Lugar');
     const t3 = sanitizeText(searchParams.get('t3'), '3º Lugar');
 
-    // 2. SEGURANÇA: Trava as imagens no seu próprio domínio (evita SSRF)
+    // 2. Allowlist estrita de capas cadastradas no projeto (evita fetch interno arbitrário)
     const resolveLocalImage = (rawPath: string | null) => {
-      if (!rawPath) return '';
-      // Só aceita caminhos que começam com '/' e não têm 'http' ou '//'
-      if (!rawPath.startsWith('/') || rawPath.startsWith('//') || rawPath.includes(':')) {
-        return '';
-      }
+      if (!rawPath || !IMAGENS_PERMITIDAS.has(rawPath)) return '';
       const resolved = new URL(rawPath, origin);
       return resolved.origin === origin ? resolved.toString() : '';
     };
@@ -44,8 +45,8 @@ export async function GET(request: NextRequest) {
             width: '100%',
             height: '100%',
             backgroundColor: '#050508',
-            // Gradiente simples (Satori suporta)
-            backgroundImage: 'radial-gradient(circle at 50% 35%, rgba(176, 38, 255, 0.28) 0%, transparent 65%)',
+            backgroundImage:
+              'radial-gradient(circle at 50% 35%, rgba(176, 38, 255, 0.28) 0%, transparent 65%)',
             border: '2px solid #D4AF37',
             padding: '36px 48px',
             fontFamily: 'sans-serif',
@@ -63,14 +64,13 @@ export async function GET(request: NextRequest) {
 
           {/* Pódio com capas na proporção 3:4 e cantos retos */}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '40px', width: '100%' }}>
-            
             {/* 2º Lugar (Prata) */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '210px' }}>
               <span style={{ color: '#E2E8F0', fontSize: '15px', fontWeight: 800, letterSpacing: '2px', marginBottom: '8px' }}>
                 2º LUGAR
               </span>
               {i2 ? (
-                <img src={i2} style={{ width: '195px', height: '260px', border: '2px solid #E2E8F0', objectFit: 'cover' }} />
+                <img src={i2} alt={t2} style={{ width: '195px', height: '260px', border: '2px solid #E2E8F0', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: '195px', height: '260px', backgroundColor: '#141419', border: '2px solid #E2E8F0' }} />
               )}
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
                 ★ CAMPEÃO ★
               </span>
               {i1 ? (
-                <img src={i1} style={{ width: '240px', height: '320px', border: '3px solid #D4AF37', objectFit: 'cover' }} />
+                <img src={i1} alt={t1} style={{ width: '240px', height: '320px', border: '3px solid #D4AF37', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: '240px', height: '320px', backgroundColor: '#141419', border: '3px solid #D4AF37' }} />
               )}
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
                 3º LUGAR
               </span>
               {i3 ? (
-                <img src={i3} style={{ width: '195px', height: '260px', border: '2px solid #CD7F32', objectFit: 'cover' }} />
+                <img src={i3} alt={t3} style={{ width: '195px', height: '260px', border: '2px solid #CD7F32', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: '195px', height: '260px', backgroundColor: '#141419', border: '2px solid #CD7F32' }} />
               )}
@@ -123,7 +123,6 @@ export async function GET(request: NextRequest) {
         width: 1200,
         height: 630,
         headers: {
-          // O Cache é essencial para não sobrecarregar o Cloudflare
           'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400',
         },
       }

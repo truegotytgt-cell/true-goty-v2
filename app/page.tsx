@@ -104,7 +104,7 @@ export default function Home() {
           fontSize: 'clamp(0.98rem, 3.6vw, 1.1rem)',
           color: '#a1a1aa',
           maxWidth: '600px',
-          margin: '0 0 clamp(2rem, 5vh, 3.5rem) 0',
+          margin: '0 0 clamp(2rem, 5vh, 3.2rem) 0',
           lineHeight: 1.6,
           fontWeight: 400,
         }}
@@ -112,27 +112,49 @@ export default function Home() {
         Chega de premiações de fachada. Aqui, os maiores jogos do ano se enfrentam em duelos 1v1 implacáveis até sobrar apenas um campeão. Quem leva a coroa?
       </motion.p>
 
-      {/* BOTÕES AÇÃO */}
+      {/* BOTÕES DE AÇÃO + MICRO-LEGENDA */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.5 }}
         style={{
           display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
           gap: '1rem',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          marginBottom: 'clamp(2.5rem, 7vh, 5rem)',
+          marginBottom: 'clamp(2.5rem, 6.5vh, 4.5rem)',
           width: '100%',
         }}
       >
-        <Link href="/votar/tgt" className="btn-arena">
-          ENTRAR NA ARENA
-        </Link>
+        <div
+          style={{
+            display: 'flex',
+            gap: '1.25rem',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            width: '100%',
+          }}
+        >
+          <Link href="/votar/tgt" className="btn-arena">
+            ENTRAR NA ARENA TGT
+          </Link>
 
-        <Link href="/votar/mercado" className="btn-mercado">
-          COMPARAR COM A MÍDIA
-        </Link>
+          <Link href="/votar/mercado" className="btn-mercado">
+            ARENA INDICADOS TGA
+          </Link>
+        </div>
+
+        <p
+          style={{
+            fontSize: '0.78rem',
+            color: '#71717a',
+            maxWidth: '520px',
+            margin: '0.25rem auto 0',
+            lineHeight: 1.45,
+          }}
+        >
+          Sem vínculo oficial com o The Game Awards. Ambas as arenas têm placar próprio com a voz da comunidade gamer — sem representar os vencedores oficiais do prêmio.
+        </p>
       </motion.div>
 
       {/* PLACAR / CONTADOR */}

@@ -14,5 +14,8 @@
       "database_name": "true-goty-db",
       "database_id": "eb76d54b-0522-4c53-9b1f-a8d906ac9843"
     }
-  ]
+  ],
+  "vars": {
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY": ""
+  }
 }

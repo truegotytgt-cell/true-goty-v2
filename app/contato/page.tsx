@@ -6,20 +6,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../components/LanguageProvider';
 
-// Ícone de Antena de Transmissão (SVG)
-const IconAntenna = () => (
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--purple-neon)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 20v-8"/>
-    <path d="M6 10a8 8 0 0 1 12 0"/>
-    <path d="M4 6a12 12 0 0 1 16 0"/>
-    <path d="M12 20h.01"/>
-    <path d="M10 20h4"/>
-  </svg>
-);
-
 export default function Contato() {
   const [copiado, setCopiado] = useState(false);
-  const email = "truegoty.tgt@gmail.com";
+  const email = 'truegoty.tgt@gmail.com';
   const { t } = useLanguage();
 
   const copiarEmail = () => {
@@ -30,35 +19,98 @@ export default function Contato() {
   };
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '140px 2rem 4rem', backgroundColor: 'transparent' }}>
-      
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-        style={{ 
-          backgroundColor: 'rgba(20, 20, 22, 0.85)', backdropFilter: 'blur(16px)', 
-          border: '1px solid rgba(176, 38, 255, 0.2)', padding: '3.5rem 2.5rem',
-          textAlign: 'center', maxWidth: '650px', width: '100%',
-          borderRadius: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
-          position: 'relative'
+    <main
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        padding: 'clamp(100px, 13vh, 140px) 1.25rem 4rem',
+        backgroundColor: 'transparent',
+        boxSizing: 'border-box',
+        width: '100%',
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          backgroundColor: 'rgba(20, 20, 24, 0.9)',
+          backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(176, 38, 255, 0.16), transparent 65%)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderTop: '2px solid #B026FF',
+          borderRadius: '0px',
+          padding: 'clamp(2.2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 2.5rem)',
+          textAlign: 'center',
+          maxWidth: '650px',
+          width: '100%',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.65)',
+          position: 'relative',
+          boxSizing: 'border-box',
         }}
       >
-        {/* Ícone */}
+        {/* Logo TGT */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-          <IconAntenna />
+          <img
+            src="/logo-tgt.png"
+            alt="TGT - True GOTY"
+            style={{
+              height: '92px',
+              width: 'auto',
+              objectFit: 'contain',
+              display: 'block',
+              filter: 'drop-shadow(0 0 18px rgba(176, 38, 255, 0.4))',
+            }}
+          />
         </div>
 
         {/* Selo Superior */}
-        <div style={{ color: 'var(--purple-neon)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '2px', marginBottom: '1rem' }}>
+        <div
+          style={{
+            display: 'inline-block',
+            border: '1px solid rgba(176, 38, 255, 0.4)',
+            backgroundColor: 'rgba(176, 38, 255, 0.1)',
+            color: 'var(--purple-neon)',
+            padding: '5px 14px',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            letterSpacing: '2px',
+            marginBottom: '1.1rem',
+            borderRadius: '0px',
+          }}
+        >
           [ CENTRAL DE COMUNICAÇÃO • {t.nav_contato} ]
         </div>
 
-        {/* Título com escala ampliada */}
-        <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: '#F4F4F0', marginBottom: '1rem', lineHeight: 1, fontFamily: 'var(--font-teko)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+        {/* Título */}
+        <h1
+          style={{
+            fontSize: 'clamp(2.4rem, 5.5vw, 3.5rem)',
+            fontWeight: 900,
+            color: '#F4F4F0',
+            margin: '0 0 1rem 0',
+            lineHeight: 1,
+            fontFamily: 'var(--font-teko)',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+          }}
+        >
           {t.contato_titulo}
         </h1>
-        
+
         {/* Subtítulo */}
-        <p style={{ color: '#D1D5DB', fontSize: '1.05rem', marginBottom: '2.5rem', lineHeight: 1.6, maxWidth: '500px', margin: '0 auto 2.5rem auto' }}>
+        <p
+          style={{
+            color: '#D1D5DB',
+            fontSize: '1.02rem',
+            lineHeight: 1.6,
+            maxWidth: '500px',
+            margin: '0 auto 2.25rem auto',
+          }}
+        >
           {t.contato_sub}
         </p>
 
@@ -71,37 +123,76 @@ export default function Contato() {
           <span style={{ color: '#a1a1aa', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px' }}>[ FEEDBACK ]</span>
         </div>
 
-        {/* Visor de E-mail (Invertido e com borda roxa) */}
-        <div style={{ 
-          backgroundColor: 'rgba(10, 10, 10, 0.6)', padding: '1.5rem', marginBottom: '2rem',
-          border: '1px solid rgba(176, 38, 255, 0.4)', borderRadius: '12px', position: 'relative'
-        }}>
+        {/* Visor de E-mail (Cantos Retos) */}
+        <div
+          style={{
+            backgroundColor: 'rgba(10, 10, 12, 0.78)',
+            padding: '1.4rem 1.25rem',
+            marginBottom: '2rem',
+            border: '1px solid rgba(176, 38, 255, 0.45)',
+            borderRadius: '0px',
+            position: 'relative',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--purple-neon)', boxShadow: '0 0 10px var(--purple-neon)', animation: 'pulseGlow 2s infinite' }} />
-            <span style={{ color: 'var(--purple-neon)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '2px' }}>CANAL ATIVO</span>
+            <div
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--purple-neon)',
+                boxShadow: '0 0 10px var(--purple-neon)',
+                animation: 'pulseGlow 2s infinite',
+              }}
+            />
+            <span style={{ color: 'var(--purple-neon)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '2px' }}>
+              CANAL ATIVO
+            </span>
           </div>
-          <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#FFF', letterSpacing: '1px' }}>
+          <span
+            style={{
+              fontSize: 'clamp(1.1rem, 4.5vw, 1.5rem)',
+              fontWeight: 900,
+              color: '#FFF',
+              letterSpacing: '0.5px',
+              wordBreak: 'break-all',
+            }}
+          >
             {email}
           </span>
         </div>
 
-        {/* Botão de Copiar (Pílula Original) */}
-        <button 
+        {/* Botão de Copiar (Editorial) */}
+        <button
+          type="button"
           onClick={copiarEmail}
-          style={{ 
-            width: '100%', maxWidth: '320px', padding: '1rem 2rem', fontSize: '1.1rem', margin: '0 auto', display: 'flex', justifyContent: 'center',
-            backgroundColor: copiado ? '#D4AF37' : 'var(--purple-neon)', 
-            color: copiado ? '#000' : '#FFF',
-            borderRadius: '50px', border: 'none', cursor: 'pointer', fontWeight: 900,
-            boxShadow: copiado ? '0 0 20px rgba(212, 175, 55, 0.4)' : '0 0 30px rgba(176, 38, 255, 0.4)',
-            transition: 'all 0.3s ease'
+          style={{
+            width: '100%',
+            maxWidth: '340px',
+            padding: '1rem 2rem',
+            fontSize: '1.25rem',
+            fontFamily: 'var(--font-teko)',
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            margin: '0 auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: copiado ? '#D4AF37' : '#B026FF',
+            color: copiado ? '#0A0A0A' : '#FFFFFF',
+            borderRadius: '0px',
+            border: `1px solid ${copiado ? '#F4D06F' : 'rgba(255, 255, 255, 0.18)'}`,
+            cursor: 'pointer',
+            fontWeight: 800,
+            boxShadow: copiado ? '0 0 24px rgba(212, 175, 55, 0.45)' : '0 0 28px rgba(176, 38, 255, 0.4)',
+            transition: 'all 0.25s ease',
           }}
         >
           {copiado ? '✓ ENDEREÇO COPIADO' : t.contato_btn}
         </button>
 
         {/* Aviso Legal */}
-        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <p style={{ color: '#71717a', fontSize: '0.75rem', lineHeight: 1.5, margin: 0 }}>
             O TGT é um projeto independente de entretenimento. Não possui vínculo, afiliação ou apoio do TGA nem de outras premiações do mercado.
           </p>
@@ -109,11 +200,28 @@ export default function Contato() {
 
         {/* Link de Voltar */}
         <div style={{ marginTop: '1.5rem' }}>
-          <Link href="/" style={{ color: '#a1a1aa', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#FFF'} onMouseOut={(e) => e.currentTarget.style.color = '#a1a1aa'}>
+          <Link
+            href="/"
+            style={{
+              color: '#a1a1aa',
+              textDecoration: 'none',
+              fontSize: '0.85rem',
+              fontWeight: 'bold',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'color 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = '#FFF';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = '#a1a1aa';
+            }}
+          >
             ← {t.contato_voltar}
           </Link>
         </div>
-
       </motion.div>
     </main>
   );

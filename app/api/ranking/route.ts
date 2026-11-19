@@ -1,41 +1,58 @@
-// app/api/ranking/route.ts
 import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getDB } from '../../../lib/db';
 import jogosData from '../../../lib/jogos.json';
 
+const CATEGORIAS_VALIDAS = ['tgt', 'mercado'] as const;
+type CategoriaValida = (typeof CATEGORIAS_VALIDAS)[number];
+
+function resolverCategoria(raw: string | null): CategoriaValida {
+  return raw === 'mercado' ? 'mercado' : 'tgt';
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const categoria = searchParams.get('category') || 'tgt';
+    const categoria = resolverCategoria(searchParams.get('category'));
 
     const { env } = getCloudflareContext();
     const db = getDB(env);
 
     // 1. Puxa os confrontos agrupados
-    const { results } = await db.prepare(
-      "SELECT winner_title, loser_title, COUNT(*) as wins FROM pairwise_results WHERE category = ? GROUP BY winner_title, loser_title"
-    ).bind(categoria).all();
+    const queryResult = await db
+      .prepare(
+        'SELECT winner_title, loser_title, COUNT(*) as wins FROM pairwise_results WHERE category = ? GROUP BY winner_title, loser_title'
+      )
+      .bind(categoria)
+      .all();
+
+    const rows = Array.isArray(queryResult?.results) ? queryResult.results : [];
 
     const matrizVitorias = new Map<string, Map<string, number>>();
-    results.forEach((row: any) => {
-      if (!matrizVitorias.has(row.winner_title)) matrizVitorias.set(row.winner_title, new Map());
-      matrizVitorias.get(row.winner_title)!.set(row.loser_title, row.wins);
+    rows.forEach((row: any) => {
+      if (typeof row?.winner_title !== 'string' || typeof row?.loser_title !== 'string') return;
+      if (!matrizVitorias.has(row.winner_title)) {
+        matrizVitorias.set(row.winner_title, new Map());
+      }
+      matrizVitorias.get(row.winner_title)!.set(row.loser_title, Number(row.wins) || 0);
     });
 
-    const getVitorias = (jogoA: string, jogoB: string) => {
+    const getVitorias = (jogoA: string, jogoB: string): number => {
       return matrizVitorias.get(jogoA)?.get(jogoB) || 0;
     };
 
-    // 2. Inicializa placar com pontuação E nota da crítica
+    // 2. Inicializa placar com pontuação e nota de referência
     const jogosCategoria = (jogosData as any)[categoria]?.top10 || [];
     const placar = new Map<string, { pontos: number; rating: number }>();
-    
+
     jogosCategoria.forEach((jogo: any) => {
-      placar.set(jogo.titulo, { pontos: 0, rating: jogo.user_rating_original || 0 });
+      placar.set(jogo.titulo, {
+        pontos: 0,
+        rating: typeof jogo.user_rating_original === 'number' ? jogo.user_rating_original : 0,
+      });
     });
 
-    // 3. Calcula o Condorcet Global
+    // 3. Calcula o Condorcet Global (1 ponto por confronto direto vencido com mais votos)
     jogosCategoria.forEach((jogoA: any) => {
       let pontos = 0;
       jogosCategoria.forEach((jogoB: any) => {
@@ -45,28 +62,28 @@ export async function GET(request: Request) {
           if (vitoriasA > vitoriasB) pontos++;
         }
       });
-      placar.get(jogoA.titulo)!.pontos = pontos;
+      const entry = placar.get(jogoA.titulo);
+      if (entry) entry.pontos = pontos;
     });
 
-    // 4. Ordena por Pontos, depois por Rating (Empate), depois Alfabeticamente
+    // 4. Ordena por Pontos -> Head-to-Head -> Rating -> Alfabético
     const rankingFinal = Array.from(placar.entries())
-      .map(([titulo, data]) => ({ 
-        game_title: titulo, 
+      .map(([titulo, data]) => ({
+        game_title: titulo,
         total_score: data.pontos,
-        rating: data.rating
+        rating: data.rating,
       }))
       .sort((a, b) => {
-        // 1º Critério: Pontos
+        // 1º Critério: Pontos Condorcet
         if (b.total_score !== a.total_score) return b.total_score - a.total_score;
-        
-        // 2º Critério: Nota da Crítica (Desempate inicial)
-        if (b.rating !== a.rating) return b.rating - a.rating;
 
-        // 3º Critério: Head-to-Head (Se já houver votos)
-        const aVenceuB = getVitorias(a.game_title, b.game_title) > getVitorias(b.game_title, a.game_title);
-        if (aVenceuB) return -1;
-        const bVenceuA = getVitorias(b.game_title, a.game_title) > getVitorias(a.game_title, b.game_title);
-        if (bVenceuA) return 1;
+        // 2º Critério: Confronto direto (Head-to-Head)
+        const vitoriasAB = getVitorias(a.game_title, b.game_title);
+        const vitoriasBA = getVitorias(b.game_title, a.game_title);
+        if (vitoriasAB !== vitoriasBA) return vitoriasBA - vitoriasAB;
+
+        // 3º Critério: Nota de referência
+        if (b.rating !== a.rating) return b.rating - a.rating;
 
         // 4º Critério: Alfabético
         return a.game_title.localeCompare(b.game_title);
@@ -75,9 +92,8 @@ export async function GET(request: Request) {
     const response = NextResponse.json({ success: true, ranking: rankingFinal });
     response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
     return response;
-
   } catch (error) {
-    console.error("Erro ao buscar ranking:", error);
-    return NextResponse.json({ success: false, error: "Falha ao buscar ranking" }, { status: 500 });
+    console.error('Erro ao buscar ranking:', error);
+    return NextResponse.json({ success: false, error: 'Falha ao buscar ranking' }, { status: 500 });
   }
 }

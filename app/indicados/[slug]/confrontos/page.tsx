@@ -88,11 +88,12 @@ function ConfrontosJogoContent() {
     }
   });
 
+  // Cantos retos editoriais e bordas finas (sem chanfro)
   const cardStyle = {
-    backgroundColor: 'rgba(20, 20, 24, 0.8)',
+    backgroundColor: 'rgba(20, 20, 24, 0.85)',
     backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.05)',
-    clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '0px',
     position: 'relative' as const,
     overflow: 'hidden',
     boxSizing: 'border-box' as const,
@@ -161,7 +162,7 @@ function ConfrontosJogoContent() {
           width: 100%;
           height: 8px;
           background: rgba(255,255,255,0.05);
-          border-radius: 4px;
+          border-radius: 0px;
           display: flex;
           overflow: hidden;
           position: relative;
@@ -176,6 +177,23 @@ function ConfrontosJogoContent() {
           height: 100%;
           flex: 1;
           transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cta-arena-wrapper {
+          margin-top: 2.5rem;
+          width: 100%;
+        }
+
+        .cta-arena-btn {
+          width: 100%;
+          padding: 1.25rem 2rem;
+          font-size: clamp(1.25rem, 3vw, 1.55rem);
+          letter-spacing: 1.5px;
+          gap: 12px;
+          background: linear-gradient(135deg, #7e22ce 0%, #B026FF 100%);
+          color: #FFFFFF;
+          box-shadow: 0 12px 35px rgba(176, 38, 255, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.15);
+          text-align: center;
         }
 
         @media (max-width: 900px) {
@@ -198,6 +216,10 @@ function ConfrontosJogoContent() {
             grid-template-columns: 1fr;
             margin-bottom: 1.75rem;
           }
+
+          .cta-arena-btn {
+            padding: 1.1rem 1.25rem;
+          }
         }
       `}</style>
 
@@ -210,7 +232,7 @@ function ConfrontosJogoContent() {
 
       <div className="confrontos-layout">
         
-        {/* DOSSIÊ DO JOGO */}
+        {/* DOSSIÊ DO JOGO (CANTOS RETOS) */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -218,7 +240,7 @@ function ConfrontosJogoContent() {
           className="dossie-card"
           style={{ ...cardStyle, borderTop: `3px solid ${corPrincipal}` }}
         >
-          <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: '4px', overflow: 'hidden', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
+          <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: '0px', overflow: 'hidden', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
             <img src={jogoAtual.imagem} alt={jogoAtual.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(20,20,24,1) 0%, transparent 40%)' }} />
           </div>
@@ -274,7 +296,7 @@ function ConfrontosJogoContent() {
             </p>
           </div>
 
-          {/* DESTAQUES (DOMÍNIO, EQUILÍBRIO, ARQUI-INIMIGO) */}
+          {/* DESTAQUES (CANTOS RETOS + ÍCONE BALANÇA EM EQUILÍBRIO) */}
           {!carregando && maisParelho && maiorVitoria && arquiInimigo && (
             <div className="destaques-grid">
               <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: `2px solid ${corPrincipal}` }}>
@@ -287,9 +309,15 @@ function ConfrontosJogoContent() {
                 </p>
               </div>
 
-              <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: `2px solid #FFF` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FFF', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M5 10l7-7 7 7"/><path d="M5 14l7 7 7-7"/></svg>
+              <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '2px solid #E2E8F0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3v18" />
+                    <path d="M8 21h8" />
+                    <path d="M4 7h16" />
+                    <path d="M6 7l-3 7a3 3 0 0 0 6 0L6 7z" />
+                    <path d="M18 7l-3 7a3 3 0 0 0 6 0l-3-7z" />
+                  </svg>
                   Equilíbrio
                 </div>
                 <p style={{ color: '#D1D5DB', fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>
@@ -297,7 +325,7 @@ function ConfrontosJogoContent() {
                 </p>
               </div>
 
-              <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: `2px solid #ef4444` }}>
+              <div style={{ ...cardStyle, padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '2px solid #ef4444' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ef4444', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M9.5 6.5L21 18v3h-3L6.5 9.5"/></svg>
                   Arqui-Inimigo
@@ -314,100 +342,98 @@ function ConfrontosJogoContent() {
               CARREGANDO HISTÓRICO...
             </div>
           ) : (
-            <div className="confrontos-grid">
-              {oponentesOrdenados.map((oponente: any) => {
-                const stat = stats[oponente.titulo];
-                const semVotos = !stat || stat.total === 0;
-                const porcentagemVitoria = semVotos ? 50 : stat.porcentagemA; 
-                const porcentagemDerrota = 100 - porcentagemVitoria;
+            <>
+              <div className="confrontos-grid">
+                {oponentesOrdenados.map((oponente: any) => {
+                  const stat = stats[oponente.titulo];
+                  const semVotos = !stat || stat.total === 0;
+                  const porcentagemVitoria = semVotos ? 50 : stat.porcentagemA; 
+                  const porcentagemDerrota = 100 - porcentagemVitoria;
 
-                const corBarraEsq = semVotos ? 'rgba(255,255,255,0.1)' : (porcentagemVitoria > 50 ? corPrincipal : '#ef4444');
-                const corBarraDir = semVotos ? 'rgba(255,255,255,0.1)' : (porcentagemDerrota > 50 ? '#ef4444' : corSecundaria);
+                  const corBarraEsq = semVotos ? 'rgba(255,255,255,0.1)' : (porcentagemVitoria > 50 ? corPrincipal : '#ef4444');
+                  const corBarraDir = semVotos ? 'rgba(255,255,255,0.1)' : (porcentagemDerrota > 50 ? '#ef4444' : corSecundaria);
 
-                return (
-                  <div key={oponente.slug} className="oponente-card" style={{ 
-                    ...cardStyle, 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    height: '100px',
-                    width: '100%',
-                    transition: 'border-color 0.3s'
-                  }}>
-                    {/* ARTE DIAGONAL SANGRADA */}
-                    <div style={{ width: '92px', height: '100%', position: 'absolute', left: 0, top: 0, overflow: 'hidden' }}>
-                      <img 
-                        src={oponente.imagem} 
-                        alt={oponente.titulo} 
-                        className="oponente-img"
-                        style={{ 
-                          width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease',
-                          maskImage: 'linear-gradient(to right, black 40%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 100%)'
-                        }} 
-                      />
-                      <div className="vs-marca" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: 0, transition: 'all 0.3s', color: corPrincipal, fontWeight: 900, fontSize: '2rem', pointerEvents: 'none', textShadow: '0 0 10px rgba(0,0,0,0.8)' }}>
-                        VS
+                  return (
+                    <div key={oponente.slug} className="oponente-card" style={{ 
+                      ...cardStyle, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      height: '100px',
+                      width: '100%',
+                      transition: 'border-color 0.3s'
+                    }}>
+                      <div style={{ width: '92px', height: '100%', position: 'absolute', left: 0, top: 0, overflow: 'hidden' }}>
+                        <img 
+                          src={oponente.imagem} 
+                          alt={oponente.titulo} 
+                          className="oponente-img"
+                          style={{ 
+                            width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease',
+                            maskImage: 'linear-gradient(to right, black 40%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 100%)'
+                          }} 
+                        />
+                        <div className="vs-marca" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: 0, transition: 'all 0.3s', color: corPrincipal, fontWeight: 900, fontSize: '2rem', pointerEvents: 'none', textShadow: '0 0 10px rgba(0,0,0,0.8)' }}>
+                          VS
+                        </div>
                       </div>
-                    </div>
 
-                    <div style={{ marginLeft: '94px', flex: 1, minWidth: 0, paddingRight: '1rem', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.7rem' }}>
-                        <span style={{ fontWeight: 'bold', color: 'var(--text-light)', fontSize: '0.92rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                          {oponente.titulo}
-                        </span>
-                        
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                      <div style={{ marginLeft: '94px', flex: 1, minWidth: 0, paddingRight: '1rem', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.7rem' }}>
+                          <span style={{ fontWeight: 'bold', color: 'var(--text-light)', fontSize: '0.92rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                            {oponente.titulo}
+                          </span>
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                            {semVotos ? (
+                              <span style={{ color: '#71717a', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', whiteSpace: 'nowrap' }}>SEM DADOS</span>
+                            ) : (
+                              <>
+                                <span style={{ color: porcentagemVitoria > 50 ? corPrincipal : '#ef4444', fontWeight: 900, fontSize: '1.05rem' }}>
+                                  {porcentagemVitoria}%
+                                </span>
+                                {porcentagemVitoria > 50 ? (
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={corPrincipal} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                ) : porcentagemVitoria < 50 ? (
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                ) : null}
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="barra-cabo">
                           {semVotos ? (
-                            <span style={{ color: '#71717a', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', whiteSpace: 'nowrap' }}>SEM DADOS</span>
+                            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(to right, transparent 49%, #71717a 50%, transparent 51%)' }} />
                           ) : (
                             <>
-                              <span style={{ color: porcentagemVitoria > 50 ? corPrincipal : '#ef4444', fontWeight: 900, fontSize: '1.05rem' }}>
-                                {porcentagemVitoria}%
-                              </span>
-                              {porcentagemVitoria > 50 ? (
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={corPrincipal} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                              ) : porcentagemVitoria < 50 ? (
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                              ) : null}
+                              <motion.div initial={{ width: 0 }} animate={{ width: `${porcentagemVitoria}%` }} transition={{ duration: 1 }} className="cabo-esq" style={{ backgroundColor: corBarraEsq }} />
+                              <motion.div initial={{ width: 0 }} animate={{ width: `${porcentagemDerrota}%` }} transition={{ duration: 1 }} className="cabo-dir" style={{ backgroundColor: corBarraDir }} />
                             </>
                           )}
                         </div>
                       </div>
-
-                      {/* BARRA CABO DE GUERRA */}
-                      <div className="barra-cabo">
-                        {semVotos ? (
-                          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(to right, transparent 49%, #71717a 50%, transparent 51%)' }} />
-                        ) : (
-                          <>
-                            <motion.div initial={{ width: 0 }} animate={{ width: `${porcentagemVitoria}%` }} transition={{ duration: 1 }} className="cabo-esq" style={{ backgroundColor: corBarraEsq }} />
-                            <motion.div initial={{ width: 0 }} animate={{ width: `${porcentagemDerrota}%` }} transition={{ duration: 1 }} className="cabo-dir" style={{ backgroundColor: corBarraDir }} />
-                          </>
-                        )}
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
-
-              {/* 10º CARD ESPECIAL */}
-              <div style={{
-                ...cardStyle,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                height: '100px', border: `1px dashed ${corPrincipal}80`, backgroundColor: `${corPrincipal}05`,
-                textAlign: 'center', padding: '1rem'
-              }}>
-                <span style={{ color: '#D1D5DB', fontSize: '0.8rem', marginBottom: '0.4rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  Discorda desse placar?
-                </span>
-                <Link href={`/votar/${categoria}`} style={{ 
-                  color: corPrincipal, textDecoration: 'none', fontWeight: 900, fontSize: '0.9rem',
-                  display: 'flex', alignItems: 'center', gap: '6px', transition: 'transform 0.2s'
-                }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateX(5px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateX(0)'}>
-                  ENTRAR NA ARENA E VOTAR →
-                </Link>
+                  );
+                })}
               </div>
 
-            </div>
+              {/* BOTÃO CTA PRINCIPAL DE DESTAQUE MÁXIMO (CHANFRO EXCLUSIVO 45°) */}
+              <div className="cta-arena-wrapper">
+                <Link href={`/votar/${categoria}`} className="btn-arena cta-arena-btn">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
+                    <path d="M13 19l6-6" />
+                    <path d="M16 16l4 4" />
+                    <path d="M19 21l2-2" />
+                    <path d="M14.5 6.5L18 3h3v3l-3.5 3.5" />
+                    <path d="M5 14l6 6" />
+                    <path d="M8 17l-4 4" />
+                    <path d="M5 19l-2 2" />
+                  </svg>
+                  <span>DISCORDA? ENTRE NA ARENA E DECIDA O VERDADEIRO GOTY</span>
+                </Link>
+              </div>
+            </>
           )}
         </motion.div>
       </div>

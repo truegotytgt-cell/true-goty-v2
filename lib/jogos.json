@@ -1,101 +1,137 @@
 {
   "tgt": {
     "top10": [
-      { 
-        "titulo": "007: First Light", 
-        "slug": "007-first-light", 
-        "imagem": "/007.jpg", 
-        "plataformas": ["PC", "PS5", "Xbox"], 
-        "user_rating_original": 8.8,
-        "produtora": "IO Interactive",
-        "diretor": "Hakan Abrak"
+      {
+        "titulo": "The Legend of Zelda: Ocarina of Time",
+        "slug": "zelda",
+        "imagem": "/zelda.jpg",
+        "plataformas": ["Switch"],
+        "produtora": "Nintendo EAD",
+        "diretor": "Toru Osawa, Eiji Aonuma e Yoshiaki Koizumi"
       },
-      { 
-        "titulo": "Forza 6", 
-        "slug": "forza-6", 
-        "imagem": "/forza6.jpg", 
-        "plataformas": ["Xbox", "PC"], 
-        "user_rating_original": 9.0,
-        "produtora": "Playground Games",
-        "diretor": "Mike Brown e Torben Ellert"
-      },
-      { 
-        "titulo": "Grand Theft Auto VI", 
-        "slug": "gta-vi", 
-        "imagem": "/gtaVI.jpg", 
-        "plataformas": ["PS5", "Xbox"], 
-        "user_rating_original": 9.5,
-        "produtora": "Rockstar Games",
-        "diretor": "Rob Nelson"
-      },
-      { 
-        "titulo": "Mina the Hollower", 
-        "slug": "mina", 
-        "imagem": "/mina.jpg", 
-        "plataformas": ["PC", "Switch"], 
-        "user_rating_original": 8.5,
-        "produtora": "Yacht Club Games",
-        "diretor": "Sean Velasco"
-      },
-      { 
-        "titulo": "Onimusha: Way of the Sword", 
-        "slug": "onimusha", 
-        "imagem": "/onimusha.jpg", 
-        "plataformas": ["PC", "PS5", "Xbox"], 
-        "user_rating_original": 9.0,
-        "produtora": "Capcom",
-        "diretor": "Satoru Nihei"
-      },
-      { 
-        "titulo": "Phantom Blade Zero", 
-        "slug": "phantom", 
-        "imagem": "/phantom.jpg", 
-        "plataformas": ["PC", "PS5"], 
-        "user_rating_original": 8.2,
-        "produtora": "S-Game",
-        "diretor": "Soulframe Liang"
-      },
-      { 
-        "titulo": "Pokopia", 
-        "slug": "pokopia", 
-        "imagem": "/pokopia.jpg", 
-        "plataformas": ["Switch"], 
-        "user_rating_original": 8.0,
-        "produtora": "The Pokémon Company, Game Freak, Omega Force",
-        "diretor": "Takuto Edagawa"
-      },
-      { 
-        "titulo": "Resident Evil Requiem", 
-        "slug": "re-requiem", 
-        "imagem": "/re_requiem.jpg", 
-        "plataformas": ["PC", "PS5", "Xbox"], 
-        "user_rating_original": 9.2,
+      {
+        "titulo": "Resident Evil Requiem",
+        "slug": "re-requiem",
+        "imagem": "/re_requiem.jpg",
+        "plataformas": ["PC", "PS5", "Xbox"],
         "produtora": "Capcom",
         "diretor": "Koshi Nakanishi"
       },
-      { 
-        "titulo": "Saros", 
-        "slug": "saros", 
-        "imagem": "/saros.jpg", 
-        "plataformas": ["PS5"], 
-        "user_rating_original": 8.7,
-        "produtora": "Housemarque",
-        "diretor": "Gregory Louden"
+      {
+        "titulo": "Queen’s Domain",
+        "slug": "queens-domain",
+        "imagem": "/queensdomain.jpg",
+        "plataformas": ["PC", "PS5", "Xbox"],
+        "produtora": "Equipe de Desenvolvimento Independente",
+        "diretor": "A confirmar"
       },
-      { 
-        "titulo": "The Legend of Zelda: Ocarina of Time", 
-        "slug": "zelda", 
-        "imagem": "/zelda.jpg", 
-        "plataformas": ["Switch"], 
-        "user_rating_original": 9.8,
-        "produtora": "Nintendo EAD",
-        "diretor": "Toru Osawa, Eiji Aonuma e Yoshiaki Koizumi"
+      {
+        "titulo": "Splatoon Raiders",
+        "slug": "splatoon-raiders",
+        "imagem": "/splatoon.jpg",
+        "plataformas": ["Switch"],
+        "produtora": "Nintendo EPD",
+        "diretor": "Hisashi Nogami"
+      },
+      {
+        "titulo": "Trails in the Sky 2nd",
+        "slug": "trails-in-the-sky-2nd",
+        "imagem": "/trails.jpg",
+        "plataformas": ["PC", "PS5", "Switch"],
+        "produtora": "Nihon Falcom",
+        "diretor": "Toshihiro Kondo"
+      },
+      {
+        "titulo": "Pokémon Pokopia",
+        "slug": "pokopia",
+        "imagem": "/pokopia.jpg",
+        "plataformas": ["Switch"],
+        "produtora": "The Pokémon Company, Game Freak, Omega Force",
+        "diretor": "Takuto Edagawa"
+      },
+      {
+        "titulo": "Pragmata",
+        "slug": "pragmata",
+        "imagem": "/pragmata.jpg",
+        "plataformas": ["PC", "PS5", "Xbox"],
+        "produtora": "Capcom",
+        "diretor": "Naoto Oyama"
+      },
+      {
+        "titulo": "Phantom Blade Zero",
+        "slug": "phantom",
+        "imagem": "/phantom.jpg",
+        "plataformas": ["PC", "PS5"],
+        "produtora": "S-Game",
+        "diretor": "Soulframe Liang"
+      },
+      {
+        "titulo": "Control Resonant",
+        "slug": "control-resonant",
+        "imagem": "/control.jpg",
+        "plataformas": ["PC", "PS5", "Xbox"],
+        "produtora": "Remedy Entertainment",
+        "diretor": "Mikael Kasurinen"
+      },
+      {
+        "titulo": "Grand Theft Auto VI",
+        "slug": "gta-vi",
+        "imagem": "/gtaVI.jpg",
+        "plataformas": ["PS5", "Xbox"],
+        "produtora": "Rockstar Games",
+        "diretor": "Rob Nelson"
       }
     ]
   },
   "mercado": {
-    "_aviso": "⚠️ CATEGORIA MERCADO: Os 10 jogos e imagens serão inseridos no dia 19/11.",
-    "_instrucoes": "Para ativar esta categoria, apague a chave '_aviso' e '_instrucoes' e preencha o array 'top10' abaixo com os jogos do mercado.",
-    "top10": []
+    "top10": [
+      {
+        "titulo": "007: First Light",
+        "slug": "007-first-light",
+        "imagem": "/007.jpg",
+        "plataformas": ["PC", "PS5", "Xbox"],
+        "produtora": "IO Interactive",
+        "diretor": "Hakan Abrak"
+      },
+      {
+        "titulo": "Control Resonant",
+        "slug": "control-resonant",
+        "imagem": "/control.jpg",
+        "plataformas": ["PC", "PS5", "Xbox"],
+        "produtora": "Remedy Entertainment"
+      },
+      {
+        "titulo": "Grand Theft Auto VI",
+        "slug": "gta-vi",
+        "imagem": "/gtaVI.jpg",
+        "plataformas": ["PS5", "Xbox"],
+        "produtora": "Rockstar Games",
+        "diretor": "Rob Nelson"
+      },
+      {
+        "titulo": "Phantom Blade Zero",
+        "slug": "phantom",
+        "imagem": "/phantom.jpg",
+        "plataformas": ["PC", "PS5"],
+        "produtora": "S-Game",
+        "diretor": "Soulframe Liang"
+      },
+      {
+        "titulo": "Resident Evil Requiem",
+        "slug": "re-requiem",
+        "imagem": "/re_requiem.jpg",
+        "plataformas": ["PC", "PS5", "Xbox"],
+        "produtora": "Capcom",
+        "diretor": "Koshi Nakanishi"
+      },
+      {
+        "titulo": "The Legend of Zelda: Ocarina of Time",
+        "slug": "zelda",
+        "imagem": "/zelda.jpg",
+        "plataformas": ["Switch"],
+        "produtora": "Nintendo EAD",
+        "diretor": "Toru Osawa, Eiji Aonuma e Yoshiaki Koizumi"
+      }
+    ]
   }
 }

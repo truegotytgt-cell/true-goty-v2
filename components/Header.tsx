@@ -66,11 +66,11 @@ export default function Header() {
 
   const navLinks = [
     { name: t.nav_inicio, path: '/' },
-    { name: t.nav_metodo, path: '/metodo' },
-    { name: t.nav_indicados, path: '/indicados' },
+    { name: t.nav_votar, path: '/votar', isVotar: true },
     { name: t.nav_goty, path: '/resultados' },
+    { name: t.nav_indicados, path: '/indicados' },
+    { name: t.nav_metodo, path: '/metodo' },
     { name: 'HISTÓRIA', path: '/historia' },
-    { name: t.nav_votar, path: '/votar' },
     { name: t.nav_sobre, path: '/sobre' },
   ];
 
@@ -103,12 +103,16 @@ export default function Header() {
           <nav className={styles.desktopNav} aria-label="Navegação principal">
             {navLinks.map((link) => {
               const active = isLinkActive(link.path);
+              const classes = [
+                styles.desktopNavLink,
+                link.isVotar ? styles.desktopNavLinkVotar : '',
+                active ? styles.desktopNavLinkActive : '',
+              ]
+                .filter(Boolean)
+                .join(' ');
+
               return (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  className={`${styles.desktopNavLink} ${active ? styles.desktopNavLinkActive : ''}`}
-                >
+                <Link key={link.path} href={link.path} className={classes}>
                   {link.name}
                 </Link>
               );
@@ -203,12 +207,20 @@ export default function Header() {
           <nav className={styles.mobileNavList}>
             {navLinks.map((link) => {
               const active = isLinkActive(link.path);
+              const classes = [
+                styles.mobileNavLink,
+                link.isVotar ? styles.mobileNavLinkVotar : '',
+                active ? styles.mobileNavLinkActive : '',
+              ]
+                .filter(Boolean)
+                .join(' ');
+
               return (
                 <Link
                   key={link.path}
                   href={link.path}
                   onClick={() => setMenuOpen(false)}
-                  className={`${styles.mobileNavLink} ${active ? styles.mobileNavLinkActive : ''}`}
+                  className={classes}
                 >
                   <span>{link.name}</span>
                   {active && <span className={styles.activeDot} />}
