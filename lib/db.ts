@@ -10,12 +10,24 @@ export type PairwiseVotoDB = {
   category: string;
 };
 
-type D1PreparedStatementLike = {
-  bind: (...values: unknown[]) => unknown;
+export type D1BoundStatement = {
+  all: <T = Record<string, unknown>>() => Promise<{ results?: T[] }>;
+  first: <T = Record<string, unknown>>() => Promise<T | null>;
+  run: () => Promise<{ meta?: { changes?: number } }>;
 };
 
-type D1DatabaseLike = {
+export type D1PreparedStatementLike = D1BoundStatement & {
+  bind: (...values: unknown[]) => D1BoundStatement;
+};
+
+export type D1BatchResult = {
+  meta?: { changes?: number };
+  results?: Record<string, unknown>[];
+};
+
+export type D1DatabaseLike = {
   prepare: (query: string) => D1PreparedStatementLike;
+  batch: (statements: D1BoundStatement[]) => Promise<D1BatchResult[]>;
 };
 
 type CloudflareEnvLike = {
@@ -30,7 +42,11 @@ export function getDB(env: unknown): D1DatabaseLike {
   return cfEnv.true_goty_db;
 }
 
-export function prepararVotosStatements(db: D1DatabaseLike, votos: VotoDB[], session_id: string) {
+export function prepararVotosStatements(
+  db: D1DatabaseLike,
+  votos: VotoDB[],
+  session_id: string
+): D1BoundStatement[] {
   return votos.map((voto) => {
     return db
       .prepare('INSERT OR IGNORE INTO results (game_title, score, category, session_id) VALUES (?, ?, ?, ?)')
@@ -42,7 +58,7 @@ export function prepararPairwiseStatements(
   db: D1DatabaseLike,
   pairwise: PairwiseVotoDB[],
   session_id: string
-) {
+): D1BoundStatement[] {
   const timestamp = Date.now();
   const anoAtual = new Date().getFullYear();
   return pairwise.map((p) => {
