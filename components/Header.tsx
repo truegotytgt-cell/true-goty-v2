@@ -1,4 +1,3 @@
-// components/Header.tsx
 'use client';
 
 import Link from 'next/link';
@@ -14,7 +13,6 @@ export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { lang, setLang, t } = useLanguage();
 
-  // Fecha o dropdown de idioma ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -25,13 +23,11 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fecha o menu gaveta e o seletor sempre que mudar de página
   useEffect(() => {
     setMenuOpen(false);
     setLangOpen(false);
   }, [pathname]);
 
-  // Trava a rolagem do fundo enquanto o menu mobile estiver aberto
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = 'hidden';
@@ -43,7 +39,6 @@ export default function Header() {
     };
   }, [menuOpen]);
 
-  // Fecha o menu gaveta se a tela crescer para desktop ou apertar ESC
   useEffect(() => {
     function handleResize() {
       if (window.innerWidth > 900) {
@@ -70,7 +65,7 @@ export default function Header() {
     { name: t.nav_goty, path: '/resultados' },
     { name: t.nav_indicados, path: '/indicados' },
     { name: t.nav_metodo, path: '/metodo' },
-    { name: 'HISTÓRIA', path: '/historia' },
+    { name: t.nav_historia, path: '/historia' },
     { name: t.nav_sobre, path: '/sobre' },
   ];
 
@@ -86,7 +81,6 @@ export default function Header() {
     <>
       <header className={styles.header}>
         <div className={styles.inner}>
-          {/* ESQUERDA: LOGO TGT */}
           <Link
             href="/"
             className={styles.logoLink}
@@ -99,7 +93,6 @@ export default function Header() {
             />
           </Link>
 
-          {/* CENTRO: NAVEGAÇÃO DESKTOP */}
           <nav className={styles.desktopNav} aria-label="Navegação principal">
             {navLinks.map((link) => {
               const active = isLinkActive(link.path);
@@ -110,7 +103,6 @@ export default function Header() {
               ]
                 .filter(Boolean)
                 .join(' ');
-
               return (
                 <Link key={link.path} href={link.path} className={classes}>
                   {link.name}
@@ -119,7 +111,6 @@ export default function Header() {
             })}
           </nav>
 
-          {/* DIREITA: IDIOMA + CONTATO (DESKTOP) + HAMBÚRGUER (MOBILE) */}
           <div className={styles.rightActions}>
             <div className={styles.langWrapper} ref={dropdownRef}>
               <button
@@ -137,7 +128,6 @@ export default function Header() {
                 />
                 <span>{labelAtual}</span>
               </button>
-
               {langOpen && (
                 <div className={styles.langDropdown}>
                   <button
@@ -201,7 +191,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* MENU GAVETA MOBILE */}
       {menuOpen && (
         <div className={styles.mobileDrawer} role="dialog" aria-label="Menu de navegação">
           <nav className={styles.mobileNavList}>
@@ -214,7 +203,6 @@ export default function Header() {
               ]
                 .filter(Boolean)
                 .join(' ');
-
               return (
                 <Link
                   key={link.path}
@@ -228,7 +216,6 @@ export default function Header() {
               );
             })}
           </nav>
-
           <div className={styles.mobileDrawerFooter}>
             <Link
               href="/contato"

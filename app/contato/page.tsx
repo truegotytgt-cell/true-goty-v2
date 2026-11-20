@@ -1,4 +1,3 @@
-// app/contato/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -52,7 +51,6 @@ export default function Contato() {
           boxSizing: 'border-box',
         }}
       >
-        {/* Logo TGT */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
           <img
             src="/logo-tgt.png"
@@ -67,7 +65,6 @@ export default function Contato() {
           />
         </div>
 
-        {/* Selo Superior */}
         <div
           style={{
             display: 'inline-block',
@@ -82,10 +79,9 @@ export default function Contato() {
             borderRadius: '0px',
           }}
         >
-          [ CENTRAL DE COMUNICAÇÃO • {t.nav_contato} ]
+          [ {t.nav_contato} ]
         </div>
 
-        {/* Título */}
         <h1
           style={{
             fontSize: 'clamp(2.4rem, 5.5vw, 3.5rem)',
@@ -101,7 +97,6 @@ export default function Contato() {
           {t.contato_titulo}
         </h1>
 
-        {/* Subtítulo */}
         <p
           style={{
             color: '#D1D5DB',
@@ -114,16 +109,6 @@ export default function Contato() {
           {t.contato_sub}
         </p>
 
-        {/* Tags de Assunto */}
-        <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
-          <span style={{ color: '#a1a1aa', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px' }}>[ IMPRENSA ]</span>
-          <span style={{ color: '#71717a', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px' }}>•</span>
-          <span style={{ color: '#a1a1aa', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px' }}>[ PARCERIAS ]</span>
-          <span style={{ color: '#71717a', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px' }}>•</span>
-          <span style={{ color: '#a1a1aa', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px' }}>[ FEEDBACK ]</span>
-        </div>
-
-        {/* Visor de E-mail (Cantos Retos) */}
         <div
           style={{
             backgroundColor: 'rgba(10, 10, 12, 0.78)',
@@ -134,21 +119,6 @@ export default function Contato() {
             position: 'relative',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-            <div
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--purple-neon)',
-                boxShadow: '0 0 10px var(--purple-neon)',
-                animation: 'pulseGlow 2s infinite',
-              }}
-            />
-            <span style={{ color: 'var(--purple-neon)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '2px' }}>
-              CANAL ATIVO
-            </span>
-          </div>
           <span
             style={{
               fontSize: 'clamp(1.1rem, 4.5vw, 1.5rem)',
@@ -162,7 +132,6 @@ export default function Contato() {
           </span>
         </div>
 
-        {/* Botão de Copiar (Editorial) */}
         <button
           type="button"
           onClick={copiarEmail}
@@ -188,17 +157,15 @@ export default function Contato() {
             transition: 'all 0.25s ease',
           }}
         >
-          {copiado ? '✓ ENDEREÇO COPIADO' : t.contato_btn}
+          {copiado ? t.contato_copiado : t.contato_btn}
         </button>
 
-        {/* Aviso Legal */}
         <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <p style={{ color: '#71717a', fontSize: '0.75rem', lineHeight: 1.5, margin: 0 }}>
-            O TGT é um projeto independente de entretenimento. Não possui vínculo, afiliação ou apoio do TGA nem de outras premiações do mercado.
+            {t.footer_direitos}
           </p>
         </div>
 
-        {/* Link de Voltar */}
         <div style={{ marginTop: '1.5rem' }}>
           <Link
             href="/"
@@ -212,14 +179,8 @@ export default function Contato() {
               gap: '8px',
               transition: 'color 0.2s',
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.color = '#FFF';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.color = '#a1a1aa';
-            }}
           >
-            ← {t.contato_voltar}
+            {t.contato_voltar}
           </Link>
         </div>
       </motion.div>

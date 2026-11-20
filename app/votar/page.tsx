@@ -1,8 +1,9 @@
-// app/votar/page.tsx
 'use client';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import jogosData from '../../lib/jogos.json';
+import { useLanguage } from '../../components/LanguageProvider';
 
 const IconTrophy = ({ color }: { color: string }) => (
   <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -16,7 +17,13 @@ const IconTrophy = ({ color }: { color: string }) => (
 );
 
 export default function VotarSelecao() {
+  const { t } = useLanguage();
   const btnClip = 'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)';
+
+  const qtdTgt = ((jogosData as any).tgt?.top10 || []).length;
+  const qtdMercado = ((jogosData as any).mercado?.top10 || []).length;
+  const duelosTgt = qtdTgt > 1 ? (qtdTgt * (qtdTgt - 1)) / 2 : 0;
+  const duelosMercado = qtdMercado > 1 ? (qtdMercado * (qtdMercado - 1)) / 2 : 0;
 
   return (
     <main
@@ -32,7 +39,6 @@ export default function VotarSelecao() {
         width: '100%',
       }}
     >
-      {/* HEADER COMPACTO COM TÍTULO EM 1 LINHA */}
       <motion.div
         initial={{ opacity: 0, y: -14 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,9 +58,8 @@ export default function VotarSelecao() {
             borderRadius: '0px',
           }}
         >
-          [ TEMPORADA 2026 ]
+          {t.votar_sel_badge}
         </div>
-
         <h1
           style={{
             color: 'var(--text-light)',
@@ -65,9 +70,8 @@ export default function VotarSelecao() {
             letterSpacing: '1px',
           }}
         >
-          QUAL É O SEU <span className="title-shine">VERDADEIRO GOTY?</span>
+          {t.votar_sel_titulo1} <span className="title-shine">{t.votar_sel_titulo2}</span>
         </h1>
-
         <p
           style={{
             color: '#D1D5DB',
@@ -80,11 +84,10 @@ export default function VotarSelecao() {
             lineHeight: 1.1,
           }}
         >
-          Duelos 1v1. Sem nota média. Um campeão sai daqui.
+          {t.votar_sel_sub}
         </p>
       </motion.div>
 
-      {/* CARDS DAS ARENAS (CABEM INTEIROS NA PRIMEIRA DOBRA) */}
       <div
         style={{
           display: 'grid',
@@ -95,7 +98,6 @@ export default function VotarSelecao() {
           alignItems: 'stretch',
         }}
       >
-        {/* ARENA TRUE GOTY (10 JOGOS • 45 DUELOS) */}
         <Link href="/votar/tgt" style={{ textDecoration: 'none', display: 'flex' }}>
           <motion.div
             whileHover={{ scale: 1.015, y: -4 }}
@@ -118,7 +120,6 @@ export default function VotarSelecao() {
             <div style={{ marginBottom: '0.8rem', filter: 'drop-shadow(0 0 16px rgba(176, 38, 255, 0.8))' }}>
               <IconTrophy color="var(--purple-neon)" />
             </div>
-
             <div
               style={{
                 color: 'var(--purple-neon)',
@@ -141,17 +142,14 @@ export default function VotarSelecao() {
                   animation: 'pulseGlow 1.5s infinite',
                 }}
               />
-              ARENA ABERTA • 45 DUELOS
+              {t.votar_sel_tgt_status} • {duelosTgt} {t.veredito_duelos}
             </div>
-
             <h2 style={{ color: '#FFF', fontSize: '2.4rem', fontWeight: 900, margin: 0, lineHeight: 1, fontFamily: 'var(--font-teko)' }}>
-              ARENA <span style={{ color: 'var(--purple-neon)' }}>TRUE GOTY</span>
+              {t.votar_sel_tgt_titulo} <span style={{ color: 'var(--purple-neon)' }}>{t.votar_sel_tgt_destaque}</span>
             </h2>
-
             <p style={{ color: '#D1D5DB', margin: '0.65rem 0 1.35rem 0', fontSize: '0.92rem', lineHeight: 1.5, maxWidth: '380px' }}>
-              Os 10 mais aclamados do ano frente a frente em duelos implacáveis.
+              {t.votar_sel_tgt_desc}
             </p>
-
             <div style={{ marginTop: 'auto', width: '100%' }}>
               <div
                 style={{
@@ -167,13 +165,12 @@ export default function VotarSelecao() {
                   fontFamily: 'var(--font-teko)',
                 }}
               >
-                ENTRAR NA ARENA TGT
+                {t.votar_sel_tgt_btn}
               </div>
             </div>
           </motion.div>
         </Link>
 
-        {/* ARENA MERCADO (TGA) — 6 JOGOS • 15 DUELOS */}
         <Link href="/votar/mercado" style={{ textDecoration: 'none', display: 'flex' }}>
           <motion.div
             whileHover={{ scale: 1.015, y: -4 }}
@@ -196,7 +193,6 @@ export default function VotarSelecao() {
             <div style={{ marginBottom: '0.8rem', filter: 'drop-shadow(0 0 16px rgba(212, 175, 55, 0.7))' }}>
               <IconTrophy color="#D4AF37" />
             </div>
-
             <div
               style={{
                 color: '#F4D06F',
@@ -210,17 +206,14 @@ export default function VotarSelecao() {
               }}
             >
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#D4AF37', boxShadow: '0 0 12px #D4AF37' }} />
-              ARENA ABERTA • 15 DUELOS
+              {t.votar_sel_mercado_status} • {duelosMercado} {t.veredito_duelos}
             </div>
-
             <h2 style={{ color: '#FFF', fontSize: '2.4rem', fontWeight: 900, margin: 0, lineHeight: 1, fontFamily: 'var(--font-teko)' }}>
-              ARENA <span style={{ color: '#D4AF37' }}>MERCADO (TGA)</span>
+              {t.votar_sel_mercado_titulo} <span style={{ color: '#D4AF37' }}>{t.votar_sel_mercado_destaque}</span>
             </h2>
-
             <p style={{ color: '#E4E4E7', margin: '0.65rem 0 0.75rem 0', fontSize: '0.92rem', lineHeight: 1.5, maxWidth: '380px' }}>
-              Os indicados escolhidos pela mídia e pelo Geoff Keighley colocados à prova no mano a mano.
+              {t.votar_sel_mercado_desc}
             </p>
-
             <p
               style={{
                 color: '#a1a1aa',
@@ -232,9 +225,8 @@ export default function VotarSelecao() {
                 maxWidth: '400px',
               }}
             >
-              Simulação independente sem vínculo oficial. Estes votos não contam para o TGA, apenas para a estatística do True GOTY.
+              {t.votar_sel_mercado_disclaimer}
             </p>
-
             <div style={{ marginTop: 'auto', width: '100%' }}>
               <div
                 style={{
@@ -250,7 +242,7 @@ export default function VotarSelecao() {
                   boxShadow: '0 10px 35px rgba(212, 175, 55, 0.4)',
                 }}
               >
-                ENTRAR NA ARENA TGA
+                {t.votar_sel_mercado_btn}
               </div>
             </div>
           </motion.div>

@@ -22,6 +22,16 @@ const IconLockClock = () => (
   </svg>
 );
 
+function persistirVereditoLocal(categoria: CategoriaValida, placarFinal: any[]) {
+  try {
+    localStorage.setItem(`tgt_has_voted_${categoria}`, 'true');
+    localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
+    localStorage.removeItem(`tgt_progress_${categoria}`);
+  } catch (err) {
+    console.warn('Não foi possível persistir o ranking local:', err);
+  }
+}
+
 export default function Votar() {
   const params = useParams();
   const router = useRouter();
@@ -125,9 +135,6 @@ export default function Votar() {
     notFound();
   }
 
-  // ==========================================
-  // TELA DE PORTÕES FECHADOS (SEM JOGOS AINDA)
-  // ==========================================
   if (jogos.length === 0) {
     return (
       <main
@@ -258,20 +265,16 @@ export default function Votar() {
       const resultado = await resposta.json();
 
       if (resultado.success) {
-        localStorage.setItem(`tgt_has_voted_${categoria}`, 'true');
-        localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
+        persistirVereditoLocal(categoria, placarFinal);
+        window.location.href = `/obrigado?categoria=${categoria}`;
+      } else if (resultado.code === 'ALREADY_VOTED') {
+        persistirVereditoLocal(categoria, placarFinal);
+        alert('Parece que você já votou nesta categoria! Vamos te levar para a página de resultados.');
         window.location.href = `/obrigado?categoria=${categoria}`;
       } else {
-        if (resultado.error && resultado.error.includes('já votou')) {
-          localStorage.setItem(`tgt_has_voted_${categoria}`, 'true');
-          localStorage.setItem(`tgt_my_ranking_${categoria}`, JSON.stringify(placarFinal));
-          alert('Parece que você já votou nesta categoria! Vamos te levar para a página de resultados.');
-          window.location.href = `/obrigado?categoria=${categoria}`;
-        } else {
-          alert('Ops! Ocorreu um erro: ' + resultado.error);
-          (window as any).turnstile?.reset();
-          setEnviando(false);
-        }
+        alert('Ops! Ocorreu um erro: ' + (resultado.error || 'Falha ao enviar voto.'));
+        (window as any).turnstile?.reset();
+        setEnviando(false);
       }
     } catch {
       alert('Erro de conexão. Tente novamente.');
@@ -280,9 +283,6 @@ export default function Votar() {
     }
   }
 
-  // ==========================================
-  // TELA DE BRIEFING (CANTOS RETOS + CTA .btn-arena)
-  // ==========================================
   if (!iniciou && dueloAtual === 0 && votos.length === 0) {
     const totalDuelosPrevisto = (jogos.length * (jogos.length - 1)) / 2;
     const duelosPorJogo = jogos.length - 1;
@@ -530,9 +530,6 @@ export default function Votar() {
     );
   }
 
-  // ==========================================
-  // TELA DE CARREGAMENTO
-  // ==========================================
   if (!carregado || duelos.length === 0) {
     return (
       <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', paddingTop: '120px' }}>
@@ -541,9 +538,6 @@ export default function Votar() {
     );
   }
 
-  // ==========================================
-  // TELA DE SELEÇÃO FINAL
-  // ==========================================
   if (dueloAtual >= duelos.length) {
     const placar = calcularPlacar(jogos, votos);
 
@@ -573,9 +567,6 @@ export default function Votar() {
     );
   }
 
-  // ==========================================
-  // TELA DE DUELO
-  // ==========================================
   const duelo = duelos[dueloAtual];
   const progressoPorcentagem = (dueloAtual / duelos.length) * 100;
 

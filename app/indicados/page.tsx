@@ -4,13 +4,13 @@ import { useState } from 'react';
 import jogosData from '@/lib/jogos.json';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/components/LanguageProvider';
 
 function formatarNota(nota: number) {
   if (typeof nota !== 'number') return nota;
   return nota.toFixed(1);
 }
 
-// Links oficiais por slug e plataforma
 const LINKS_OFICIAIS: Record<string, Partial<Record<'pc' | 'ps5' | 'xbox' | 'switch', string>>> = {
   '007-first-light': {
     pc: 'https://store.steampowered.com/search/?term=007+First+Light',
@@ -55,7 +55,7 @@ const LINKS_OFICIAIS: Record<string, Partial<Record<'pc' | 'ps5' | 'xbox' | 'swi
   onimusha: {
     pc: 'https://store.steampowered.com/search/?term=Onimusha+Way+of+the+Sword',
     ps5: 'https://store.playstation.com/pt-br/search/Onimusha%20Way%20of%20the%20Sword',
-    xbox: 'https://www.xbox.com/pt-BR/search/results/games?q=Onimusha+Way+of+the+Sword',
+    xbox: 'https://www.xbox.com/pt-BR/search/results/games?q=Onimusha+Way+of%20the%20Sword',
   },
   phantom: {
     pc: 'https://store.steampowered.com/search/?term=Phantom+Blade+Zero',
@@ -77,31 +77,30 @@ const LINKS_OFICIAIS: Record<string, Partial<Record<'pc' | 'ps5' | 'xbox' | 'swi
   },
 };
 
-// --- ÍCONES VETORIAIS OFICIAIS DAS PLATAFORMAS ---
 const IconPC = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <title>Ver na Steam (PC)</title>
+    <title>PC</title>
     <path d="M2 3h9v8.5H2V3zm11 0h9v8.5h-9V3zM2 13h9v8H2v-8zm11 0h9v8h-9v-8z" />
   </svg>
 );
 
 const IconPlayStation = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-    <title>Ver na PlayStation Store</title>
+    <title>PlayStation</title>
     <path d="M8.984 2.596v17.547l3.915 1.261V6.688c0-.69.304-1.151.794-.991.636.18.76.814.76 1.505v5.875c2.441 1.193 4.362-.002 4.362-3.152 0-3.237-1.126-4.675-4.438-5.827-1.307-.448-3.728-1.186-5.39-1.502zm4.656 16.241l6.296-2.275c.715-.258.826-.625.246-.818-.586-.192-1.637-.139-2.357.123l-4.205 1.5V14.98l.24-.085s1.201-.42 2.913-.615c1.696-.18 3.785.03 5.437.661 1.848.601 2.04 1.472 1.576 2.072-.465.6-1.622 1.036-1.622 1.036l-8.544 3.107V18.86zM1.807 18.6c-1.9-.545-2.214-1.668-1.352-2.32.801-.586 2.16-1.052 2.16-1.052l5.615-2.013v2.313L4.205 17c-.705.271-.825.632-.239.826.586.195 1.637.15 2.343-.12L8.247 17v2.074c-.12.03-.256.044-.39.073-1.939.331-3.996.196-6.038-.479z" />
   </svg>
 );
 
 const IconXbox = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <title>Ver na Xbox Store</title>
+    <title>Xbox</title>
     <path d="M4.102 21.033A11.947 11.947 0 0012 24a11.96 11.96 0 007.902-2.967c1.877-1.912-4.316-8.709-7.902-11.417-3.582 2.708-9.779 9.505-7.898 11.417zm11.16-14.406c2.5 2.961 7.484 10.313 6.076 12.912A11.942 11.942 0 0024 12.004a11.95 11.95 0 00-3.57-8.536s-.027-.022-.082-.042a.12.12 0 00-.072-.018c-.499 0-1.908.397-5.014 3.219zM11.997 0C8.82 0 5.927 1.152 3.694 3.062c.06-.012.124-.018.189-.018 1.484 0 4.53 1.44 8.117 3.748 3.587-2.308 6.633-3.748 8.117-3.748.065 0 .129.006.189.018A11.95 11.95 0 0011.997 0zM3.652 3.426c-.055.02-.082.042-.082.042A11.95 11.95 0 000 12.004c0 2.854.998 5.475 2.662 7.535-1.408-2.6 3.576-9.951 6.076-12.912C5.632 3.805 4.223 3.408 3.724 3.408a.12.12 0 00-.072.018z" />
   </svg>
 );
 
 const IconSwitch = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <title>Ver na Nintendo eShop</title>
+    <title>Nintendo</title>
     <path d="M10.04 20.4H7.1c-1.94 0-3.5-1.58-3.5-3.52V7.12c0-1.94 1.56-3.52 3.5-3.52h2.94v16.8zM7.1 2C4.29 2 2 4.29 2 7.12v9.76C2 19.71 4.29 22 7.1 22h4.54V2H7.1zm.52 5.42a1.72 1.72 0 1 0 0 3.44 1.72 1.72 0 0 0 0-3.44zM16.9 2h-3.54v20h3.54c2.81 0 5.1-2.29 5.1-5.12V7.12C22 4.29 19.71 2 16.9 2zm-.52 12.78a1.72 1.72 0 1 1 0-3.44 1.72 1.72 0 0 1 0 3.44z" />
   </svg>
 );
@@ -129,24 +128,19 @@ function renderizarPlataformas(slug: string, plataformas: string[], corPrincipal
         const pLower = p.toLowerCase();
         let icone = null;
         let chave: 'pc' | 'ps5' | 'xbox' | 'switch' | null = null;
-        let labelLoja = p;
 
         if (pLower === 'ps5' || pLower === 'playstation') {
           icone = <IconPlayStation />;
           chave = 'ps5';
-          labelLoja = 'PlayStation Store';
         } else if (pLower === 'xbox') {
           icone = <IconXbox />;
           chave = 'xbox';
-          labelLoja = 'Xbox Store';
         } else if (pLower === 'switch' || pLower === 'nintendo') {
           icone = <IconSwitch />;
           chave = 'switch';
-          labelLoja = 'Nintendo eShop';
         } else if (pLower === 'pc') {
           icone = <IconPC />;
           chave = 'pc';
-          labelLoja = 'Steam (PC)';
         } else {
           return null;
         }
@@ -167,8 +161,8 @@ function renderizarPlataformas(slug: string, plataformas: string[], corPrincipal
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`Abrir na ${labelLoja}`}
-            title={`Abrir na ${labelLoja}`}
+            aria-label={p}
+            title={p}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -176,14 +170,6 @@ function renderizarPlataformas(slug: string, plataformas: string[], corPrincipal
               color: '#a1a1aa',
               transition: 'color 0.2s, transform 0.2s',
               padding: '2px',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.color = corPrincipal;
-              e.currentTarget.style.transform = 'scale(1.15)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.color = '#a1a1aa';
-              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
             {icone}
@@ -195,9 +181,9 @@ function renderizarPlataformas(slug: string, plataformas: string[], corPrincipal
 }
 
 export default function Indicados() {
+  const { t } = useLanguage();
   const [categoria, setCategoria] = useState<'tgt' | 'mercado'>('tgt');
   const jogos = (jogosData as any)[categoria]?.top10 || [];
-
   const isTgt = categoria === 'tgt';
   const corPrincipal = isTgt ? '#B026FF' : '#D4AF37';
   const corTextoHoverCta = isTgt ? '#FFFFFF' : '#0A0A0A';
@@ -229,23 +215,19 @@ export default function Indicados() {
           height: 100%;
           transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
         }
-
         .indicado-card:hover {
           border-color: ${corPrincipal};
           box-shadow: 0 14px 34px ${corSombraCard};
         }
-
         .indicado-card:hover .indicado-cover {
           transform: scale(1.04);
         }
-
         .indicado-cover {
           width: 100%;
           height: 100%;
           object-fit: cover;
           transition: transform 0.35s ease;
         }
-
         .raio-x-cta {
           display: flex;
           align-items: center;
@@ -263,30 +245,25 @@ export default function Indicados() {
           text-transform: uppercase;
           transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
         }
-
         .raio-x-cta-left {
           display: inline-flex;
           align-items: center;
           gap: 7px;
         }
-
         .raio-x-arrow {
           display: inline-block;
           transition: transform 0.25s ease;
         }
-
         .indicado-card:hover .raio-x-cta {
           background-color: ${corPrincipal};
           border-top-color: ${corPrincipal};
           color: ${corTextoHoverCta};
         }
-
         .indicado-card:hover .raio-x-arrow {
           transform: translateX(4px);
         }
       `}</style>
 
-      {/* CABEÇALHO DINÂMICO */}
       <div style={{ textAlign: 'center', marginBottom: '3rem', width: '100%' }}>
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -307,7 +284,7 @@ export default function Indicados() {
             borderRadius: '0px',
           }}
         >
-          <span>[ FINALISTAS DA TEMPORADA 2026 ]</span>
+          <span>{t.indicados_badge}</span>
         </motion.div>
 
         <motion.h1
@@ -324,20 +301,12 @@ export default function Indicados() {
             lineHeight: 0.95,
           }}
         >
-          {isTgt ? (
-            <>
-              INDICADOS <span style={{ color: '#71717a' }}>//</span>{' '}
-              <span style={{ color: '#B026FF' }}>ARENA TRUE GOTY</span>
-            </>
-          ) : (
-            <>
-              INDICADOS <span style={{ color: '#71717a' }}>//</span>{' '}
-              <span style={{ color: '#D4AF37' }}>MERCADO (TGA)</span>
-            </>
-          )}
+          {t.indicados_titulo} <span style={{ color: '#71717a' }}>//</span>{' '}
+          <span style={{ color: corPrincipal }}>
+            {isTgt ? t.rank_arena_tgt : t.rank_arena_mercado}
+          </span>
         </motion.h1>
 
-        {/* SELETOR DE CATEGORIA */}
         <div
           style={{
             display: 'inline-flex',
@@ -364,7 +333,7 @@ export default function Indicados() {
               transition: 'all 0.25s',
             }}
           >
-            ARENA TRUE GOTY
+            {t.rank_arena_tgt}
           </button>
           <button
             type="button"
@@ -384,18 +353,15 @@ export default function Indicados() {
               transition: 'all 0.25s',
             }}
           >
-            MERCADO (TGA)
+            {t.rank_arena_mercado}
           </button>
         </div>
 
         <p style={{ color: '#a1a1aa', fontSize: '0.95rem', maxWidth: '660px', margin: '1.5rem auto 0', lineHeight: 1.55 }}>
-          {isTgt
-            ? 'Analise os finalistas da comunidade. Clique em qualquer jogo ou na faixa Raio-X 1v1 para abrir seu histórico completo de confrontos.'
-            : 'Os finalistas decididos pela indústria (Geoff Keighley). Lista meramente comparativa, sem vínculo oficial com o The Game Awards.'}
+          {isTgt ? t.indicados_sub_tgt : t.indicados_sub_mercado}
         </p>
       </div>
 
-      {/* ESTADO VAZIO */}
       {jogos.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -411,26 +377,16 @@ export default function Indicados() {
             marginTop: '1rem',
           }}
         >
-          <div
-            className="font-arena"
-            style={{ color: '#D4AF37', fontSize: '2rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '1.5px' }}
-          >
-            REVELAÇÃO OFICIAL EM 19/11
-          </div>
-          <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 1.75rem 0' }}>
-            Assim que os indicados do mercado forem anunciados, os finalistas aparecerão aqui para os confrontos diretos.
-          </p>
           <button
             type="button"
             onClick={() => setCategoria('tgt')}
             className="btn-arena"
             style={{ padding: '0.95rem 2.5rem', fontSize: '1.3rem' }}
           >
-            VER INDICADOS TRUE GOTY
+            {t.rank_arena_tgt}
           </button>
         </motion.div>
       ) : (
-        /* GRID DE CARTAS */
         <div
           style={{
             display: 'grid',
@@ -459,7 +415,6 @@ export default function Indicados() {
                 >
                   <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', overflow: 'hidden' }}>
                     <img src={jogo.imagem} alt={jogo.titulo} className="indicado-cover" />
-
                     <div
                       style={{
                         position: 'absolute',
@@ -467,8 +422,7 @@ export default function Indicados() {
                         background: 'linear-gradient(to top, #111114 0%, rgba(17,17,20,0.8) 28%, transparent 70%)',
                       }}
                     />
-
-                    {typeof jogo.user_rating_original === 'number' && (
+                    {typeof jogo.user_rating_original === 'number' && jogo.user_rating_original > 0 && (
                       <div
                         style={{
                           position: 'absolute',
@@ -490,7 +444,6 @@ export default function Indicados() {
                       </div>
                     )}
                   </div>
-
                   <div style={{ padding: '0 1rem', marginTop: '-8px', position: 'relative', zIndex: 2 }}>
                     <h3
                       className="font-arena"
@@ -511,18 +464,16 @@ export default function Indicados() {
                     </h3>
                   </div>
                 </Link>
-
                 <div style={{ padding: '0 1rem 0.9rem 1rem' }}>
                   {renderizarPlataformas(jogo.slug, jogo.plataformas, corPrincipal)}
                 </div>
-
                 <Link
                   href={`/indicados/${jogo.slug}/confrontos?cat=${categoria}`}
                   className="raio-x-cta"
                 >
                   <span className="raio-x-cta-left">
                     <IconSwords />
-                    <span>VER RAIO-X 1V1</span>
+                    <span>{t.indicados_raio_x}</span>
                   </span>
                   <span className="raio-x-arrow">→</span>
                 </Link>
@@ -540,7 +491,7 @@ export default function Indicados() {
           style={{ marginTop: '4rem', textAlign: 'center' }}
         >
           <p style={{ color: '#a1a1aa', marginBottom: '1.5rem', fontSize: '1.1rem' }}>
-            Já escolheu seus favoritos?
+            {t.indicados_cta_chamada}
           </p>
           <Link
             href={`/votar/${categoria}`}
@@ -554,7 +505,7 @@ export default function Indicados() {
               color: isTgt ? '#FFF' : '#000',
             }}
           >
-            ENTRAR NA ARENA DE VOTAÇÃO
+            {t.indicados_cta_btn}
           </Link>
         </motion.div>
       )}

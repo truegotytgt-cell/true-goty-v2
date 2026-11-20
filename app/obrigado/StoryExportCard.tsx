@@ -1,4 +1,3 @@
-// app/obrigado/StoryExportCard.tsx
 'use client';
 
 import React from 'react';
@@ -7,7 +6,7 @@ import type { JogoTop3 } from './shareUtils';
 type Props = {
   top3: JogoTop3[];
   categoria?: string;
-  ref?: React.Ref<HTMLDivElement>; // Adicionado o ref como propriedade normal para o React 19
+  ref?: React.Ref<HTMLDivElement>;
 };
 
 const LaurelBranch = ({ flip = false }: { flip?: boolean }) => (
@@ -138,7 +137,7 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
             fontFamily: 'var(--font-teko), sans-serif',
             fontSize: isTgt ? '58px' : '54px',
             fontWeight: 800,
-            lineHeight: 0.9,
+            lineHeight: 0.92,
             letterSpacing: '6px',
             color: '#FFFFFF',
             textTransform: 'uppercase',
@@ -149,33 +148,20 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
         <div
           style={{
             fontFamily: 'var(--font-teko), sans-serif',
-            fontSize: '58px',
-            fontWeight: 800,
-            lineHeight: 0.9,
-            letterSpacing: '6px',
-            color: '#FFFFFF',
-            textTransform: 'uppercase',
-          }}
-        >
-          MEU VERDADEIRO
-        </div>
-        <div
-          style={{
-            fontFamily: 'var(--font-teko), sans-serif',
             fontSize: '94px',
             fontWeight: 900,
             lineHeight: 0.86,
             letterSpacing: '3.5px',
             color: corOuro,
             textTransform: 'uppercase',
-            marginTop: '4px',
+            marginTop: '6px',
           }}
         >
           GAME OF THE YEAR
         </div>
         <div
           style={{
-            marginTop: '12px',
+            marginTop: '14px',
             fontSize: '22px',
             fontWeight: 800,
             letterSpacing: '5px',
@@ -219,7 +205,7 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
                 textTransform: 'uppercase',
               }}
             >
-              {isTgt ? 'CAMPEÃO' : 'CAMPEÃO'}
+              CAMPEÃO
             </span>
             <LaurelBranch flip />
           </div>

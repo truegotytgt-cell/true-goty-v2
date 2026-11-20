@@ -1,4 +1,3 @@
-// app/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -8,12 +7,12 @@ import { useLanguage } from '../components/LanguageProvider';
 
 export default function Home() {
   const [votos, setVotos] = useState<number | null>(null);
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
 
   useEffect(() => {
     fetch('/api/stats')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success) setVotos(data.totalVoters);
       })
       .catch(() => setVotos(0));
@@ -39,7 +38,6 @@ export default function Home() {
         width: '100%',
       }}
     >
-      {/* TÍTULO PRINCIPAL */}
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -55,14 +53,13 @@ export default function Home() {
           maxWidth: '100%',
         }}
       >
-        QUEM É O VERDADEIRO
+        {t.home_titulo1}
         <br />
         <span className="title-shine" style={{ fontSize: '1.1em', display: 'inline-block' }}>
-          GAME OF THE YEAR?
+          {t.home_titulo2}
         </span>
       </motion.h1>
 
-      {/* SELO / BADGE */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -91,11 +88,10 @@ export default function Home() {
             transform: 'skewX(10deg)',
           }}
         >
-          SEM JÚRI DE GABINETE • 100% VOTO GAMER
+          {t.home_badge}
         </span>
       </motion.div>
 
-      {/* TEXTO DE APOIO */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -109,10 +105,9 @@ export default function Home() {
           fontWeight: 400,
         }}
       >
-        Chega de premiações de fachada. Aqui, os maiores jogos do ano se enfrentam em duelos 1v1 implacáveis até sobrar apenas um campeão. Quem leva a coroa?
+        {t.home_sub}
       </motion.p>
 
-      {/* BOTÕES DE AÇÃO + MICRO-LEGENDA */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -136,14 +131,12 @@ export default function Home() {
           }}
         >
           <Link href="/votar/tgt" className="btn-arena">
-            ENTRAR NA ARENA TGT
+            {t.home_btn_votar}
           </Link>
-
           <Link href="/votar/mercado" className="btn-mercado">
-            ARENA INDICADOS TGA
+            {t.home_btn_mercado}
           </Link>
         </div>
-
         <p
           style={{
             fontSize: '0.78rem',
@@ -153,11 +146,10 @@ export default function Home() {
             lineHeight: 1.45,
           }}
         >
-          Sem vínculo oficial com o The Game Awards. Ambas as arenas têm placar próprio com a voz da comunidade gamer — sem representar os vencedores oficiais do prêmio.
+          {t.home_disclaimer}
         </p>
       </motion.div>
 
-      {/* PLACAR / CONTADOR */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -190,7 +182,7 @@ export default function Home() {
               fontWeight: 600,
             }}
           >
-            VEREDITOS REGISTRADOS NA ARENA
+            {t.home_contador}
           </span>
         </div>
       </motion.div>

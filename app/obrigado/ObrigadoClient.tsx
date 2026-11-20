@@ -1,4 +1,3 @@
-// app/obrigado/ObrigadoClient.tsx
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -9,6 +8,7 @@ import html2canvas from 'html2canvas';
 import jogosData from '../../lib/jogos.json';
 import StoryExportCard from './StoryExportCard';
 import { IconShare, SocialShareBar } from './ShareIcons';
+import { useLanguage } from '../../components/LanguageProvider';
 import {
   JogoTop3,
   RedeSocial,
@@ -25,13 +25,14 @@ type ToastState = {
 };
 
 export default function ObrigadoClient() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoria = searchParams.get('categoria') === 'mercado' ? 'mercado' : 'tgt';
 
   const [top3, setTop3] = useState<JogoTop3[]>([]);
   const [verificado, setVerificado] = useState(false);
-  const [previewScale, setPreviewScale] = useState(0.38);
+  const [previewScale, setPreviewScale] = useState(0.3);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
 
@@ -49,17 +50,18 @@ export default function ObrigadoClient() {
 
   useEffect(() => {
     const atualizarEscala = () => {
-      const larguraDisponivel = window.innerWidth - 48;
-      const alturaDisponivel = window.innerHeight - 130;
+      const larguraJanela = document.documentElement.clientWidth || window.innerWidth;
+      const larguraDisponivel = Math.max(240, larguraJanela - 32);
+      const alturaDisponivel = Math.max(400, window.innerHeight - 150);
       const escalaPorLargura = larguraDisponivel / 1080;
       const escalaPorAltura = alturaDisponivel / 1920;
 
       const escalaDesejada =
-        window.innerWidth >= 900
-          ? Math.min(0.42, Math.max(0.36, escalaPorAltura))
-          : Math.min(0.36, escalaPorLargura);
+        larguraJanela >= 900
+          ? Math.min(0.42, Math.max(0.32, escalaPorAltura))
+          : Math.min(0.32, escalaPorLargura);
 
-      setPreviewScale(Math.max(0.26, Math.min(escalaDesejada, escalaPorLargura)));
+      setPreviewScale(Math.max(0.22, Math.min(escalaDesejada, escalaPorLargura)));
     };
 
     atualizarEscala();
@@ -157,9 +159,9 @@ export default function ObrigadoClient() {
   const copiarTextoELink = async () => {
     try {
       await navigator.clipboard.writeText(getTextoCompartilhamento(top3, categoria));
-      mostrarToast('✓ Texto e link copiados! Agora é só colar.', false, 3500);
+      mostrarToast('✓', false, 3500);
     } catch {
-      mostrarToast('Não foi possível copiar o texto automaticamente.', false, 3500);
+      mostrarToast('!', false, 3500);
     }
   };
 
@@ -187,7 +189,7 @@ export default function ObrigadoClient() {
     const blob = await gerarImagemStory(true);
 
     if (!blob) {
-      mostrarToast('Erro ao gerar a imagem do pódio.');
+      mostrarToast('Erro');
       setIsGenerating(false);
       return;
     }
@@ -218,22 +220,8 @@ export default function ObrigadoClient() {
     }
 
     salvarBlobComoArquivo(blob, nomeArquivo);
-    const copiou = await copiarImagemParaClipboard(blob);
-
-    if (copiou) {
-      mostrarToast(
-        '✓ Cartão 9:16 baixado e copiado! Aperte Ctrl+V nas redes ou publique o arquivo salvo.',
-        true,
-        8500
-      );
-    } else {
-      mostrarToast(
-        '✓ Cartão 9:16 salvo em alta definição! Agora é só compartilhar nas suas redes.',
-        true,
-        7500
-      );
-    }
-
+    await copiarImagemParaClipboard(blob);
+    mostrarToast('✓', true, 7500);
     setIsGenerating(false);
   };
 
@@ -243,7 +231,7 @@ export default function ObrigadoClient() {
     const blob = await gerarImagemStory(true);
 
     if (!blob) {
-      mostrarToast('Erro ao gerar o cartão do pódio.');
+      mostrarToast('Erro');
       setIsGenerating(false);
       return;
     }
@@ -276,44 +264,23 @@ export default function ObrigadoClient() {
       salvarBlobComoArquivo(blob, nomeArquivo);
       try {
         await navigator.clipboard.writeText(texto);
-        mostrarToast(
-          '✓ Story 9:16 baixado e legenda copiada! Poste nos seus Stories do Instagram.',
-          false,
-          7000
-        );
       } catch {
-        mostrarToast(
-          '✓ Story 9:16 baixado! Abra o Instagram e publique nos seus Stories.',
-          true,
-          7000
-        );
+        // ignora falha de clipboard
       }
+      mostrarToast('✓', false, 7000);
       setIsGenerating(false);
       return;
     }
 
     if (rede === 'discord') {
-      const resultado = await copiarImagemOuBaixar(blob);
+      await copiarImagemOuBaixar(blob);
       window.open('https://discord.com/channels/@me', '_blank', 'noopener,noreferrer');
-
-      if (resultado === 'copiado') {
-        mostrarToast(
-          '✓ Cartão do pódio copiado! No Discord que acabou de abrir, escolha o canal e aperte Ctrl+V.',
-          true,
-          9000
-        );
-      } else {
-        mostrarToast(
-          '✓ Story 9:16 salvo! Arraste a imagem para o canal no Discord.',
-          true,
-          9000
-        );
-      }
+      mostrarToast('✓', true, 8000);
       setIsGenerating(false);
       return;
     }
 
-    const resultadoImg = await copiarImagemOuBaixar(blob);
+    await copiarImagemOuBaixar(blob);
 
     let intentUrl = '';
     if (rede === 'whatsapp') {
@@ -329,21 +296,7 @@ export default function ObrigadoClient() {
       window.open(intentUrl, '_blank', 'noopener,noreferrer');
     }
 
-    const nomeRede = rede === 'whatsapp' ? 'WhatsApp' : rede === 'x' ? 'X' : 'Reddit';
-    if (resultadoImg === 'copiado') {
-      mostrarToast(
-        `✓ Imagem copiada! Na aba do ${nomeRede}, aperte Ctrl+V para colar o pôster junto do texto.`,
-        true,
-        8000
-      );
-    } else {
-      mostrarToast(
-        `✓ Imagem salva! Na aba do ${nomeRede}, anexe o pôster baixado ao seu post.`,
-        true,
-        8000
-      );
-    }
-
+    mostrarToast('✓', true, 8000);
     setIsGenerating(false);
   };
 
@@ -361,7 +314,7 @@ export default function ObrigadoClient() {
           letterSpacing: '2px',
         }}
       >
-        CARREGANDO SEU VEREDITO...
+        {t.rank_carregando}
       </main>
     );
   }
@@ -370,17 +323,52 @@ export default function ObrigadoClient() {
   const previewHeight = Math.round(1920 * previewScale);
 
   return (
-    <main
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '92px 2rem 2.5rem',
-        backgroundColor: 'transparent',
-      }}
-    >
-      {/* MOLDE OFICIAL 1080x1920 FORA DA TELA (USADO PELO HTML2CANVAS) */}
+    <main className="obrigado-main">
+      <style>{`
+        .obrigado-main {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100dvh;
+          padding: 96px 1rem 3rem;
+          background-color: transparent;
+          width: 100%;
+          box-sizing: border-box;
+          overflow-x: hidden;
+        }
+        .obrigado-grid {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2rem;
+          width: 100%;
+          max-width: 1120px;
+          box-sizing: border-box;
+        }
+        .obrigado-actions-col {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          width: 100%;
+          max-width: 480px;
+          margin: 0 auto;
+          box-sizing: border-box;
+        }
+        @media (min-width: 900px) {
+          .obrigado-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 3.5rem;
+            align-items: center;
+            justify-items: center;
+          }
+        }
+      `}</style>
+
       <div
         aria-hidden="true"
         style={{
@@ -396,7 +384,6 @@ export default function ObrigadoClient() {
         <StoryExportCard ref={exportRef} top3={top3} categoria={categoria} />
       </div>
 
-      {/* TOAST DE FEEDBACK */}
       <AnimatePresence>
         {toast && (
           <div
@@ -453,14 +440,8 @@ export default function ObrigadoClient() {
                     whiteSpace: 'nowrap',
                     transition: 'background-color 0.2s',
                   }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.26)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.14)';
-                  }}
                 >
-                  Copiar texto + link
+                  {t.contato_btn}
                 </button>
               )}
             </motion.div>
@@ -472,27 +453,27 @@ export default function ObrigadoClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-          gap: '3.5rem',
-          width: '100%',
-          maxWidth: '1120px',
-          alignItems: 'center',
-        }}
+        className="obrigado-grid"
       >
-        {/* COLUNA ESQUERDA: PRÉVIA AMPLIADA 9:16 COM AURA DE PALCO */}
-        <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+            width: '100%',
+          }}
+        >
           <div style={{ position: 'relative', width: `${previewWidth}px`, height: `${previewHeight}px` }}>
             <div
               aria-hidden="true"
               style={{
                 position: 'absolute',
-                inset: '-48px',
+                inset: '-24px',
                 background: isTgt
-                  ? 'radial-gradient(ellipse at 50% 44%, rgba(176, 38, 255, 0.58) 0%, rgba(212, 175, 55, 0.36) 38%, rgba(5, 5, 8, 0) 72%)'
-                  : 'radial-gradient(ellipse at 50% 44%, rgba(212, 175, 55, 0.62) 0%, rgba(244, 208, 111, 0.28) 38%, rgba(5, 5, 8, 0) 72%)',
-                filter: 'blur(38px)',
+                  ? 'radial-gradient(ellipse at 50% 44%, rgba(176, 38, 255, 0.52) 0%, rgba(212, 175, 55, 0.32) 38%, rgba(5, 5, 8, 0) 72%)'
+                  : 'radial-gradient(ellipse at 50% 44%, rgba(212, 175, 55, 0.56) 0%, rgba(244, 208, 111, 0.24) 38%, rgba(5, 5, 8, 0) 72%)',
+                filter: 'blur(30px)',
                 pointerEvents: 'none',
                 zIndex: 0,
               }}
@@ -528,51 +509,36 @@ export default function ObrigadoClient() {
           </div>
         </div>
 
-        {/* COLUNA DIREITA: TEXTOS E AÇÕES */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            width: '100%',
-            maxWidth: '480px',
-            margin: '0 auto',
-          }}
-        >
+        <div className="obrigado-actions-col">
           <div
             style={{
               color: corPrincipal,
               fontSize: '0.82rem',
               fontWeight: 900,
-              letterSpacing: '3px',
+              letterSpacing: '2.5px',
               marginBottom: '0.6rem',
               fontFamily: 'var(--font-teko)',
+              textAlign: 'center',
+              width: '100%',
             }}
           >
-            {isTgt
-              ? '[ VEREDITO REGISTRADO • ARENA TRUE GOTY ]'
-              : '[ VEREDITO REGISTRADO • ARENA MERCADO (TGA) ]'}
+            {isTgt ? t.rank_arena_tgt : t.rank_arena_mercado}
           </div>
 
           <h1
             style={{
               color: '#FFF',
-              fontSize: 'clamp(2.3rem, 3.8vw, 3.3rem)',
+              fontSize: 'clamp(2.2rem, 6.5vw, 3.3rem)',
               fontWeight: 900,
               fontFamily: 'var(--font-teko)',
               textTransform: 'uppercase',
               margin: '0 0 0.75rem 0',
               lineHeight: 1.05,
+              textAlign: 'center',
+              width: '100%',
             }}
           >
-            <span style={{ display: 'block' }}>SEU VEREDITO</span>
-            <span style={{ display: 'block', whiteSpace: 'nowrap' }}>
-              ESTÁ NA{' '}
-              <span className="title-shine" style={{ display: 'inline-block' }}>
-                HISTÓRIA!
-              </span>
-            </span>
+            <span className="title-shine">{t.home_titulo2}</span>
           </h1>
 
           <p
@@ -582,11 +548,10 @@ export default function ObrigadoClient() {
               marginBottom: '2rem',
               lineHeight: 1.5,
               maxWidth: '420px',
+              textAlign: 'center',
             }}
           >
-            {isTgt
-              ? 'Sua escolha já entrou no Placar Global da Arena True GOTY. Compartilhe seu pôster oficial em alta definição ou desafie a comunidade nas redes.'
-              : 'Sua escolha já entrou no Placar Global da Arena Mercado (TGA). Compartilhe seu pôster em alta definição e desafie a comunidade.'}
+            {t.rank_sub_global}
           </p>
 
           <button
@@ -617,24 +582,11 @@ export default function ObrigadoClient() {
               marginBottom: '1.5rem',
               textShadow: isTgt ? '0 1px 3px rgba(0,0,0,0.8)' : 'none',
               lineHeight: 1.1,
-            }}
-            onMouseOver={(e) => {
-              if (!isGenerating) e.currentTarget.style.transform = 'scale(1.02)';
-            }}
-            onMouseOut={(e) => {
-              if (!isGenerating) e.currentTarget.style.transform = 'scale(1)';
+              boxSizing: 'border-box',
             }}
           >
-            {isGenerating ? (
-              'GERANDO PÔSTER...'
-            ) : (
-              <>
-                <IconShare />{' '}
-                {isTgt
-                  ? 'COMPARTILHAR O VERDADEIRO GAME OF THE YEAR'
-                  : 'COMPARTILHAR MEU VEREDITO (ARENA TGA)'}
-              </>
-            )}
+            <IconShare />
+            <span>{isTgt ? t.home_btn_votar : t.home_btn_mercado}</span>
           </button>
 
           <SocialShareBar
@@ -657,15 +609,10 @@ export default function ObrigadoClient() {
               transition: 'color 0.2s',
               fontFamily: 'var(--font-teko)',
               letterSpacing: '1px',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.color = corPrincipal;
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.color = '#D1D5DB';
+              marginTop: '0.5rem',
             }}
           >
-            VER PLACAR GLOBAL <span style={{ fontSize: '1.2rem' }}>→</span>
+            {t.rank_global_tab} <span style={{ fontSize: '1.2rem' }}>→</span>
           </Link>
         </div>
       </motion.div>
