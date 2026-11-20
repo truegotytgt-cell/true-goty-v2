@@ -33,6 +33,22 @@ function persistirVereditoLocal(categoria: CategoriaValida, placarFinal: any[]) 
   }
 }
 
+function obterOuCriarDeviceId(): string {
+  try {
+    let deviceId = localStorage.getItem('tgt_device_id');
+    if (!deviceId) {
+      deviceId =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `dev_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+      localStorage.setItem('tgt_device_id', deviceId);
+    }
+    return deviceId;
+  } catch {
+    return `fallback_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+  }
+}
+
 export default function Votar() {
   const { lang, t } = useLanguage();
   const params = useParams();
@@ -323,6 +339,7 @@ export default function Votar() {
     }
 
     setEnviando(true);
+    const deviceId = obterOuCriarDeviceId();
     const pairwiseParaEnviar = votosBrutos.map((v) => ({
       winner_title: v.vencedor,
       loser_title: v.perdedor,
@@ -333,7 +350,12 @@ export default function Votar() {
       const resposta = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: categoria, turnstileToken, pairwise: pairwiseParaEnviar }),
+        body: JSON.stringify({
+          category: categoria,
+          turnstileToken,
+          deviceId,
+          pairwise: pairwiseParaEnviar,
+        }),
       });
       const resultado = await resposta.json();
 

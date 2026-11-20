@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/teste-reset'],
+        disallow: ['/api/', '/teste-reset', '/obrigado'],
       },
     ],
     sitemap: 'https://truegoty.com/sitemap.xml',

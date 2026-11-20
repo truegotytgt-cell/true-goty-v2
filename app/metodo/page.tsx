@@ -1,3 +1,4 @@
+// app/metodo/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -5,7 +6,8 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '../../components/LanguageProvider';
 
 export default function Metodo() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const isEn = lang === 'en';
 
   const fases = [
     {
@@ -74,6 +76,42 @@ export default function Metodo() {
       ),
     },
   ];
+
+  const principios = isEn
+    ? [
+        {
+          titulo: 'Why Pairwise 1v1 Duels Eliminate Strategic Voting',
+          texto:
+            'In traditional single-choice polls, players often feel pressured to vote against a rival title rather than for their genuine favorite, or votes split between two similar games. By evaluating every pair head-to-head, each game is judged strictly on its own merits against every competitor.',
+        },
+        {
+          titulo: 'How the Condorcet Winner Is Calculated',
+          texto:
+            'Every completed ballot generates a complete preference matrix across all matchups. A Condorcet winner is the title that defeats every other nominee in a direct majority head-to-head comparison, reflecting the broadest consensus across the entire gaming community.',
+        },
+        {
+          titulo: 'Multi-Layer Anti-Bot Integrity',
+          texto:
+            'Every submission passes through Cloudflare edge security, Turnstile human verification, rate limiting, and cryptographic session deduplication before recording a single matchup in the database, ensuring that community rankings reflect real players.',
+        },
+      ]
+    : [
+        {
+          titulo: 'Por que os duelos 1v1 eliminam o voto útil e a divisão de votos',
+          texto:
+            'Em enquetes tradicionais de escolha única, dois jogos excelentes do mesmo gênero acabam dividindo votos entre si, permitindo que um terceiro título vença sem ter a preferência da maioria. Nos confrontos diretos par a par, cada jogo é avaliado individualmente frente a frente contra todos os concorrentes.',
+        },
+        {
+          titulo: 'Como funciona a matriz de apuração Condorcet',
+          texto:
+            'Cada cédula concluída alimenta uma matriz completa de confrontos diretos. O vencedor de Condorcet é o jogo capaz de derrotar todos os demais finalistas no mano a mano por maioria de preferência, representando o consenso mais sólido e justo da comunidade.',
+        },
+        {
+          titulo: 'Auditoria e proteção contra manipulação automatizada',
+          texto:
+            'Antes de qualquer resultado ser gravado no banco de dados, o envio passa por verificação humana via Cloudflare Turnstile, controle de taxa por IP e deduplicação criptográfica de sessão, garantindo que o placar reflita exclusivamente jogadores reais.',
+        },
+      ];
 
   return (
     <main
@@ -276,6 +314,29 @@ export default function Metodo() {
           </div>
         </div>
       </motion.div>
+
+      <section style={{ width: '100%', marginBottom: '4rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <h2 className="font-arena" style={{ color: '#D4AF37', fontSize: '2rem', letterSpacing: '1px', textAlign: 'center', marginBottom: '0.5rem' }}>
+          {isEn ? 'Transparency & Voting Science' : 'Transparência e Ciência da Votação'}
+        </h2>
+        {principios.map((item) => (
+          <article
+            key={item.titulo}
+            style={{
+              backgroundColor: '#111114',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              padding: '1.75rem',
+            }}
+          >
+            <h3 style={{ color: '#F4F4F0', fontSize: '1.15rem', fontWeight: 700, marginTop: 0, marginBottom: '0.6rem' }}>
+              {item.titulo}
+            </h3>
+            <p style={{ color: '#b0b0b8', fontSize: '0.95rem', lineHeight: 1.65, margin: 0 }}>
+              {item.texto}
+            </p>
+          </article>
+        ))}
+      </section>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}

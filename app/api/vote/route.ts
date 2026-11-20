@@ -38,12 +38,20 @@ export async function POST(request: Request) {
 
     // 1. Extração e validação básica do Payload
     const turnstileToken = typeof body?.turnstileToken === 'string' ? body.turnstileToken.trim() : '';
+    const deviceId = typeof body?.deviceId === 'string' ? body.deviceId.trim() : '';
     const categoriaRaw = body?.category ?? 'tgt';
     const pairwise: unknown = body?.pairwise;
 
     if (!turnstileToken) {
       return NextResponse.json(
         { success: false, code: 'TURNSTILE_MISSING', error: 'Token do Turnstile ausente.' },
+        { status: 400 }
+      );
+    }
+
+    if (!deviceId || deviceId.length < 8 || deviceId.length > 128) {
+      return NextResponse.json(
+        { success: false, code: 'DEVICE_ID_MISSING', error: 'Identificador do dispositivo ausente.' },
         { status: 400 }
       );
     }
@@ -130,6 +138,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // 2. Validação anti-bot com Cloudflare Turnstile
     const turnstileSecret = (env as any).TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY;
     if (!turnstileSecret) {
       console.error('ERRO CRÍTICO: TURNSTILE_SECRET_KEY não configurada no ambiente.');
@@ -166,18 +175,8 @@ export async function POST(request: Request) {
       );
     }
 
+    // 3. Sessão anônima baseada no aparelho (permite múltiplos votos na mesma rede Wi-Fi)
     const db = getDB(env);
-
-    let ip = request.headers.get('cf-connecting-ip')?.trim() || '';
-    if (!ip && process.env.NODE_ENV === 'development') {
-      ip = '127.0.0.1';
-    }
-    if (!ip) {
-      return NextResponse.json(
-        { success: false, code: 'ORIGIN_MISSING', error: 'Origem da requisição não identificada.' },
-        { status: 400 }
-      );
-    }
 
     let salt = (env as any).SESSION_SALT || process.env.SESSION_SALT;
     if (!salt && process.env.NODE_ENV === 'development') {
@@ -191,7 +190,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const session_id = await gerarHash(`${ip}${salt}`);
+    const session_id = await gerarHash(`${deviceId}${salt}`);
 
     const votoExistente = await db
       .prepare('SELECT id FROM results WHERE session_id = ? AND category = ? LIMIT 1')
