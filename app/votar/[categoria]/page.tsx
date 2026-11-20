@@ -6,6 +6,7 @@ import Script from 'next/script';
 import jogosData from '../../../lib/jogos.json';
 import { calcularPlacar, Jogo } from '../../../lib/condorcet';
 import { useVotingProgress } from '../../../lib/useVotingProgress';
+import { useLanguage } from '../../../components/LanguageProvider';
 import { motion } from 'framer-motion';
 import ArenaDuelo from '../../../components/ArenaDuelo';
 import CartaoVeredito from '../../../components/CartaoVeredito';
@@ -33,6 +34,7 @@ function persistirVereditoLocal(categoria: CategoriaValida, placarFinal: any[]) 
 }
 
 export default function Votar() {
+  const { lang, t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const categoriaParam = params?.categoria;
@@ -135,6 +137,85 @@ export default function Votar() {
     notFound();
   }
 
+  const txt =
+    lang === 'en'
+      ? {
+          mercadoFechadoBadge: '[ MARKET ARENA (TGA) • OPENING NOV 19 ]',
+          mercadoFechadoTitulo1: 'GATES CLOSED',
+          mercadoFechadoTitulo2: 'UNTIL NOV 19',
+          mercadoFechadoDesc:
+            'Once the market nominees are revealed on Nov 19, this arena will unlock for head-to-head matchups.',
+          mercadoSemVinculo: 'Independent simulation with no official affiliation with The Game Awards.',
+          mercadoNotaRodape:
+            'Independent simulation with no official affiliation with The Game Awards — votes counted only on the True GOTY community scoreboard.',
+          voltar: '← Back',
+          trocarArena: '← Switch arena',
+          preparando: 'Preparing the red carpet...',
+          step2Title: 'BUILD THE SCOREBOARD',
+          step2Desc: (duelosPorJogo: number) =>
+            `Each win grants +1 point. Each finalist plays ${duelosPorJogo} duels in the arena.`,
+          step3Title: 'CROWN THE CHAMPION',
+          step3Desc:
+            'At the end, math reveals the champion. Ties are resolved in direct head-to-head matchups.',
+          voteAgora: 'VOTE NOW →',
+          aguardeSeguranca: 'Please wait for the security check to appear and click again.',
+          jaVotou: 'Looks like you have already voted in this category! Taking you to the results page.',
+          erroEnvio: 'Oops! An error occurred: ',
+          falhaEnvio: 'Failed to submit vote.',
+          erroConexao: 'Connection error. Please try again.',
+        }
+      : lang === 'es'
+        ? {
+            mercadoFechadoBadge: '[ ARENA MERCADO (TGA) • APERTURA EL 19/11 ]',
+            mercadoFechadoTitulo1: 'PUERTAS CERRADAS',
+            mercadoFechadoTitulo2: 'HASTA EL 19/11',
+            mercadoFechadoDesc:
+              'Cuando se revelen los nominados del mercado el 19/11, esta arena se abrirá para los duelos directos.',
+            mercadoSemVinculo: 'Simulación independiente sin vínculo oficial con The Game Awards.',
+            mercadoNotaRodape:
+              'Simulación independiente sin vínculo oficial con The Game Awards — votos contabilizados solo en la tabla de la comunidad True GOTY.',
+            voltar: '← Volver',
+            trocarArena: '← Cambiar de arena',
+            preparando: 'Preparando la alfombra roja...',
+            step2Title: 'CONSTRUYE EL MARCADOR',
+            step2Desc: (duelosPorJogo: number) =>
+              `Cada victoria vale +1 punto. Cada finalista disputa ${duelosPorJogo} duelos en la arena.`,
+            step3Title: 'CORONA AL CAMPEÓN',
+            step3Desc:
+              'Al final, las matemáticas revelan al campeón. Los empates se resuelven mano a mano.',
+            voteAgora: 'VOTAR AHORA →',
+            aguardeSeguranca: 'Por favor, espera a que aparezca la verificación de seguridad y haz clic de nuevo.',
+            jaVotou: '¡Parece que ya votaste en esta categoría! Te llevamos a la página de resultados.',
+            erroEnvio: '¡Ups! Ocurrió un error: ',
+            falhaEnvio: 'No se pudo enviar el voto.',
+            erroConexao: 'Error de conexión. Inténtalo de nuevo.',
+          }
+        : {
+            mercadoFechadoBadge: '[ ARENA MERCADO (TGA) • ABERTURA EM 19/11 ]',
+            mercadoFechadoTitulo1: 'PORTÕES FECHADOS',
+            mercadoFechadoTitulo2: 'ATÉ 19/11',
+            mercadoFechadoDesc:
+              'Assim que os indicados do mercado forem revelados no dia 19/11, esta arena será destravada para os confrontos diretos.',
+            mercadoSemVinculo: 'Simulação independente sem vínculo oficial com o The Game Awards.',
+            mercadoNotaRodape:
+              'Simulação independente sem vínculo oficial com o The Game Awards — votos computados apenas no placar da comunidade True GOTY.',
+            voltar: '← Voltar',
+            trocarArena: '← Trocar de arena',
+            preparando: 'Preparando o tapete vermelho...',
+            step2Title: 'CONSTRUA O PLACAR',
+            step2Desc: (duelosPorJogo: number) =>
+              `Cada vitória vale +1 ponto. Cada finalista disputa ${duelosPorJogo} duelos na arena.`,
+            step3Title: 'COROE O CAMPEÃO',
+            step3Desc:
+              'No fim, a matemática revela o campeão. Empates são resolvidos no mano a mano.',
+            voteAgora: 'VOTE AGORA →',
+            aguardeSeguranca: 'Por favor, aguarde a verificação de segurança aparecer e clique novamente.',
+            jaVotou: 'Parece que você já votou nesta categoria! Vamos te levar para a página de resultados.',
+            erroEnvio: 'Ops! Ocorreu um erro: ',
+            falhaEnvio: 'Falha ao enviar voto.',
+            erroConexao: 'Erro de conexão. Tente novamente.',
+          };
+
   if (jogos.length === 0) {
     return (
       <main
@@ -185,19 +266,19 @@ export default function Votar() {
               borderRadius: '0px',
             }}
           >
-            [ ARENA MERCADO (TGA) • ABERTURA EM 19/11 ]
+            {txt.mercadoFechadoBadge}
           </div>
 
           <h1 style={{ color: '#FFF', fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontWeight: 900, margin: '0 0 0.85rem 0', lineHeight: 1, fontFamily: 'var(--font-teko)' }}>
-            PORTÕES FECHADOS <span style={{ color: '#D4AF37' }}>ATÉ 19/11</span>
+            {txt.mercadoFechadoTitulo1} <span style={{ color: '#D4AF37' }}>{txt.mercadoFechadoTitulo2}</span>
           </h1>
 
           <p style={{ color: '#D1D5DB', fontSize: '1rem', lineHeight: 1.6, margin: '0 0 1rem 0', maxWidth: '500px' }}>
-            Assim que os indicados do mercado forem revelados no dia <strong>19/11</strong>, esta arena será destravada para os confrontos diretos.
+            {txt.mercadoFechadoDesc}
           </p>
 
           <p style={{ color: '#8b8b94', fontSize: '0.78rem', lineHeight: 1.5, margin: '0 0 2.25rem 0', maxWidth: '480px' }}>
-            Simulação independente sem vínculo oficial com o The Game Awards.
+            {txt.mercadoSemVinculo}
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
@@ -217,16 +298,8 @@ export default function Votar() {
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.color = '#FFF';
-                e.currentTarget.style.borderColor = '#D4AF37';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.color = '#d4d4d8';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.16)';
-              }}
             >
-              ← Voltar
+              {txt.voltar}
             </button>
             <button
               type="button"
@@ -234,7 +307,7 @@ export default function Votar() {
               className="btn-arena"
               style={{ padding: '0.95rem 2.2rem', fontSize: '1.25rem' }}
             >
-              ENTRAR NA ARENA TRUE GOTY
+              {t.votar_sel_tgt_btn}
             </button>
           </div>
         </motion.div>
@@ -245,7 +318,7 @@ export default function Votar() {
   async function enviarParaPlacarGlobal(placarFinal: any[], votosBrutos: any[]) {
     const turnstileToken = (window as any).turnstile?.getResponse();
     if (!turnstileToken) {
-      alert('Por favor, aguarde a verificação de segurança aparecer e clique novamente.');
+      alert(txt.aguardeSeguranca);
       return;
     }
 
@@ -269,15 +342,15 @@ export default function Votar() {
         window.location.href = `/obrigado?categoria=${categoria}`;
       } else if (resultado.code === 'ALREADY_VOTED') {
         persistirVereditoLocal(categoria, placarFinal);
-        alert('Parece que você já votou nesta categoria! Vamos te levar para a página de resultados.');
+        alert(txt.jaVotou);
         window.location.href = `/obrigado?categoria=${categoria}`;
       } else {
-        alert('Ops! Ocorreu um erro: ' + (resultado.error || 'Falha ao enviar voto.'));
+        alert(txt.erroEnvio + (resultado.error || txt.falhaEnvio));
         (window as any).turnstile?.reset();
         setEnviando(false);
       }
     } catch {
-      alert('Erro de conexão. Tente novamente.');
+      alert(txt.erroConexao);
       (window as any).turnstile?.reset();
       setEnviando(false);
     }
@@ -291,20 +364,20 @@ export default function Votar() {
       {
         num: '01',
         cor: isTgt ? '#B026FF' : '#D4AF37',
-        titulo: 'ESCOLHA O VENCEDOR',
-        texto: 'Clique no jogo superior em cada confronto direto ou use as setas do teclado.',
+        titulo: t.intro_step1_title,
+        texto: t.intro_step1_desc,
       },
       {
         num: '02',
         cor: isTgt ? '#D4AF37' : '#F4D06F',
-        titulo: 'CONSTRUA O PLACAR',
-        texto: `Cada vitória vale +1 ponto. Cada finalista disputa ${duelosPorJogo} duelos na arena.`,
+        titulo: txt.step2Title,
+        texto: txt.step2Desc(duelosPorJogo),
       },
       {
         num: '03',
         cor: '#F4F4F0',
-        titulo: 'COROE O CAMPEÃO',
-        texto: 'No fim, a matemática revela o campeão. Empates são resolvidos no mano a mano.',
+        titulo: txt.step3Title,
+        texto: txt.step3Desc,
       },
     ];
 
@@ -366,7 +439,7 @@ export default function Votar() {
               zIndex: 1,
             }}
           >
-            {isTgt ? '[ TEMPORADA 2026 • ARENA TRUE GOTY ]' : '[ TEMPORADA 2026 • ARENA MERCADO (TGA) ]'}
+            {isTgt ? t.intro_badge_tgt : t.intro_badge_mercado}
           </div>
 
           <h1
@@ -381,15 +454,15 @@ export default function Votar() {
               textShadow: '0 10px 30px rgba(0,0,0,0.75)',
             }}
           >
-            ESCOLHA O SEU
+            {t.intro_titulo_1}
             <br />
             {isTgt ? (
               <span className="title-shine" style={{ fontSize: 'clamp(3rem, 7vw, 5.2rem)', display: 'inline-block', marginTop: '0.15rem' }}>
-                TRUE GAME OF THE YEAR
+                {t.intro_titulo_2}
               </span>
             ) : (
               <span style={{ color: '#D4AF37', fontSize: 'clamp(3rem, 7vw, 5.2rem)', display: 'inline-block', marginTop: '0.15rem' }}>
-                CAMPEÃO DO MERCADO (TGA)
+                {t.arena_pergunta_mercado_2}
               </span>
             )}
           </h1>
@@ -405,7 +478,7 @@ export default function Votar() {
               fontWeight: 500,
             }}
           >
-            {totalDuelosPrevisto} duelos diretos. Um campeão. Quem decide é quem joga.
+            {totalDuelosPrevisto} {t.intro_sub}
           </p>
 
           <div
@@ -487,12 +560,12 @@ export default function Votar() {
                 : '0 14px 40px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(255,255,255,0.25)',
             }}
           >
-            VOTE AGORA →
+            {txt.voteAgora}
           </button>
 
           {!isTgt && (
             <p style={{ color: '#71717a', fontSize: '0.78rem', marginTop: '1rem', maxWidth: '500px', lineHeight: 1.45, zIndex: 1 }}>
-              Simulação independente sem vínculo oficial com o The Game Awards — votos computados apenas no placar da comunidade True GOTY.
+              {txt.mercadoNotaRodape}
             </p>
           )}
 
@@ -514,16 +587,8 @@ export default function Votar() {
               zIndex: 1,
               transition: 'all 0.2s ease',
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.color = '#FFF';
-              e.currentTarget.style.borderColor = corPrincipal;
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.color = '#a1a1aa';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.14)';
-            }}
           >
-            ← Trocar de arena
+            {txt.trocarArena}
           </button>
         </motion.div>
       </main>
@@ -533,7 +598,7 @@ export default function Votar() {
   if (!carregado || duelos.length === 0) {
     return (
       <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', paddingTop: '120px' }}>
-        <h1 style={{ color: corPrincipal }}>Preparando o tapete vermelho...</h1>
+        <h1 style={{ color: corPrincipal }}>{txt.preparando}</h1>
       </main>
     );
   }

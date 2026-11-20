@@ -1,13 +1,9 @@
-// app/resultados/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ÍCONES SVG (estilo TGT — traço fino, sem emoji)
-// ─────────────────────────────────────────────────────────────────────────────
+import { useLanguage } from '../../components/LanguageProvider';
 
 const IconCoroa = () => (
   <svg width="56" height="56" viewBox="0 0 64 64" fill="none">
@@ -71,6 +67,7 @@ type Categoria = 'tgt' | 'mercado';
 type StatusVeredito = 'concluido' | 'pendente';
 
 export default function Resultados() {
+  const { lang, t } = useLanguage();
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<Categoria | null>(null);
   const [votosPorCategoria, setVotosPorCategoria] = useState<{ tgt: number; mercado: number }>({ tgt: 0, mercado: 0 });
   const [statusVeredito, setStatusVeredito] = useState<{ tgt: StatusVeredito; mercado: StatusVeredito }>({
@@ -99,6 +96,30 @@ export default function Resultados() {
     };
     setStatusVeredito({ tgt: checar('tgt'), mercado: checar('mercado') });
   }, []);
+
+  const formatarNumero = (valor: number) => {
+    if (lang === 'en') return valor.toLocaleString('en-US');
+    if (lang === 'es') return valor.toLocaleString('es-ES');
+    return valor.toLocaleString('pt-BR');
+  };
+
+  const labelVereditos =
+    lang === 'en' ? 'VERDICTS RECORDED' : lang === 'es' ? 'VEREDICTOS COMPUTADOS' : 'VEREDITOS COMPUTADOS';
+
+  const labelConcluido =
+    lang === 'en' ? '✓ VERDICT COMPLETED' : lang === 'es' ? '✓ VEREDICTO COMPLETADO' : '✓ VEREDITO CONCLUÍDO';
+
+  const labelPendente =
+    lang === 'en' ? 'PENDING — VOTE NOW' : lang === 'es' ? 'PENDIENTE — VOTAR AHORA' : 'PENDENTE — VOTAR AGORA';
+
+  const labelVerRanking =
+    lang === 'en' ? 'VIEW GLOBAL RANKING' : lang === 'es' ? 'VER RANKING GLOBAL' : 'VER RANKING MUNDIAL';
+
+  const labelVerMeuTop =
+    lang === 'en' ? 'VIEW MY TOP 10' : lang === 'es' ? 'VER MI TOP 10' : 'VER MEU TOP 10';
+
+  const labelTrocarArena =
+    lang === 'en' ? '← SWITCH ARENA' : lang === 'es' ? '← CAMBIAR DE ARENA' : '← TROCAR DE ARENA';
 
   const isTgtAtiva = categoriaSelecionada === 'tgt';
   const corTema = isTgtAtiva ? '#B026FF' : '#D4AF37';
@@ -166,7 +187,6 @@ export default function Resultados() {
           align-items: stretch;
         }
 
-        /* BARRA DE CONTEXTO SUPERIOR (ETAPA 2) */
         .context-bar {
           display: flex;
           align-items: center;
@@ -259,7 +279,7 @@ export default function Resultados() {
             borderRadius: '0px',
           }}
         >
-          [ VEREDITO DA COMUNIDADE // TEMPORADA 2026 ]
+          {t.res_sel_badge}
         </motion.div>
 
         <motion.h1
@@ -276,10 +296,10 @@ export default function Resultados() {
             lineHeight: 0.95,
           }}
         >
-          QUEM É O VERDADEIRO
+          {t.home_titulo1}
           <br />
           <span className="title-shine" style={{ fontSize: '1.08em', display: 'inline-block' }}>
-            GAME OF THE YEAR?
+            {t.home_titulo2}
           </span>
         </motion.h1>
 
@@ -289,7 +309,7 @@ export default function Resultados() {
           transition={{ delay: 0.15 }}
           style={{ color: '#a1a1aa', fontSize: '1rem', maxWidth: '620px', margin: '0 auto', lineHeight: 1.6 }}
         >
-          Os duelos foram travados. Escolha a arena e confira quem sobreviveu ao veredito matemático.
+          {t.res_sel_sub}
         </motion.p>
       </div>
 
@@ -300,8 +320,8 @@ export default function Resultados() {
           animate={{ opacity: 1, y: 0 }}
           className="grid-categorias"
         >
-          {/* Card TRUE GOTY */}
           <button
+            type="button"
             onClick={() => setCategoriaSelecionada('tgt')}
             className="arena-card arena-card-tgt"
             style={{
@@ -335,11 +355,11 @@ export default function Resultados() {
                 zIndex: 2,
               }}
             >
-              ARENA <span style={{ color: '#A855F7' }}>TRUE GOTY</span>
+              {t.votar_sel_tgt_titulo} <span style={{ color: '#A855F7' }}>{t.votar_sel_tgt_destaque}</span>
             </h2>
 
             <p style={{ color: '#D1D5DB', fontSize: '0.94rem', margin: 0, lineHeight: 1.55, position: 'relative', zIndex: 2 }}>
-              A elite avaliada pelos jogadores. Sem lobby, sem filtro.
+              {t.res_sel_tgt_desc}
             </p>
 
             <div
@@ -366,13 +386,13 @@ export default function Resultados() {
                   backgroundColor: 'rgba(212, 175, 55, 0.08)',
                 }}
               >
-                {votosPorCategoria.tgt.toLocaleString('pt-BR')} VEREDITOS COMPUTADOS
+                {formatarNumero(votosPorCategoria.tgt)} {labelVereditos}
               </div>
             </div>
           </button>
 
-          {/* Card ARENA MERCADO (TGA) — OURO METÁLICO VIBRANTE */}
           <button
+            type="button"
             onClick={() => setCategoriaSelecionada('mercado')}
             className="arena-card arena-card-mercado"
             style={{
@@ -406,11 +426,11 @@ export default function Resultados() {
                 zIndex: 2,
               }}
             >
-              ARENA <span style={{ color: '#D4AF37' }}>MERCADO (TGA)</span>
+              {t.votar_sel_mercado_titulo} <span style={{ color: '#D4AF37' }}>{t.votar_sel_mercado_destaque}</span>
             </h2>
 
             <p style={{ color: '#E4E4E7', fontSize: '0.94rem', margin: 0, lineHeight: 1.55, position: 'relative', zIndex: 2 }}>
-              Os indicados escolhidos pela mídia e pelo Geoff Keighley colocados à prova no mano a mano.
+              {t.res_sel_mercado_desc}
             </p>
 
             <p
@@ -425,7 +445,7 @@ export default function Resultados() {
                 zIndex: 2,
               }}
             >
-              Simulação independente sem vínculo oficial. Estes votos não contam para o TGA, apenas para a estatística do True GOTY.
+              {t.votar_sel_mercado_disclaimer}
             </p>
 
             <div
@@ -447,7 +467,7 @@ export default function Resultados() {
                   backgroundColor: 'rgba(212, 175, 55, 0.12)',
                 }}
               >
-                {votosPorCategoria.mercado.toLocaleString('pt-BR')} VEREDITOS COMPUTADOS
+                {formatarNumero(votosPorCategoria.mercado)} {labelVereditos}
               </div>
             </div>
           </button>
@@ -474,7 +494,6 @@ export default function Resultados() {
             }
           `}</style>
 
-          {/* BARRA DE CONTEXTO SUPERIOR */}
           <div className="context-bar">
             <button
               type="button"
@@ -494,18 +513,8 @@ export default function Resultados() {
                 letterSpacing: '0.15em',
                 transition: 'all 0.2s ease',
               }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.color = '#FFF';
-                e.currentTarget.style.borderColor = corTema;
-                e.currentTarget.style.backgroundColor = `${corTema}18`;
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.color = '#d4d4d8';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.16)';
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
-              }}
             >
-              ← TROCAR DE ARENA
+              {labelTrocarArena}
             </button>
 
             <div
@@ -537,14 +546,12 @@ export default function Resultados() {
                   lineHeight: 1,
                 }}
               >
-                {isTgtAtiva ? 'ARENA TRUE GOTY' : 'ARENA MERCADO (TGA)'}
+                {isTgtAtiva ? t.rank_arena_tgt : t.rank_arena_mercado}
               </span>
             </div>
           </div>
 
-          {/* GRID DE 2 PORTAIS LADO A LADO */}
           <div className="portal-grid">
-            {/* PORTAL ESQUERDO: PLACAR GLOBAL */}
             <Link
               href={`/resultados/global?cat=${categoriaSelecionada}`}
               style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
@@ -598,19 +605,14 @@ export default function Resultados() {
                       letterSpacing: '1.5px',
                     }}
                   >
-                    PLACAR GLOBAL DA ARENA
+                    {t.rank_global_tab}
                   </h2>
 
                   <p style={{ color: '#D1D5DB', fontSize: '0.95rem', margin: 0, lineHeight: 1.55, maxWidth: '340px' }}>
-                    O consenso implacável de todos os vereditos selados pela comunidade gamer.
+                    {t.rank_sub_global}
                   </p>
 
-                  <div
-                    style={{
-                      marginTop: 'auto',
-                      paddingTop: '0.75rem',
-                    }}
-                  >
+                  <div style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
                     <span
                       style={{
                         display: 'inline-block',
@@ -623,7 +625,7 @@ export default function Resultados() {
                         backgroundColor: `${corTema}12`,
                       }}
                     >
-                      {votosPorCategoria[categoriaSelecionada].toLocaleString('pt-BR')} VEREDITOS NO RANKING
+                      {formatarNumero(votosPorCategoria[categoriaSelecionada])} {labelVereditos}
                     </span>
                   </div>
                 </div>
@@ -636,13 +638,12 @@ export default function Resultados() {
                     color: corTemaClaro,
                   }}
                 >
-                  <span>VER RANKING MUNDIAL</span>
+                  <span>{labelVerRanking}</span>
                   <span className="portal-arrow">→</span>
                 </div>
               </div>
             </Link>
 
-            {/* PORTAL DIREITO: MEU PÓDIO INDIVIDUAL */}
             <Link
               href={`/resultados/pessoal?cat=${categoriaSelecionada}`}
               style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
@@ -696,14 +697,13 @@ export default function Resultados() {
                       letterSpacing: '1.5px',
                     }}
                   >
-                    MEU PÓDIO INDIVIDUAL
+                    {t.rank_pessoal_tab}
                   </h2>
 
                   <p style={{ color: '#D1D5DB', fontSize: '0.95rem', margin: 0, lineHeight: 1.55, maxWidth: '340px' }}>
-                    A hierarquia exata forjada nos seus 45 confrontos diretos nesta arena.
+                    {t.veredito_empate}
                   </p>
 
-                  {/* SELO DE STATUS BEM VISÍVEL */}
                   <div style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
                     {statusVeredito[categoriaSelecionada] === 'concluido' ? (
                       <span
@@ -718,7 +718,7 @@ export default function Resultados() {
                           backgroundColor: 'rgba(16, 185, 129, 0.14)',
                         }}
                       >
-                        ✓ VEREDITO CONCLUÍDO
+                        {labelConcluido}
                       </span>
                     ) : (
                       <span
@@ -733,7 +733,7 @@ export default function Resultados() {
                           backgroundColor: 'rgba(212, 175, 55, 0.14)',
                         }}
                       >
-                        PENDENTE — VOTAR AGORA
+                        {labelPendente}
                       </span>
                     )}
                   </div>
@@ -747,7 +747,7 @@ export default function Resultados() {
                     color: corTemaClaro,
                   }}
                 >
-                  <span>VER MEU TOP 10</span>
+                  <span>{labelVerMeuTop}</span>
                   <span className="portal-arrow">→</span>
                 </div>
               </div>

@@ -1,5 +1,7 @@
 // app/obrigado/shareUtils.ts
 
+export type IdiomaCompartilhamento = 'pt' | 'en' | 'es';
+
 export type RedeSocial = 'whatsapp' | 'x' | 'reddit' | 'instagram' | 'discord';
 
 export type JogoTop3 = {
@@ -30,10 +32,16 @@ export function getDominioVisual(): string {
   return host.toUpperCase();
 }
 
-export function getTextoCompartilhamento(top3: JogoTop3[], categoria = 'tgt'): string {
+export function getTextoCompartilhamento(
+  top3: JogoTop3[],
+  categoria = 'tgt',
+  lang: IdiomaCompartilhamento = 'pt'
+): string {
   const url = getUrlDinamica();
   const isTgt = categoria !== 'mercado';
-  const primeiro = top3[0]?.titulo || 'meu favorito';
+  const primeiro =
+    top3[0]?.titulo ||
+    (lang === 'en' ? 'my favorite' : lang === 'es' ? 'mi favorito' : 'meu favorito');
   const segundo = top3[1]?.titulo;
   const terceiro = top3[2]?.titulo;
 
@@ -44,6 +52,50 @@ export function getTextoCompartilhamento(top3: JogoTop3[], categoria = 'tgt'): s
   ]
     .filter(Boolean)
     .join('\n');
+
+  if (lang === 'en') {
+    if (!isTgt) {
+      return [
+        'I put the TGA nominees head-to-head in 15 direct duels. Only one survived. ⚔️🏆',
+        '',
+        'My Podium in Market Nominees (TGA 2026):',
+        linhasPodio,
+        '',
+        `Disagree? Take the 15-duel community test on True GOTY: ${url}`,
+      ].join('\n');
+    }
+
+    return [
+      '45 head-to-head duels. Only one game survived. ⚔️🏆',
+      '',
+      'My True GOTY 2026:',
+      linhasPodio,
+      '',
+      `Disagree? Prove it in the 45 duels and build your official verdict: ${url}`,
+    ].join('\n');
+  }
+
+  if (lang === 'es') {
+    if (!isTgt) {
+      return [
+        'Enfrenté a los nominados de TGA en 15 duelos directos. Solo uno sobrevivió. ⚔️🏆',
+        '',
+        'Mi Podio en Nominados del Mercado (TGA 2026):',
+        linhasPodio,
+        '',
+        `¿No estás de acuerdo? Haz la prueba de 15 duelos de la comunidad en True GOTY: ${url}`,
+      ].join('\n');
+    }
+
+    return [
+      '45 duelos cara a cara. Solo un juego sobrevivió. ⚔️🏆',
+      '',
+      'Mi True GOTY 2026:',
+      linhasPodio,
+      '',
+      `¿No estás de acuerdo? Demuéstralo en los 45 duelos y arma tu veredicto oficial: ${url}`,
+    ].join('\n');
+  }
 
   if (!isTgt) {
     return [
@@ -66,8 +118,29 @@ export function getTextoCompartilhamento(top3: JogoTop3[], categoria = 'tgt'): s
   ].join('\n');
 }
 
-export function getTituloReddit(top3: JogoTop3[], categoria = 'tgt'): string {
-  const campeao = top3[0]?.titulo || 'Meu campeão';
+export function getTituloReddit(
+  top3: JogoTop3[],
+  categoria = 'tgt',
+  lang: IdiomaCompartilhamento = 'pt'
+): string {
+  const campeao =
+    top3[0]?.titulo ||
+    (lang === 'en' ? 'My champion' : lang === 'es' ? 'Mi campeón' : 'Meu campeão');
+
+  if (lang === 'en') {
+    if (categoria === 'mercado') {
+      return `15 head-to-head duels with TGA 2026 nominees and my champion was ${campeao} — who was yours?`;
+    }
+    return `45 head-to-head duels and my True GOTY 2026 was ${campeao} — who was yours?`;
+  }
+
+  if (lang === 'es') {
+    if (categoria === 'mercado') {
+      return `15 duelos directos con nominados de TGA 2026 y mi campeón fue ${campeao} — ¿cuál fue el suyo?`;
+    }
+    return `45 duelos cara a cara y mi True GOTY 2026 fue ${campeao} — ¿cuál fue el suyo?`;
+  }
+
   if (categoria === 'mercado') {
     return `15 duelos frente a frente nos indicados do TGA 2026 e meu campeão foi ${campeao} — qual foi o de vocês?`;
   }

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { JogoTop3 } from './shareUtils';
+import { useLanguage } from '../../components/LanguageProvider';
 
 type Props = {
   top3: JogoTop3[];
@@ -39,6 +40,7 @@ const LaurelBranch = ({ flip = false }: { flip?: boolean }) => (
 );
 
 export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props) {
+  const { t } = useLanguage();
   const isTgt = categoria !== 'mercado';
   const corOuro = '#D4AF37';
   const corOuroClaro = '#F4D06F';
@@ -143,7 +145,7 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
             textTransform: 'uppercase',
           }}
         >
-          {isTgt ? 'O VERDADEIRO' : 'VEREDITO DA COMUNIDADE'}
+          {isTgt ? t.story_topo_tgt : t.story_topo_mercado}
         </div>
         <div
           style={{
@@ -169,7 +171,7 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
             textTransform: 'uppercase',
           }}
         >
-          {isTgt ? 'ARENA TRUE GOTY • 45 DUELOS DIRETOS' : 'ARENA MERCADO (TGA) • 15 DUELOS DIRETOS'}
+          {isTgt ? t.story_sub_tgt : t.story_sub_mercado}
         </div>
       </div>
 
@@ -205,7 +207,7 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
                 textTransform: 'uppercase',
               }}
             >
-              CAMPEÃO
+              {t.story_campeao}
             </span>
             <LaurelBranch flip />
           </div>
@@ -270,13 +272,13 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
       >
         {[
           {
-            label: '2º LUGAR',
+            label: t.story_segundo,
             jogo: segundo,
             cor: corPrata,
             corBrilho: 'rgba(226, 232, 240, 0.3)',
           },
           {
-            label: '3º LUGAR',
+            label: t.story_terceiro,
             jogo: terceiro,
             cor: corBronze,
             corBrilho: 'rgba(205, 127, 50, 0.36)',
@@ -380,7 +382,7 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
             textAlign: 'center',
           }}
         >
-          DESCUBRA O SEU EM{' '}
+          {t.story_cta_prefix}{' '}
           <span style={{ color: corOuro, letterSpacing: '4.5px' }}>TRUEGOTY.COM</span>
         </div>
         {!isTgt && (
@@ -395,7 +397,7 @@ export default function StoryExportCard({ top3, categoria = 'tgt', ref }: Props)
               textAlign: 'center',
             }}
           >
-            SIMULAÇÃO INDEPENDENTE DA COMUNIDADE • SEM VÍNCULO OFICIAL COM O TGA
+            {t.story_disclaimer_mercado}
           </div>
         )}
       </div>

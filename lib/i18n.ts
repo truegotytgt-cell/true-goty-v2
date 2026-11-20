@@ -39,6 +39,31 @@ export const translations = {
       'Simulação independente sem vínculo oficial. Estes votos não contam para o TGA, apenas para a estatística do True GOTY.',
     votar_sel_mercado_btn: 'ENTRAR NA ARENA TGA',
 
+    res_sel_badge: '[ VEREDITO DA COMUNIDADE // TEMPORADA 2026 ]',
+    res_sel_sub:
+      'Os duelos foram travados. Escolha a arena e confira quem sobreviveu ao veredito matemático.',
+    res_sel_tgt_desc: 'A elite avaliada pelos jogadores.',
+    res_sel_mercado_desc: 'Os indicados da indústria à prova da comunidade.',
+
+    hist_badge: '[ ARQUIVO DA ARENA • TELEMETRIA & RECORDES ]',
+    hist_titulo_1: 'MEMÓRIA DA',
+    hist_titulo_2: 'ARENA',
+    hist_sub:
+      'Reviva os maiores massacres, as zebras improváveis e os duelos mais sangrentos da temporada.',
+    hist_arena_label: 'ARENA',
+    hist_temporada_label: 'TEMPORADA',
+    hist_vazio_1: 'ARQUIVO DE 2026 EM',
+    hist_vazio_2: 'BRANCO',
+
+    intro_badge_tgt: '[ TEMPORADA 2026 • ARENA TRUE GOTY ]',
+    intro_badge_mercado: '[ TEMPORADA 2026 • ARENA MERCADO (TGA) ]',
+    intro_titulo_1: 'ESCOLHA O SEU',
+    intro_titulo_2: 'TRUE GAME OF THE YEAR',
+    intro_sub: 'duelos diretos. Um campeão. Quem decide é quem joga.',
+    intro_step1_title: 'ESCOLHA O VENCEDOR',
+    intro_step1_desc: 'Clique no jogo superior em cada confronto direto ou use as setas do teclado.',
+    intro_btn_start: 'INICIAR DUELOS →',
+
     arena_trocar: '← TROCAR ARENA',
     arena_desfazer: '↺ DESFAZER VOTO',
     arena_confronto: 'CONFRONTO',
@@ -144,6 +169,21 @@ export const translations = {
     contato_copiado: '✓ ENDEREÇO COPIADO',
     contato_voltar: 'Voltar para o Início',
 
+    story_topo_tgt: 'O VERDADEIRO',
+    story_topo_mercado: 'VEREDITO DA COMUNIDADE',
+    story_sub_tgt: 'ARENA TRUE GOTY • 45 DUELOS DIRETOS',
+    story_sub_mercado: 'ARENA MERCADO (TGA) • 15 DUELOS DIRETOS',
+    story_campeao: 'CAMPEÃO',
+    story_segundo: '2º LUGAR',
+    story_terceiro: '3º LUGAR',
+    story_cta_prefix: 'DESCUBRA O SEU EM',
+    story_disclaimer_mercado: 'SIMULAÇÃO INDEPENDENTE DA COMUNIDADE • SEM VÍNCULO OFICIAL COM O TGA',
+
+    obrigado_titulo: 'SEU VEREDITO ESTÁ SELADO',
+    obrigado_sub: 'Seu pódio foi registrado. Compartilhe seu card 9:16 ou a mensagem com a comunidade.',
+    obrigado_btn_compartilhar: 'COMPARTILHAR SEU VEREDITO',
+    obrigado_copiar_texto: 'COPIAR TEXTO',
+
     footer_termos: 'Termos de Uso',
     footer_privacidade: 'Política de Privacidade',
     footer_direitos:
@@ -201,7 +241,7 @@ export const translations = {
     home_contador: 'VERDICTS RECORDED IN THE ARENA',
 
     votar_sel_badge: '[ 2026 SEASON ]',
-    votar_sel_titulo1: 'WHAT IS YOUR',
+    votar_sel_titulo1: 'WHO IS YOUR',
     votar_sel_titulo2: 'TRUE GOTY?',
     votar_sel_sub: '1v1 duels. No review scores. One champion emerges.',
     votar_sel_tgt_status: 'ARENA OPEN',
@@ -218,12 +258,36 @@ export const translations = {
       'Independent simulation with no official affiliation. These votes do not count toward TGA, only True GOTY statistics.',
     votar_sel_mercado_btn: 'ENTER TGA ARENA',
 
+    res_sel_badge: '[ COMMUNITY VERDICT // 2026 SEASON ]',
+    res_sel_sub:
+      'The duels have been fought. Choose the arena and see who survived the mathematical verdict.',
+    res_sel_tgt_desc: 'The elite rated by players.',
+    res_sel_mercado_desc: 'Industry nominees put to the community test.',
+
+    hist_badge: '[ ARENA ARCHIVE • TELEMETRY & RECORDS ]',
+    hist_titulo_1: 'ARENA',
+    hist_titulo_2: 'MEMORY',
+    hist_sub: 'Relive the biggest stomps, unlikely upsets, and fiercest duels of the season.',
+    hist_arena_label: 'ARENA',
+    hist_temporada_label: 'SEASON',
+    hist_vazio_1: '2026 ARCHIVE',
+    hist_vazio_2: 'EMPTY',
+
+    intro_badge_tgt: '[ 2026 SEASON • TRUE GOTY ARENA ]',
+    intro_badge_mercado: '[ 2026 SEASON • MARKET ARENA (TGA) ]',
+    intro_titulo_1: 'CHOOSE YOUR',
+    intro_titulo_2: 'TRUE GAME OF THE YEAR',
+    intro_sub: 'direct duels. One champion. Players decide.',
+    intro_step1_title: 'PICK THE WINNER',
+    intro_step1_desc: 'Tap your favorite game in each head-to-head matchup or use the arrow keys.',
+    intro_btn_start: 'START DUELS →',
+
     arena_trocar: '← SWITCH ARENA',
     arena_desfazer: '↺ UNDO VOTE',
     arena_confronto: 'MATCHUP',
     arena_tgt_label: 'TRUE GOTY ARENA',
     arena_mercado_label: 'MARKET ARENA (TGA)',
-    arena_pergunta_tgt_1: 'WHAT IS YOUR',
+    arena_pergunta_tgt_1: 'WHO IS YOUR',
     arena_pergunta_tgt_2: 'TRUE GOTY',
     arena_pergunta_mercado_1: 'WHO IS THE',
     arena_pergunta_mercado_2: 'MARKET (TGA) CHAMPION',
@@ -323,6 +387,21 @@ export const translations = {
     contato_copiado: '✓ EMAIL COPIED',
     contato_voltar: 'Back to Home',
 
+    story_topo_tgt: 'THE TRUE',
+    story_topo_mercado: 'COMMUNITY VERDICT',
+    story_sub_tgt: 'TRUE GOTY ARENA • 45 DIRECT DUELS',
+    story_sub_mercado: 'MARKET ARENA (TGA) • 15 DIRECT DUELS',
+    story_campeao: 'CHAMPION',
+    story_segundo: '2ND PLACE',
+    story_terceiro: '3RD PLACE',
+    story_cta_prefix: 'FIND YOURS AT',
+    story_disclaimer_mercado: 'INDEPENDENT COMMUNITY SIMULATION • NOT AFFILIATED WITH TGA',
+
+    obrigado_titulo: 'YOUR VERDICT IS SEALED',
+    obrigado_sub: 'Your podium has been locked in. Share your 9:16 card or text with the community.',
+    obrigado_btn_compartilhar: 'SHARE YOUR VERDICT',
+    obrigado_copiar_texto: 'COPY TEXT',
+
     footer_termos: 'Terms of Use',
     footer_privacidade: 'Privacy Policy',
     footer_direitos:
@@ -380,7 +459,7 @@ export const translations = {
     home_contador: 'VEREDICTOS REGISTRADOS EN LA ARENA',
 
     votar_sel_badge: '[ TEMPORADA 2026 ]',
-    votar_sel_titulo1: '¿CUÁL ES TU',
+    votar_sel_titulo1: '¿QUIÉN ES TU',
     votar_sel_titulo2: 'VERDADERO GOTY?',
     votar_sel_sub: 'Duelos 1v1. Sin nota promedio. Sale un campeón.',
     votar_sel_tgt_status: 'ARENA ABIERTA',
@@ -397,12 +476,37 @@ export const translations = {
       'Simulación independiente sin vínculo oficial. Estos votos no cuentan para TGA, solo para la estadística de True GOTY.',
     votar_sel_mercado_btn: 'ENTRAR A LA ARENA TGA',
 
+    res_sel_badge: '[ VEREDICTO DE LA COMUNIDAD // TEMPORADA 2026 ]',
+    res_sel_sub:
+      'Los duelos se han librado. Elige la arena y descubre quién sobrevivió al veredicto matemático.',
+    res_sel_tgt_desc: 'La élite valorada por los jugadores.',
+    res_sel_mercado_desc: 'Nominados de la industria puestos a prueba por la comunidad.',
+
+    hist_badge: '[ ARCHIVO DE LA ARENA • TELEMETRÍA Y RÉCORDS ]',
+    hist_titulo_1: 'MEMORIA DE LA',
+    hist_titulo_2: 'ARENA',
+    hist_sub:
+      'Revive las mayores palizas, las sorpresas improbables y los duelos más intensos de la temporada.',
+    hist_arena_label: 'ARENA',
+    hist_temporada_label: 'TEMPORADA',
+    hist_vazio_1: 'ARCHIVO DE 2026 EN',
+    hist_vazio_2: 'BLANCO',
+
+    intro_badge_tgt: '[ TEMPORADA 2026 • ARENA TRUE GOTY ]',
+    intro_badge_mercado: '[ TEMPORADA 2026 • ARENA MERCADO (TGA) ]',
+    intro_titulo_1: 'ELIGE TU',
+    intro_titulo_2: 'TRUE GAME OF THE YEAR',
+    intro_sub: 'duelos directos. Un campeón. Quien decide es quien juega.',
+    intro_step1_title: 'ELIGE AL GANADOR',
+    intro_step1_desc: 'Toca tu juego favorito en cada duelo directo o usa las flechas del teclado.',
+    intro_btn_start: 'COMENZAR DUELOS →',
+
     arena_trocar: '← CAMBIAR ARENA',
     arena_desfazer: '↺ DESHACER VOTO',
     arena_confronto: 'DUELO',
     arena_tgt_label: 'ARENA TRUE GOTY',
     arena_mercado_label: 'ARENA MERCADO (TGA)',
-    arena_pergunta_tgt_1: '¿CUÁL ES TU',
+    arena_pergunta_tgt_1: '¿QUIÉN ES TU',
     arena_pergunta_tgt_2: 'TRUE GOTY',
     arena_pergunta_mercado_1: '¿QUIÉN ES EL CAMPEÓN DEL',
     arena_pergunta_mercado_2: 'MERCADO (TGA)',
@@ -502,6 +606,21 @@ export const translations = {
     contato_copiado: '✓ CORREO COPIADO',
     contato_voltar: 'Volver al Inicio',
 
+    story_topo_tgt: 'EL VERDADERO',
+    story_topo_mercado: 'VEREDICTO DE LA COMUNIDADE',
+    story_sub_tgt: 'ARENA TRUE GOTY • 45 DUELOS DIRECTOS',
+    story_sub_mercado: 'ARENA MERCADO (TGA) • 15 DUELOS DIRECTOS',
+    story_campeao: 'CAMPEÓN',
+    story_segundo: '2º PUESTO',
+    story_terceiro: '3º PUESTO',
+    story_cta_prefix: 'DESCUBRE EL TUYO EN',
+    story_disclaimer_mercado: 'SIMULACIÓN INDEPENDIENTE DE LA COMUNIDAD • SIN VÍNCULO OFICIAL CON TGA',
+
+    obrigado_titulo: 'TU VEREDICTO ESTÁ SELLADO',
+    obrigado_sub: 'Tu podio quedó registrado. Comparte tu tarjeta 9:16 o el mensaje con la comunidad.',
+    obrigado_btn_compartilhar: 'COMPARTIR TU VEREDICTO',
+    obrigado_copiar_texto: 'COPIAR TEXTO',
+
     footer_termos: 'Términos de Uso',
     footer_privacidade: 'Política de Privacidad',
     footer_direitos:
@@ -512,8 +631,8 @@ export const translations = {
       'Bienvenido a True GOTY (TGT). Al acceder y utilizar este sitio, aceptas los términos descritos a continuación.',
     termos_h2_1: '1. Propósito del Sitio',
     termos_p2:
-      'TGT es una plataforma de entretenimiento comunitario creada para descubrir, mediante votación popular (Método Condorcet), el juego más querido del año. El sitio no tiene vínculo oficial con premiaciones reales del mercado (como The Game Awards).',
-    termos_h2_2: '2. Reglas de Votação',
+      'TGT es una plataforma de entretenimiento comunitario creada para descubrir, mediante votación popular (Método Condorcet), el juego más amado del año. El sitio no tiene vínculo oficial con premiaciones reales del mercado (como The Game Awards).',
+    termos_h2_2: '2. Reglas de Votación',
     termos_p3:
       'Para garantizar la integridad de la voz de la comunidad, cada usuario puede votar solo una vez por categoría (TGT y Mercado). Utilizamos tecnologías de verificación (Cloudflare Turnstile) y anonimización de IP para evitar fraudes y bots.',
     termos_h2_3: '3. Conducta del Usuario',

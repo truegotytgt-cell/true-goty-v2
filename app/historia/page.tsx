@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import jogosData from '../../lib/jogos.json';
+import { useLanguage } from '../../components/LanguageProvider';
 
 const IconZebra = ({ color }: { color: string }) => (
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -32,6 +33,7 @@ const IconChama = ({ color }: { color: string }) => (
 );
 
 function HistoriaContent() {
+  const { lang, t } = useLanguage();
   const searchParams = useSearchParams();
   const catUrl = searchParams.get('cat');
 
@@ -56,7 +58,6 @@ function HistoriaContent() {
     }
   }, [catUrl]);
 
-  // Tema dinâmico: Roxo Imperial (True GOTY) vs Ouro Metálico (Mercado / TGA)
   const isTgt = categoria === 'tgt';
   const corPrincipal = isTgt ? 'var(--purple-neon)' : '#D4AF37';
   const corSecundaria = isTgt ? '#D4AF37' : '#E2E8F0';
@@ -123,6 +124,103 @@ function HistoriaContent() {
     const jogo = listaJogos.find((j: any) => j.titulo === titulo);
     return jogo ? jogo.imagem : null;
   };
+
+  const txt =
+    lang === 'en'
+      ? {
+          mercadoAviso:
+            'Independent simulation stats for market nominees (TGA) — no official affiliation with The Game Awards.',
+          btnTgt: 'TRUE GOTY',
+          btnMercado: 'MARKET',
+          carregandoArquivo: 'CONSULTING THE ARCHIVES...',
+          vazioSub:
+            'No records have been set in this arena yet. Enter the duels now and write the first stats of the season.',
+          btnInaugurar: 'OPEN THE ARENA',
+          zebraTitulo: 'BIGGEST UPSET',
+          zebraDescPrefix: 'Underdog',
+          zebraDescMid: 'took down favorite',
+          zebraDescEnd: 'times',
+          parelhoTitulo: 'TITAN CLASH',
+          parelhoDescMid: 'and',
+          parelhoDescEnd: 'Decided vote by vote between',
+          massacreTitulo: 'ARENA STOMP',
+          massacreDescMid: 'left no room for',
+          rivalTitulo: 'RIVALRY ARCHIVE',
+          rivalSub:
+            'Pit two finalists head-to-head and see who came out on top in this edition’s history.',
+          lutadorA: 'Pick Fighter A',
+          lutadorB: 'Pick Fighter B',
+          aguardandoJogos: 'Waiting for games reveal...',
+          buscando: 'SEARCHING ARCHIVE...',
+          mesmoJogo: 'A game cannot fight itself. Pick another opponent.',
+          vitorias: 'WINS',
+          vereditoDePrefix: 'Verdict from',
+          vereditoDeSuffix: 'community votes.',
+          semConfronto: 'These two have not faced each other in the arena yet. The matchup is open.',
+        }
+      : lang === 'es'
+        ? {
+            mercadoAviso:
+              'Estadísticas de la simulación independiente de nominados del mercado (TGA) — sin vínculo oficial con The Game Awards.',
+            btnTgt: 'TRUE GOTY',
+            btnMercado: 'MERCADO',
+            carregandoArquivo: 'CONSULTANDO LOS ARCHIVOS...',
+            vazioSub:
+              'Aún no hay récords en esta arena. Entra en los duelos ahora y escribe las primeras estadísticas de la temporada.',
+            btnInaugurar: 'INAUGURAR LA ARENA',
+            zebraTitulo: 'LA GRAN SORPRESA',
+            zebraDescPrefix: 'El no favorito',
+            zebraDescMid: 'derribó a',
+            zebraDescEnd: 'veces',
+            parelhoTitulo: 'CHOQUE DE TITANES',
+            parelhoDescMid: 'y',
+            parelhoDescEnd: 'Decidido voto a voto entre',
+            massacreTitulo: 'PALIZA EN LA ARENA',
+            massacreDescMid: 'no le dio tregua a',
+            rivalTitulo: 'ARCHIVO DE RIVALIDAD',
+            rivalSub:
+              'Enfrenta a dos finalistas cara a cara y descubre quién dominó el historial de la edición.',
+            lutadorA: 'Elige al Luchador A',
+            lutadorB: 'Elige al Luchador B',
+            aguardandoJogos: 'Esperando la revelación de los juegos...',
+            buscando: 'BUSCANDO EN EL ARCHIVO...',
+            mesmoJogo: 'Un juego no compite contra sí mismo. Elige otro rival.',
+            vitorias: 'VICTORIAS',
+            vereditoDePrefix: 'Veredicto de',
+            vereditoDeSuffix: 'votos de la comunidad.',
+            semConfronto: 'Estos dos aún no se han enfrentado en la arena. El duelo está abierto.',
+          }
+        : {
+            mercadoAviso:
+              'Estatísticas da simulação independente dos indicados do mercado (TGA) — sem vínculo oficial com o The Game Awards.',
+            btnTgt: 'TRUE GOTY',
+            btnMercado: 'MERCADO',
+            carregandoArquivo: 'CONSULTANDO OS ARQUIVOS DO TEMPO...',
+            vazioSub:
+              'Nenhum recorde foi cravado nesta arena ainda. Entre nos duelos agora e escreva as primeiras estatísticas da temporada.',
+            btnInaugurar: 'INAUGURAR A ARENA',
+            zebraTitulo: 'A GRANDE ZEBRA',
+            zebraDescPrefix: 'O azarão',
+            zebraDescMid: 'derrubou o gigante',
+            zebraDescEnd: 'ocasiões',
+            parelhoTitulo: 'CHOQUE DE TITÃS',
+            parelhoDescMid: 'e',
+            parelhoDescEnd: 'Decidido voto a voto entre',
+            massacreTitulo: 'MASSACRE NA ARENA',
+            massacreDescMid: 'não deu a mínima chance para',
+            rivalTitulo: 'ARQUIVO DE RIVALIDADE',
+            rivalSub:
+              'Coloque dois finalistas frente a frente e descubra quem levou a melhor no histórico da edição.',
+            lutadorA: 'Escolha o Lutador A',
+            lutadorB: 'Escolha o Lutador B',
+            aguardandoJogos: 'Aguardando revelação dos jogos...',
+            buscando: 'BUSCANDO NO ARQUIVO...',
+            mesmoJogo: 'Um jogo não luta contra ele mesmo. Escolha outro adversário.',
+            vitorias: 'VITÓRIAS',
+            vereditoDePrefix: 'Veredito de',
+            vereditoDeSuffix: 'votos da comunidade.',
+            semConfronto: 'Esses dois ainda não se encontraram na arena. O duelo está em aberto.',
+          };
 
   return (
     <main className="historia-main">
@@ -238,7 +336,6 @@ function HistoriaContent() {
         }
       `}</style>
 
-      {/* HEADER COM TEMA DINÂMICO */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: '2.5rem', width: '100%' }}>
         <div
           style={{
@@ -255,28 +352,27 @@ function HistoriaContent() {
             transition: 'all 0.3s ease',
           }}
         >
-          [ ARQUIVO DA ARENA • TELEMETRIA & RECORDES ]
+          {t.hist_badge}
         </div>
 
         <h1 style={{ color: 'white', fontSize: 'clamp(2.3rem, 8vw, 4rem)', fontWeight: 900, margin: 0, lineHeight: 1 }}>
-          MEMÓRIA DA{' '}
+          {t.hist_titulo_1}{' '}
           <span style={{ color: corPrincipal, transition: 'color 0.3s ease' }}>
-            ARENA
+            {t.hist_titulo_2}
           </span>
         </h1>
 
         <p style={{ color: '#a1a1aa', fontSize: '1rem', margin: '1rem auto 0', maxWidth: '600px', lineHeight: 1.5 }}>
-          Reviva os maiores massacres, as zebras improváveis e os duelos mais sangrentos da temporada.
+          {t.hist_sub}
         </p>
 
         {!isTgt && (
           <p style={{ color: '#8b8b94', fontSize: '0.78rem', margin: '0.6rem auto 0', maxWidth: '580px' }}>
-            Estatísticas da simulação independente dos indicados do mercado (TGA) — sem vínculo oficial com o The Game Awards.
+            {txt.mercadoAviso}
           </p>
         )}
       </motion.div>
 
-      {/* CONSOLE DE FILTROS */}
       <div
         className="historia-filtros"
         style={{
@@ -285,7 +381,7 @@ function HistoriaContent() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <span style={{ color: '#a1a1aa', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>ARENA</span>
+          <span style={{ color: '#a1a1aa', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>{t.hist_arena_label}</span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               type="button"
@@ -302,7 +398,7 @@ function HistoriaContent() {
                 transition: 'all 0.25s',
               }}
             >
-              TRUE GOTY
+              {txt.btnTgt}
             </button>
             <button
               type="button"
@@ -319,13 +415,13 @@ function HistoriaContent() {
                 transition: 'all 0.25s',
               }}
             >
-              MERCADO
+              {txt.btnMercado}
             </button>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <span style={{ color: '#a1a1aa', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>TEMPORADA</span>
+          <span style={{ color: '#a1a1aa', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>{t.hist_temporada_label}</span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             {anosDisponiveis.map((ano) => (
               <button
@@ -370,7 +466,7 @@ function HistoriaContent() {
             exit={{ opacity: 0 }}
             style={{ color: corPrincipal, fontSize: '1.2rem', marginBottom: '4rem', fontWeight: 'bold', letterSpacing: '2px', textAlign: 'center' }}
           >
-            CONSULTANDO OS ARQUIVOS DO TEMPO...
+            {txt.carregandoArquivo}
           </motion.div>
         ) : !highlights || (!highlights.zebra && !highlights.parelho && !highlights.desequilibrado) ? (
           <motion.div
@@ -399,10 +495,10 @@ function HistoriaContent() {
             }}
           >
             <h2 style={{ color: '#F4F4F0', fontSize: '2rem', marginBottom: '1rem' }}>
-              ARQUIVO DE <span style={{ color: corPrincipal }}>{anoSelecionado}</span> EM BRANCO
+              {t.hist_vazio_1} <span style={{ color: corPrincipal }}>{anoSelecionado}</span> {t.hist_vazio_2}
             </h2>
             <p style={{ color: '#a1a1aa', marginBottom: '2rem', maxWidth: '500px', lineHeight: 1.55 }}>
-              Nenhum recorde foi cravado nesta arena ainda. Entre nos duelos agora e escreva as primeiras estatísticas da temporada.
+              {txt.vazioSub}
             </p>
             <Link
               href={`/votar/${categoria}`}
@@ -419,7 +515,7 @@ function HistoriaContent() {
                   : '0 10px 30px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(255,255,255,0.25)',
               }}
             >
-              INAUGURAR A ARENA
+              {txt.btnInaugurar}
             </Link>
           </motion.div>
         ) : (
@@ -450,11 +546,11 @@ function HistoriaContent() {
                     <IconZebra color={corPrincipal} />
                   </div>
                   <h2 style={{ color: corPrincipal, fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '1px' }}>
-                    A GRANDE ZEBRA
+                    {txt.zebraTitulo}
                   </h2>
                   <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                    O azarão <strong>{highlights.zebra.lanterna}</strong> derrubou o gigante{' '}
-                    <strong>{highlights.zebra.jogo_derrotado}</strong> em <strong>{highlights.zebra.vitorias} ocasiões</strong>!
+                    {txt.zebraDescPrefix} <strong>{highlights.zebra.lanterna}</strong> {txt.zebraDescMid}{' '}
+                    <strong>{highlights.zebra.jogo_derrotado}</strong> {highlights.zebra.vitorias} {txt.zebraDescEnd}!
                   </p>
                 </div>
               )}
@@ -479,10 +575,10 @@ function HistoriaContent() {
                     <IconParelho color="#D4AF37" />
                   </div>
                   <h2 style={{ color: '#D4AF37', fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '1px' }}>
-                    CHOQUE DE TITÃS
+                    {txt.parelhoTitulo}
                   </h2>
                   <p style={{ color: '#D1D5DB', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                    Decidido voto a voto entre <strong>{highlights.parelho.jogo_a}</strong> e{' '}
+                    {txt.parelhoDescEnd} <strong>{highlights.parelho.jogo_a}</strong> {txt.parelhoDescMid}{' '}
                     <strong>{highlights.parelho.jogo_b}</strong>.
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
@@ -534,10 +630,10 @@ function HistoriaContent() {
                       letterSpacing: '1px',
                     }}
                   >
-                    MASSACRE NA ARENA
+                    {txt.massacreTitulo}
                   </h2>
                   <p style={{ color: '#D1D5DB', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                    <strong>{highlights.desequilibrado.jogo_a}</strong> não deu a mínima chance para{' '}
+                    <strong>{highlights.desequilibrado.jogo_a}</strong> {txt.massacreDescMid}{' '}
                     <strong>{highlights.desequilibrado.jogo_b}</strong>.
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
@@ -562,7 +658,6 @@ function HistoriaContent() {
               )}
             </div>
 
-            {/* CONFRONTO DIRETO (ARQUIVO DE RIVALIDADE) */}
             <div
               className="rivalidade-box"
               style={{
@@ -572,14 +667,13 @@ function HistoriaContent() {
               }}
             >
               <h2 style={{ color: 'white', fontSize: 'clamp(1.7rem, 6vw, 2.2rem)', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '0.5px' }}>
-                ARQUIVO DE RIVALIDADE
+                {txt.rivalTitulo}
               </h2>
               <p style={{ color: '#a1a1aa', margin: '0 auto 2.2rem', maxWidth: '520px', lineHeight: 1.5 }}>
-                Coloque dois finalistas frente a frente e descubra quem levou a melhor no histórico da edição.
+                {txt.rivalSub}
               </p>
 
               <div className="rivalidade-duelo">
-                {/* Lutador A */}
                 <div className="rivalidade-lutador">
                   {jogoA && getImagem(jogoA) ? (
                     <motion.img
@@ -635,7 +729,7 @@ function HistoriaContent() {
                     }}
                   >
                     <option value="" style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
-                      Escolha o Lutador A
+                      {txt.lutadorA}
                     </option>
                     {listaJogos.map((jogo: any) => (
                       <option key={`A-${jogo.titulo}`} value={jogo.titulo} style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
@@ -649,7 +743,6 @@ function HistoriaContent() {
                   VS
                 </div>
 
-                {/* Lutador B */}
                 <div className="rivalidade-lutador">
                   {jogoB && getImagem(jogoB) ? (
                     <motion.img
@@ -705,7 +798,7 @@ function HistoriaContent() {
                     }}
                   >
                     <option value="" style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
-                      Escolha o Lutador B
+                      {txt.lutadorB}
                     </option>
                     {listaJogos.map((jogo: any) => (
                       <option key={`B-${jogo.titulo}`} value={jogo.titulo} style={{ color: '#FFF', backgroundColor: '#1C1C1E' }}>
@@ -717,12 +810,12 @@ function HistoriaContent() {
               </div>
 
               {semJogos ? (
-                <div style={{ color: '#a1a1aa' }}>Aguardando revelação dos jogos...</div>
+                <div style={{ color: '#a1a1aa' }}>{txt.aguardandoJogos}</div>
               ) : buscandoH2h ? (
-                <div style={{ color: corPrincipal, fontWeight: 'bold' }}>BUSCANDO NO ARQUIVO...</div>
+                <div style={{ color: corPrincipal, fontWeight: 'bold' }}>{txt.buscando}</div>
               ) : jogoA && jogoB && jogoA === jogoB ? (
                 <div style={{ color: corPrincipal, fontWeight: 'bold' }}>
-                  Um jogo não luta contra ele mesmo. Escolha outro adversário.
+                  {txt.mesmoJogo}
                 </div>
               ) : h2h && h2h.total > 0 ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -756,7 +849,7 @@ function HistoriaContent() {
                         overflow: 'hidden',
                       }}
                     >
-                      {h2h.vitoriasA} VITÓRIAS
+                      {h2h.vitoriasA} {txt.vitorias}
                     </motion.div>
                     <motion.div
                       initial={{ width: 0 }}
@@ -774,15 +867,15 @@ function HistoriaContent() {
                         overflow: 'hidden',
                       }}
                     >
-                      {h2h.vitoriasB} VITÓRIAS
+                      {h2h.vitoriasB} {txt.vitorias}
                     </motion.div>
                   </div>
                   <p style={{ color: '#71717a', fontSize: '0.8rem', marginTop: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Veredito de {h2h.total} votos da comunidade.
+                    {txt.vereditoDePrefix} {h2h.total} {txt.vereditoDeSuffix}
                   </p>
                 </motion.div>
               ) : jogoA && jogoB ? (
-                <div style={{ color: '#a1a1aa' }}>Esses dois ainda não se encontraram na arena. O duelo está em aberto.</div>
+                <div style={{ color: '#a1a1aa' }}>{txt.semConfronto}</div>
               ) : null}
             </div>
           </motion.div>

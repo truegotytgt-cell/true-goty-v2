@@ -25,7 +25,7 @@ type ToastState = {
 };
 
 export default function ObrigadoClient() {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoria = searchParams.get('categoria') === 'mercado' ? 'mercado' : 'tgt';
@@ -47,6 +47,37 @@ export default function ObrigadoClient() {
     : 'rgba(212, 175, 55, 0.16)';
   const corOuro = '#D4AF37';
   const nomeArquivo = getNomeArquivoStory(categoria);
+
+  const feedbackText =
+    lang === 'en'
+      ? {
+          shareTitleTgt: 'The True Game of the Year',
+          shareTitleMercado: 'My TGA Nominees Verdict',
+          toastCopiadoTexto: '✓ Text & link copied to clipboard!',
+          toastFalhaTexto: '! Could not copy text automatically.',
+          toastErroImagem: 'Could not generate image. Try again.',
+          toastProntoRede: '✓ Image ready! Text also copied so you can paste.',
+          toastProntoInstagram: '✓ Story saved & caption copied for Instagram!',
+        }
+      : lang === 'es'
+        ? {
+            shareTitleTgt: 'El Verdadero Game of the Year',
+            shareTitleMercado: 'Mi Veredicto en Nominados TGA',
+            toastCopiadoTexto: '✓ ¡Texto y enlace copiados al portapapeles!',
+            toastFalhaTexto: '! No se pudo copiar el texto automáticamente.',
+            toastErroImagem: 'No se pudo generar la imagen. Inténtalo de nuevo.',
+            toastProntoRede: '✓ ¡Imagen lista! También copiamos el texto para pegar.',
+            toastProntoInstagram: '✓ ¡Story guardada y mensaje copiado para Instagram!',
+          }
+        : {
+            shareTitleTgt: 'O Verdadeiro Game of the Year',
+            shareTitleMercado: 'Meu Veredito nos Indicados do TGA',
+            toastCopiadoTexto: '✓ Texto e link copiados!',
+            toastFalhaTexto: '! Não foi possível copiar o texto automaticamente.',
+            toastErroImagem: 'Não foi possível gerar a imagem. Tente novamente.',
+            toastProntoRede: '✓ Imagem pronta! Também copiamos o texto para colar.',
+            toastProntoInstagram: '✓ Story salvo e legenda copiada para o Instagram!',
+          };
 
   useEffect(() => {
     const atualizarEscala = () => {
@@ -146,7 +177,7 @@ export default function ObrigadoClient() {
       gerarImagemStory(false);
     }, 500);
     return () => clearTimeout(timer);
-  }, [verificado, top3, categoria, gerarImagemStory]);
+  }, [verificado, top3, categoria, lang, gerarImagemStory]);
 
   const mostrarToast = (mensagem: string, mostrarBotaoTexto = false, duracao = 5500) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -158,10 +189,10 @@ export default function ObrigadoClient() {
 
   const copiarTextoELink = async () => {
     try {
-      await navigator.clipboard.writeText(getTextoCompartilhamento(top3, categoria));
-      mostrarToast('✓', false, 3500);
+      await navigator.clipboard.writeText(getTextoCompartilhamento(top3, categoria, lang));
+      mostrarToast(feedbackText.toastCopiadoTexto, false, 3500);
     } catch {
-      mostrarToast('!', false, 3500);
+      mostrarToast(feedbackText.toastFalhaTexto, false, 3500);
     }
   };
 
@@ -189,12 +220,12 @@ export default function ObrigadoClient() {
     const blob = await gerarImagemStory(true);
 
     if (!blob) {
-      mostrarToast('Erro');
+      mostrarToast(feedbackText.toastErroImagem);
       setIsGenerating(false);
       return;
     }
 
-    const texto = getTextoCompartilhamento(top3, categoria);
+    const texto = getTextoCompartilhamento(top3, categoria, lang);
     const file = new File([blob], nomeArquivo, { type: 'image/png' });
 
     if (
@@ -206,7 +237,7 @@ export default function ObrigadoClient() {
       try {
         await navigator.share({
           files: [file],
-          title: isTgt ? 'O Verdadeiro Game of the Year' : 'Meu Veredito nos Indicados do TGA',
+          title: isTgt ? feedbackText.shareTitleTgt : feedbackText.shareTitleMercado,
           text: texto,
         });
         setIsGenerating(false);
@@ -221,17 +252,22 @@ export default function ObrigadoClient() {
 
     salvarBlobComoArquivo(blob, nomeArquivo);
     await copiarImagemParaClipboard(blob);
-    mostrarToast('✓', true, 7500);
+    try {
+      await navigator.clipboard.writeText(texto);
+    } catch {
+      // ignora falha de clipboard
+    }
+    mostrarToast(feedbackText.toastProntoRede, true, 7500);
     setIsGenerating(false);
   };
 
   const compartilharRede = async (rede: RedeSocial) => {
     setIsGenerating(true);
-    const texto = getTextoCompartilhamento(top3, categoria);
+    const texto = getTextoCompartilhamento(top3, categoria, lang);
     const blob = await gerarImagemStory(true);
 
     if (!blob) {
-      mostrarToast('Erro');
+      mostrarToast(feedbackText.toastErroImagem);
       setIsGenerating(false);
       return;
     }
@@ -247,7 +283,7 @@ export default function ObrigadoClient() {
       try {
         await navigator.share({
           files: [file],
-          title: isTgt ? 'O Verdadeiro Game of the Year' : 'Meu Veredito nos Indicados do TGA',
+          title: isTgt ? feedbackText.shareTitleTgt : feedbackText.shareTitleMercado,
           text: texto,
         });
         setIsGenerating(false);
@@ -267,20 +303,30 @@ export default function ObrigadoClient() {
       } catch {
         // ignora falha de clipboard
       }
-      mostrarToast('✓', false, 7000);
+      mostrarToast(feedbackText.toastProntoInstagram, false, 7000);
       setIsGenerating(false);
       return;
     }
 
     if (rede === 'discord') {
       await copiarImagemOuBaixar(blob);
+      try {
+        await navigator.clipboard.writeText(texto);
+      } catch {
+        // ignora falha de clipboard
+      }
       window.open('https://discord.com/channels/@me', '_blank', 'noopener,noreferrer');
-      mostrarToast('✓', true, 8000);
+      mostrarToast(feedbackText.toastProntoRede, true, 8000);
       setIsGenerating(false);
       return;
     }
 
     await copiarImagemOuBaixar(blob);
+    try {
+      await navigator.clipboard.writeText(texto);
+    } catch {
+      // ignora falha de clipboard
+    }
 
     let intentUrl = '';
     if (rede === 'whatsapp') {
@@ -288,7 +334,7 @@ export default function ObrigadoClient() {
     } else if (rede === 'x') {
       intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}`;
     } else if (rede === 'reddit') {
-      const tituloReddit = getTituloReddit(top3, categoria);
+      const tituloReddit = getTituloReddit(top3, categoria, lang);
       intentUrl = `https://www.reddit.com/submit?title=${encodeURIComponent(tituloReddit)}&text=${encodeURIComponent(texto)}`;
     }
 
@@ -296,7 +342,7 @@ export default function ObrigadoClient() {
       window.open(intentUrl, '_blank', 'noopener,noreferrer');
     }
 
-    mostrarToast('✓', true, 8000);
+    mostrarToast(feedbackText.toastProntoRede, true, 8000);
     setIsGenerating(false);
   };
 
@@ -441,7 +487,7 @@ export default function ObrigadoClient() {
                     transition: 'background-color 0.2s',
                   }}
                 >
-                  {t.contato_btn}
+                  {t.obrigado_copiar_texto}
                 </button>
               )}
             </motion.div>
@@ -538,7 +584,7 @@ export default function ObrigadoClient() {
               width: '100%',
             }}
           >
-            <span className="title-shine">{t.home_titulo2}</span>
+            <span className="title-shine">{t.obrigado_titulo}</span>
           </h1>
 
           <p
@@ -551,7 +597,7 @@ export default function ObrigadoClient() {
               textAlign: 'center',
             }}
           >
-            {t.rank_sub_global}
+            {t.obrigado_sub}
           </p>
 
           <button
@@ -586,7 +632,7 @@ export default function ObrigadoClient() {
             }}
           >
             <IconShare />
-            <span>{isTgt ? t.home_btn_votar : t.home_btn_mercado}</span>
+            <span>{t.obrigado_btn_compartilhar}</span>
           </button>
 
           <SocialShareBar
