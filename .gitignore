@@ -24,3 +24,7 @@
 repomix-output*
 repomix-mapa.md
 repomix-completo.md
+
+.env*.local
+.env.local
+.dev.vars
